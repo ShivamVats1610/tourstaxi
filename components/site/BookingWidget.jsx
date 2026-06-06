@@ -12,6 +12,32 @@ const TABS = [
   { id: 'airport', label: 'Airport Transfer', icon: Plane }
 ];
 
+const CITY_OPTIONS = [
+  'Jaipur',
+  'Jodhpur',
+  'Udaipur',
+  'Kota',
+  'Ajmer',
+  'Bikaner',
+  'Jaisalmer',
+  'Pushkar',
+  'Mount Abu',
+  'Sawai Madhopur',
+  'Ranthambore',
+  'Bharatpur',
+  'Alwar',
+  'Chittorgarh',
+  'Bundi',
+  'Sikar',
+  'Jhunjhunu',
+  'Neemrana',
+  'Delhi',
+  'New Delhi',
+  'Gurugram',
+  'Noida',
+  'Agra'
+];
+
 export default function BookingWidget() {
   const [tab, setTab] = useState('one-way');
   const [pickup, setPickup] = useState('');
@@ -40,8 +66,8 @@ export default function BookingWidget() {
         </div>
 
         <div className="p-5 sm:p-6 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]">
-          <Field icon={MapPin} label="Pickup Location" placeholder="Enter pickup city" value={pickup} onChange={setPickup} />
-          {tab !== 'local' && <Field icon={MapPin} label="Drop Location" placeholder="Enter destination" value={drop} onChange={setDrop} />}
+          <Field icon={MapPin} label="Pickup Location" placeholder="Enter pickup city" value={pickup} onChange={setPickup} suggestions={CITY_OPTIONS} />
+          {tab !== 'local' && <Field icon={MapPin} label="Drop Location" placeholder="Enter destination" value={drop} onChange={setDrop} suggestions={CITY_OPTIONS} />}
           {tab === 'local' && <Field icon={Timer} label="Rental Package" select options={['4 hrs / 40 km', '8 hrs / 80 km', '12 hrs / 120 km']} value={drop} onChange={setDrop} />}
           <Field icon={Calendar} label="Pickup Date" type="date" value={date} onChange={setDate} />
           <Field icon={Clock} label="Pickup Time" type="time" value={time} onChange={setTime} />
@@ -61,9 +87,15 @@ export default function BookingWidget() {
   );
 }
 
-function Field({ icon: Icon, label, placeholder, type = 'text', select = false, options = [], value, onChange }) {
+function Field({ icon: Icon, label, placeholder, type = 'text', select = false, options = [], suggestions = [], value, onChange }) {
+  const [focused, setFocused] = useState(false);
+  const filteredSuggestions = suggestions
+    .filter(city => city.toLowerCase().includes((value || '').trim().toLowerCase()))
+    .slice(0, 6);
+  const showSuggestions = !select && type === 'text' && focused && filteredSuggestions.length > 0;
+
   return (
-    <label className="flex min-w-0 flex-col gap-1.5 group">
+    <div className="relative flex min-w-0 flex-col gap-1.5 group">
       <span className="text-[11px] uppercase tracking-wider font-semibold text-slate-500">{label}</span>
       <div className="flex h-12 min-w-0 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/15 transition-all">
         <Icon className="h-4 w-4 shrink-0 text-slate-400 group-focus-within:text-sky-500" />
@@ -73,9 +105,36 @@ function Field({ icon: Icon, label, placeholder, type = 'text', select = false, 
             {options.map(o => <option key={o}>{o}</option>)}
           </select>
         ) : (
-          <input type={type} value={value} onChange={(e) => onChange?.(e.target.value)} placeholder={placeholder} className="min-w-0 flex-1 bg-transparent outline-none text-sm text-slate-800 placeholder:text-slate-400" />
+          <input
+            type={type}
+            value={value}
+            onFocus={() => setFocused(true)}
+            onBlur={() => window.setTimeout(() => setFocused(false), 120)}
+            onChange={(e) => onChange?.(e.target.value)}
+            placeholder={placeholder}
+            className="min-w-0 flex-1 bg-transparent outline-none text-sm text-slate-800 placeholder:text-slate-400"
+          />
         )}
       </div>
-    </label>
+      {showSuggestions && (
+        <div className="absolute left-0 right-0 top-full z-30 mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
+          {filteredSuggestions.map(city => (
+            <button
+              key={city}
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onChange?.(city);
+                setFocused(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
+            >
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+              {city}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
