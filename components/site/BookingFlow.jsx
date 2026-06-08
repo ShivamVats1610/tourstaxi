@@ -18,12 +18,11 @@ const TRIP_TYPES = [
 
 const STEPS = ['Trip Type', 'Locations', 'Choose Cab', 'Fare Summary', 'Your Details', 'Confirmed'];
 
-const genBookingId = () => 'TTX' + Math.random().toString(36).slice(2, 8).toUpperCase() + Math.floor(10 + Math.random() * 89);
-
 export default function BookingFlow({ open, prefill = {}, onClose }) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState({});
   const [bookingId, setBookingId] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   // Hydrate on open with prefill
   useEffect(() => {
@@ -44,6 +43,7 @@ export default function BookingFlow({ open, prefill = {}, onClose }) {
           name: '', phone: '', email: '', address: '', notes: ''
         });
         setBookingId('');
+        setSubmitting(false);
       });
     }
   }, [open, prefill]);
@@ -74,10 +74,33 @@ export default function BookingFlow({ open, prefill = {}, onClose }) {
     return true;
   };
 
-  const next = () => {
+  const next = async () => {
     if (step === 4) {
-      setBookingId(genBookingId());
-      setStep(5);
+      setSubmitting(true);
+      try {
+        const response = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...data,
+            vehicleName: vehicle?.name || '',
+            fare,
+          }),
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+          toast.error(result.errors?.[0] || result.error || 'Unable to confirm booking');
+          return;
+        }
+
+        setBookingId(result.booking.bookingId);
+        setStep(5);
+      } catch {
+        toast.error('Unable to connect to booking server');
+      } finally {
+        setSubmitting(false);
+      }
       return;
     }
     setStep(s => Math.min(5, s + 1));
@@ -122,8 +145,8 @@ export default function BookingFlow({ open, prefill = {}, onClose }) {
         {step < 5 && (
           <div className="border-t border-slate-200 bg-white px-5 sm:px-8 py-4 flex items-center justify-between gap-3">
             <Button variant="ghost" onClick={back} disabled={step === 0} className="text-slate-600"><ArrowLeft className="h-4 w-4 mr-1.5" /> Back</Button>
-            <Button onClick={next} disabled={!canNext()} className="h-11 px-6 bg-gradient-to-r from-sky-500 to-orange-500 hover:opacity-95 font-bold shadow-lg shadow-sky-500/30">
-              {step === 4 ? <>Confirm Booking <Check className="h-4 w-4 ml-2" /></> : <>Continue <ArrowRight className="h-4 w-4 ml-2" /></>}
+            <Button onClick={next} disabled={!canNext() || submitting} className="h-11 px-6 bg-gradient-to-r from-sky-500 to-orange-500 hover:opacity-95 font-bold shadow-lg shadow-sky-500/30">
+              {step === 4 ? <>{submitting ? 'Confirming...' : 'Confirm Booking'} <Check className="h-4 w-4 ml-2" /></> : <>Continue <ArrowRight className="h-4 w-4 ml-2" /></>}
             </Button>
           </div>
         )}

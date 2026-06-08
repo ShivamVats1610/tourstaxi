@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Phone, Car } from 'lucide-react';
+import { Menu, X, Phone, Car, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NAV, COMPANY } from '@/lib/data';
 import { usePathname } from 'next/navigation';
@@ -10,6 +10,7 @@ import { usePathname } from 'next/navigation';
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [session, setSession] = useState(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -22,6 +23,24 @@ export default function Header() {
   useEffect(() => {
     queueMicrotask(() => setOpen(false));
   }, [pathname]);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/auth/me', { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((data) => {
+        if (active) setSession(data.user || null);
+      })
+      .catch(() => {
+        if (active) setSession(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
+
+  const dashboardHref = session?.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard';
 
   return (
     <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/85 backdrop-blur-md shadow-[0_4px_20px_-8px_rgba(15,23,42,0.15)]' : 'bg-transparent'}`}>
@@ -52,11 +71,20 @@ export default function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
-            <a href={`tel:${COMPANY.phoneRaw}`}>
+            {session ? (
+            <Link href={dashboardHref}>
               <Button variant="outline" className="border-slate-300 hover:border-sky-500 hover:text-sky-600 bg-white/70 backdrop-blur">
-                <Phone className="h-4 w-4 mr-2" />{COMPANY.phone}
+                Dashboard
               </Button>
-            </a>
+            </Link>
+            ) : (
+            <Link href="/login">
+              <Button variant="outline" className="border-slate-300 hover:border-sky-500 hover:text-sky-600 bg-white/70 backdrop-blur">
+                <LogIn className="h-4 w-4 mr-2" />Login
+              </Button>
+            </Link>
+            )}
+            
             <Link href="/#book">
               <Button className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/30">Book Now</Button>
             </Link>
@@ -76,7 +104,8 @@ export default function Header() {
                 <Link key={item.href} href={item.href} className="px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 font-medium">{item.label}</Link>
               ))}
               <div className="flex gap-2 mt-2">
-                <a href={`tel:${COMPANY.phoneRaw}`} className="flex-1"><Button variant="outline" className="w-full"><Phone className="h-4 w-4 mr-2" />Call</Button></a>
+                <Link href={session ? dashboardHref : '/login'} className="flex-1"><Button variant="outline" className="w-full">{session ? 'Dashboard' : 'Login'}</Button></Link>
+               
                 <Link href="/#book" className="flex-1"><Button className="w-full bg-orange-500 hover:bg-orange-600">Book Now</Button></Link>
               </div>
             </div>

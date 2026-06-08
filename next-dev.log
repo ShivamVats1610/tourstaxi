@@ -9,3 +9,4 @@
 Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: true }
 
  GET / 200 in 2.2s (next.js: 712ms, application-code: 1496ms)
+✓ Finished writing to filesystem cache in 11.7s
