@@ -2,9 +2,9 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Phone, Car, LogIn } from 'lucide-react';
+import { Menu, X, Car, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { NAV, COMPANY } from '@/lib/data';
+import { NAV } from '@/lib/data';
 import { usePathname } from 'next/navigation';
 
 export default function Header() {

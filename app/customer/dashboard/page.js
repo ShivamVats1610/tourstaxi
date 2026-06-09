@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { ArrowRight, CalendarClock, Car, LogOut, MapPin, Phone, Sparkles } from 'lucide-react';
+import { ArrowRight, CalendarClock, Car, LogOut, Mail, MapPin, Phone, Sparkles, User } from 'lucide-react';
 import { logoutAction } from '@/app/actions/auth';
+import { updateProfileAction } from '@/app/actions/crm';
 import { requireUser } from '@/lib/auth';
 import { listCustomerBookings } from '@/lib/crm';
 
@@ -55,7 +56,20 @@ export default async function CustomerDashboard() {
           <Summary icon={Phone} label="Profile Phone" value={user.phone || 'Not set'} small />
         </div>
 
-        <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
+        <section className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/10">
+          <div className="border-b border-slate-200 pb-4">
+            <h2 className="font-bold text-slate-950">My Profile</h2>
+            <p className="text-sm text-slate-500">Keep your contact details updated for booking confirmations and driver calls.</p>
+          </div>
+          <form action={updateProfileAction} className="mt-4 grid gap-3 md:grid-cols-4">
+            <Labeled icon={User} label="Name"><input name="name" defaultValue={user.name || ''} className="h-10 rounded-md border border-slate-200 px-3 text-sm" /></Labeled>
+            <Labeled icon={Mail} label="Email"><input name="email" type="email" defaultValue={user.email || ''} className="h-10 rounded-md border border-slate-200 px-3 text-sm" /></Labeled>
+            <Labeled icon={Phone} label="Phone"><input name="phone" defaultValue={user.phone || ''} className="h-10 rounded-md border border-slate-200 px-3 text-sm" /></Labeled>
+            <button className="mt-5 h-10 rounded-md bg-slate-950 px-4 text-sm font-bold text-white hover:bg-slate-800">Update Profile</button>
+          </form>
+        </section>
+
+        <section className="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
           <div className="border-b border-slate-200 px-5 py-4">
             <h2 className="font-bold text-slate-950">My Bookings</h2>
             <p className="text-sm text-slate-500">Bookings connected to your account email, phone, or active login.</p>
@@ -90,6 +104,15 @@ export default async function CustomerDashboard() {
         </div>
       </section>
     </main>
+  );
+}
+
+function Labeled({ icon: Icon, label, children }) {
+  return (
+    <label className="grid gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+      <span className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5 text-sky-500" /> {label}</span>
+      {children}
+    </label>
   );
 }
 

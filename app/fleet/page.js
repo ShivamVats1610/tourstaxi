@@ -2,12 +2,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Reveal from '@/components/site/Reveal';
-import { FLEET } from '@/lib/data';
+import { listCabs } from '@/lib/crm';
 import { Users, Briefcase, Check, ArrowRight } from 'lucide-react';
 
 export const metadata = { title: 'Fleet — ToursTaxi' };
 
-export default function FleetPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function FleetPage() {
+  const fleet = await listCabs();
+
   return (
     <div className="pt-24">
       <section className="py-20 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 text-white">
@@ -20,7 +24,7 @@ export default function FleetPage() {
 
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 grid gap-8 lg:grid-cols-2">
-          {FLEET.map((v, i) => (
+          {fleet.map((v, i) => (
             <Reveal key={v.slug} delay={i * 0.05}>
               <Card className="overflow-hidden group hover:shadow-2xl transition-all h-full">
                 <div className="grid sm:grid-cols-5">

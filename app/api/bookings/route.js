@@ -18,10 +18,10 @@ if (!required(body.tripType))
   errors.push('Trip type is required.');
 
 if (!required(body.pickup))
-  errors.push('Pickup location is required.');
+  errors.push('Exact pickup address is required.');
 
 if (body.tripType !== 'local' && !required(body.drop))
-  errors.push('Drop location is required.');
+  errors.push('Exact drop address is required.');
 
 if (!required(body.date))
   errors.push('Pickup date is required.');

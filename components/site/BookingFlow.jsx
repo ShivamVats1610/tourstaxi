@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowRight, ArrowLeft, X, MapPin, Calendar, Clock, Users, Repeat, Timer, Plane, ArrowRight as ARight, Check, Briefcase, Sparkles, ShieldCheck, Phone, Mail, User, FileText, Copy, PartyPopper } from 'lucide-react';
-import { FLEET, PACKAGES } from '@/lib/data';
+import { PACKAGES } from '@/lib/data';
 import { toast } from 'sonner';
 
 const TRIP_TYPES = [
@@ -16,9 +16,21 @@ const TRIP_TYPES = [
   { id: 'airport', label: 'Airport Transfer', icon: Plane, desc: 'Flight-tracked airport pickups & drops.' }
 ];
 
-const STEPS = ['Trip Type', 'Locations', 'Choose Cab', 'Fare Summary', 'Your Details', 'Confirmed'];
+const STEPS = ['Trip Type', 'Exact Address', 'Choose Cab', 'Fare Summary', 'Your Details', 'Confirmed'];
 
-export default function BookingFlow({ open, prefill = {}, onClose }) {
+function todayValue() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 10);
+}
+
+function nextPickupTimeValue() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + 30);
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+}
+
+export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState({});
   const [bookingId, setBookingId] = useState('');
@@ -28,13 +40,17 @@ export default function BookingFlow({ open, prefill = {}, onClose }) {
   useEffect(() => {
     if (open) {
       queueMicrotask(() => {
+        const minDate = todayValue();
+        const minTime = nextPickupTimeValue();
+        const prefillDate = prefill.date || '';
+        const prefillTime = prefill.time || '10:00';
         setStep(prefill.startStep ?? 0);
         setData({
           tripType: prefill.tripType || 'one-way',
           pickup: prefill.pickup || '',
           drop: prefill.drop || '',
-          date: prefill.date || '',
-          time: prefill.time || '10:00',
+          date: prefillDate,
+          time: prefillDate === minDate && prefillTime < minTime ? minTime : prefillTime,
           returnDate: prefill.returnDate || '',
           rental: prefill.rental || '8 hrs / 80 km',
           passengers: prefill.passengers || '2 Passengers',
@@ -48,27 +64,29 @@ export default function BookingFlow({ open, prefill = {}, onClose }) {
     }
   }, [open, prefill]);
 
-  const vehicle = useMemo(() => FLEET.find(v => v.slug === data.vehicleSlug) || null, [data.vehicleSlug]);
+  const fleet = useMemo(() => Array.isArray(cabs) ? cabs : [], [cabs]);
+  const vehicle = useMemo(() => fleet.find(v => v.slug === data.vehicleSlug) || null, [fleet, data.vehicleSlug]);
   const pkg = useMemo(() => PACKAGES.find(p => p.slug === data.packageSlug) || null, [data.packageSlug]);
 
-  // Dummy fare
   const fare = useMemo(() => {
     if (!vehicle) return null;
     const distance = data.tripType === 'local' ? 80 : data.tripType === 'airport' ? 35 : data.tripType === 'round-trip' ? 500 : 250;
-    const base = vehicle.pricePerKm * distance;
+    const usesStartPrice = vehicle.startPrice > 0;
+    const base = usesStartPrice ? vehicle.startPrice : vehicle.pricePerKm * distance;
+    if (usesStartPrice) return { distance, base, driver: 0, toll: 0, gst: 0, total: base, usesStartPrice };
     const driver = data.tripType === 'round-trip' ? 600 : 300;
     const toll = data.tripType === 'local' ? 0 : 200;
     const subtotal = base + driver + toll;
     const gst = Math.round(subtotal * 0.05);
     const total = subtotal + gst;
-    return { distance, base, driver, toll, gst, total };
+    return { distance, base, driver, toll, gst, total, usesStartPrice };
   }, [vehicle, data.tripType]);
 
   const set = (k, v) => setData(d => ({ ...d, [k]: v }));
 
   const canNext = () => {
     if (step === 0) return !!data.tripType;
-    if (step === 1) return !!data.pickup && (data.tripType === 'local' || !!data.drop) && !!data.date;
+    if (step === 1) return !!data.pickup && (data.tripType === 'local' || !!data.drop) && !!data.date && data.date >= todayValue() && (data.date !== todayValue() || !data.time || data.time >= nextPickupTimeValue());
     if (step === 2) return !!data.vehicleSlug;
     if (step === 4) return !!data.name && !!data.phone;
     return true;
@@ -133,7 +151,7 @@ export default function BookingFlow({ open, prefill = {}, onClose }) {
             <motion.div key={step} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.25 }}>
               {step === 0 && <Step1 value={data.tripType} onChange={(v) => set('tripType', v)} />}
               {step === 1 && <Step2 data={data} set={set} />}
-              {step === 2 && <Step3 value={data.vehicleSlug} onChange={(v) => set('vehicleSlug', v)} />}
+              {step === 2 && <Step3 value={data.vehicleSlug} onChange={(v) => set('vehicleSlug', v)} fleet={fleet} />}
               {step === 3 && <Step4 vehicle={vehicle} fare={fare} data={data} />}
               {step === 4 && <Step5 data={data} set={set} />}
               {step === 5 && <Step6 bookingId={bookingId} data={data} vehicle={vehicle} fare={fare} pkg={pkg} />}
@@ -184,18 +202,34 @@ function Step1({ value, onChange }) {
   );
 }
 
-/* ---------------- Step 2: Locations ---------------- */
+/* ---------------- Step 2: Exact addresses ---------------- */
 function Step2({ data, set }) {
+  const minDate = todayValue();
+  const minTime = data.date === minDate ? nextPickupTimeValue() : undefined;
+  const updateDate = (value) => {
+    const nextDate = value && value < minDate ? minDate : value;
+    set('date', nextDate);
+    if (nextDate === minDate && data.time < nextPickupTimeValue()) set('time', nextPickupTimeValue());
+    if (data.returnDate && data.returnDate < nextDate) set('returnDate', nextDate);
+  };
+  const updateTime = (value) => {
+    if (data.date === minDate && value < nextPickupTimeValue()) {
+      set('time', nextPickupTimeValue());
+      return;
+    }
+    set('time', value);
+  };
+
   return (
     <div>
-      <p className="text-slate-600 mb-5">Where are you headed?</p>
+      <p className="text-slate-600 mb-5">Add the exact pickup and drop details so the driver can reach you without a follow-up call.</p>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Labeled icon={MapPin} label="Pickup Location">
-          <Input value={data.pickup} onChange={(e) => set('pickup', e.target.value)} placeholder="e.g. Sawai Madhopur Railway Station" />
+        <Labeled icon={MapPin} label="Exact Pickup Address">
+          <Input value={data.pickup} onChange={(e) => set('pickup', e.target.value)} placeholder="Hotel, house no., landmark, full address" />
         </Labeled>
         {data.tripType !== 'local' ? (
-          <Labeled icon={MapPin} label="Drop Location">
-            <Input value={data.drop} onChange={(e) => set('drop', e.target.value)} placeholder="e.g. Jaipur Airport" />
+          <Labeled icon={MapPin} label="Exact Drop Address">
+            <Input value={data.drop} onChange={(e) => set('drop', e.target.value)} placeholder="Destination address or landmark" />
           </Labeled>
         ) : (
           <Labeled icon={Timer} label="Rental Package">
@@ -205,14 +239,14 @@ function Step2({ data, set }) {
           </Labeled>
         )}
         <Labeled icon={Calendar} label="Pickup Date">
-          <Input type="date" value={data.date} onChange={(e) => set('date', e.target.value)} />
+          <Input type="date" value={data.date} min={minDate} onChange={(e) => updateDate(e.target.value)} />
         </Labeled>
         <Labeled icon={Clock} label="Pickup Time">
-          <Input type="time" value={data.time} onChange={(e) => set('time', e.target.value)} />
+          <Input type="time" value={data.time} min={minTime} onChange={(e) => updateTime(e.target.value)} />
         </Labeled>
         {data.tripType === 'round-trip' && (
           <Labeled icon={Calendar} label="Return Date">
-            <Input type="date" value={data.returnDate} onChange={(e) => set('returnDate', e.target.value)} />
+            <Input type="date" value={data.returnDate} min={data.date || minDate} onChange={(e) => set('returnDate', e.target.value)} />
           </Labeled>
         )}
         <Labeled icon={Users} label="Passengers">
@@ -235,12 +269,17 @@ function Labeled({ icon: Icon, label, children }) {
 }
 
 /* ---------------- Step 3: Vehicle ---------------- */
-function Step3({ value, onChange }) {
+function Step3({ value, onChange, fleet }) {
   return (
     <div>
       <p className="text-slate-600 mb-5">Pick the cab that fits your trip.</p>
+      {!fleet.length && (
+        <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
+          No active cabs are available right now. Add active cab details from admin to show them here.
+        </div>
+      )}
       <div className="grid gap-3 sm:grid-cols-2">
-        {FLEET.map(v => {
+        {fleet.map(v => {
           const active = value === v.slug;
           return (
             <button key={v.slug} onClick={() => onChange(v.slug)} className={`text-left rounded-2xl border-2 overflow-hidden transition-all group ${active ? 'border-sky-500 shadow-lg shadow-sky-500/10' : 'border-slate-200 hover:border-sky-300'} bg-white`}>
@@ -274,7 +313,7 @@ function Step3({ value, onChange }) {
 /* ---------------- Step 4: Fare ---------------- */
 function Step4({ vehicle, fare, data }) {
   if (!vehicle || !fare) return <div className="text-slate-600">Please select a vehicle first.</div>;
-  const rows = [
+  const rows = fare.usesStartPrice ? [{ label: 'Cab Fare', val: fare.base }] : [
     { label: `Base Fare (${fare.distance} km × ₹${vehicle.pricePerKm}/km)`, val: fare.base },
     { label: 'Driver Allowance', val: fare.driver },
     { label: 'Toll & Parking', val: fare.toll },

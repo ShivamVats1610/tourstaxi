@@ -4,6 +4,7 @@ import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 import { Toaster } from 'sonner';
 import BookingProvider from '@/lib/booking-context';
+import { listCabs } from '@/lib/crm';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -13,11 +14,13 @@ export const metadata = {
   keywords: 'cab booking, ranthambore taxi, jaipur taxi, golden triangle tour, outstation cab, ToursTaxi'
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const cabs = await listCabs({ fallbackToFleet: false });
+
   return (
     <html lang="en" className={inter.variable}>
       <body className="font-sans antialiased bg-slate-50 text-slate-900">
-        <BookingProvider>
+        <BookingProvider cabs={cabs}>
           <Header />
           <main className="min-h-screen">{children}</main>
           <Footer />

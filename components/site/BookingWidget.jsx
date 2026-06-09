@@ -12,31 +12,17 @@ const TABS = [
   { id: 'airport', label: 'Airport Transfer', icon: Plane }
 ];
 
-const CITY_OPTIONS = [
-  'Jaipur',
-  'Jodhpur',
-  'Udaipur',
-  'Kota',
-  'Ajmer',
-  'Bikaner',
-  'Jaisalmer',
-  'Pushkar',
-  'Mount Abu',
-  'Sawai Madhopur',
-  'Ranthambore',
-  'Bharatpur',
-  'Alwar',
-  'Chittorgarh',
-  'Bundi',
-  'Sikar',
-  'Jhunjhunu',
-  'Neemrana',
-  'Delhi',
-  'New Delhi',
-  'Gurugram',
-  'Noida',
-  'Agra'
-];
+function todayValue() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 10);
+}
+
+function nextPickupTimeValue() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + 30);
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+}
 
 export default function BookingWidget() {
   const [tab, setTab] = useState('one-way');
@@ -46,6 +32,24 @@ export default function BookingWidget() {
   const [time, setTime] = useState('10:00');
   const [passengers, setPassengers] = useState('2 Passengers');
   const { open } = useBooking();
+  const minDate = todayValue();
+  const minTime = date === minDate ? nextPickupTimeValue() : undefined;
+
+  const updateDate = (value) => {
+    const nextDate = value && value < minDate ? minDate : value;
+    setDate(nextDate);
+    if (nextDate === minDate && time < nextPickupTimeValue()) {
+      setTime(nextPickupTimeValue());
+    }
+  };
+
+  const updateTime = (value) => {
+    if (date === minDate && value < nextPickupTimeValue()) {
+      setTime(nextPickupTimeValue());
+      return;
+    }
+    setTime(value);
+  };
 
   const explore = () => open({ tripType: tab, pickup, drop, date, time, passengers, startStep: pickup && (tab === 'local' || drop) && date ? 2 : 1 });
 
@@ -66,11 +70,11 @@ export default function BookingWidget() {
         </div>
 
         <div className="p-5 sm:p-6 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]">
-          <Field icon={MapPin} label="Pickup Location" placeholder="Enter pickup city" value={pickup} onChange={setPickup} suggestions={CITY_OPTIONS} />
-          {tab !== 'local' && <Field icon={MapPin} label="Drop Location" placeholder="Enter destination" value={drop} onChange={setDrop} suggestions={CITY_OPTIONS} />}
+          <Field icon={MapPin} label="Exact Pickup" placeholder="Hotel, house no., landmark, full address" value={pickup} onChange={setPickup} />
+          {tab !== 'local' && <Field icon={MapPin} label="Exact Drop" placeholder="Destination address or landmark" value={drop} onChange={setDrop} />}
           {tab === 'local' && <Field icon={Timer} label="Rental Package" select options={['4 hrs / 40 km', '8 hrs / 80 km', '12 hrs / 120 km']} value={drop} onChange={setDrop} />}
-          <Field icon={Calendar} label="Pickup Date" type="date" value={date} onChange={setDate} />
-          <Field icon={Clock} label="Pickup Time" type="time" value={time} onChange={setTime} />
+          <Field icon={Calendar} label="Pickup Date" type="date" value={date} onChange={updateDate} min={minDate} />
+          <Field icon={Clock} label="Pickup Time" type="time" value={time} onChange={updateTime} min={minTime} />
           <Field icon={Users} label="Passengers" select options={['1 Passenger', '2 Passengers', '3 Passengers', '4 Passengers', '5+ Passengers']} value={passengers} onChange={setPassengers} />
         </div>
 
@@ -87,13 +91,7 @@ export default function BookingWidget() {
   );
 }
 
-function Field({ icon: Icon, label, placeholder, type = 'text', select = false, options = [], suggestions = [], value, onChange }) {
-  const [focused, setFocused] = useState(false);
-  const filteredSuggestions = suggestions
-    .filter(city => city.toLowerCase().includes((value || '').trim().toLowerCase()))
-    .slice(0, 6);
-  const showSuggestions = !select && type === 'text' && focused && filteredSuggestions.length > 0;
-
+function Field({ icon: Icon, label, placeholder, type = 'text', select = false, options = [], value, onChange, min }) {
   return (
     <div className="relative flex min-w-0 flex-col gap-1.5 group">
       <span className="text-[11px] uppercase tracking-wider font-semibold text-slate-500">{label}</span>
@@ -108,33 +106,13 @@ function Field({ icon: Icon, label, placeholder, type = 'text', select = false, 
           <input
             type={type}
             value={value}
-            onFocus={() => setFocused(true)}
-            onBlur={() => window.setTimeout(() => setFocused(false), 120)}
             onChange={(e) => onChange?.(e.target.value)}
             placeholder={placeholder}
+            min={min}
             className="min-w-0 flex-1 bg-transparent outline-none text-sm text-slate-800 placeholder:text-slate-400"
           />
         )}
       </div>
-      {showSuggestions && (
-        <div className="absolute left-0 right-0 top-full z-30 mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
-          {filteredSuggestions.map(city => (
-            <button
-              key={city}
-              type="button"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                onChange?.(city);
-                setFocused(false);
-              }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
-            >
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-              {city}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

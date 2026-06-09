@@ -5,7 +5,7 @@ import BookingFlow from '@/components/site/BookingFlow';
 const BookingCtx = createContext({ open: () => {} });
 export const useBooking = () => useContext(BookingCtx);
 
-export default function BookingProvider({ children }) {
+export default function BookingProvider({ children, cabs = [] }) {
   const [state, setState] = useState({ open: false, prefill: {} });
 
   const open = useCallback((prefill = {}) => setState({ open: true, prefill }), []);
@@ -14,7 +14,7 @@ export default function BookingProvider({ children }) {
   return (
     <BookingCtx.Provider value={{ open }}>
       {children}
-      <BookingFlow open={state.open} prefill={state.prefill} onClose={close} />
+      <BookingFlow open={state.open} prefill={state.prefill} onClose={close} cabs={cabs} />
     </BookingCtx.Provider>
   );
 }
