@@ -1,89 +1,99 @@
 'use client';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Star, Users, Briefcase, ArrowRight, Phone, MapPin, Clock, Smartphone, Apple, Play, Check, ShieldCheck, BadgeIndianRupee, Headphones, Sparkles, Route as RouteIcon } from 'lucide-react';
+import { Apple, ArrowRight, BadgeIndianRupee, CalendarCheck, Check, Clock, Download, Headphones, Play, Route as RouteIcon, ShieldCheck, Smartphone, Star, Users, Briefcase, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import BookingWidget from '@/components/site/BookingWidget';
 import Reveal from '@/components/site/Reveal';
 import SectionTitle from '@/components/site/SectionTitle';
-import { STATS, WHY_CHOOSE, FLEET, PACKAGES, ROUTES, TESTIMONIALS, FAQS } from '@/lib/data';
+import { COMPANY, FAQS, FLEET, PACKAGES, ROUTES, TESTIMONIALS, WHY_CHOOSE } from '@/lib/data';
 
-const ICONS = { ShieldCheck, BadgeIndianRupee, Headphones, Clock, Sparkles, Route: RouteIcon };
+const HERO_BG = 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=2200&q=85';
+const ICONS = { ShieldCheck, BadgeIndianRupee, Headphones, Clock, Route: RouteIcon };
 
 function Home() {
   return (
     <>
-      {/* ---------- HERO ---------- */}
-      <section className="relative min-h-[100vh] flex items-center pt-24 pb-16 overflow-hidden">
-        <div className="absolute inset-0">
-          <img src="https://images.unsplash.com/photo-1625037669075-e5472e080265?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTV8MHwxfHNlYXJjaHwyfHxTVVYlMjBJbmRpYXxlbnwwfHx8fDE3ODA3Mjc2ODZ8MA&ixlib=rb-4.1.0&q=85" alt="luxury cab" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/75 to-sky-900/60" />
-          <div className="absolute inset-0 bg-grid opacity-40" />
-        </div>
+      <section className="relative overflow-hidden pt-[74px]">
+        <div className="relative min-h-[590px] pb-20 pt-20 sm:pt-24">
+          <img src={HERO_BG} alt="city road for cab booking" className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-slate-950/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/25 via-transparent to-slate-950/55" />
 
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid lg:grid-cols-2 gap-10 items-center">
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="order-2 lg:order-1">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur text-white text-xs font-semibold uppercase tracking-wider mb-5">
-                <Star className="h-3.5 w-3.5 text-orange-400 fill-orange-400" /> Rated 4.9 by 10,000+ travellers
-              </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight text-white text-balance">
-                Premium Cabs.<br /> <span className="bg-gradient-to-r from-sky-400 via-orange-300 to-orange-500 bg-clip-text text-transparent">Unforgettable Journeys.</span>
-              </h1>
-              <p className="mt-5 text-white/80 text-lg leading-relaxed max-w-xl">Outstation cabs, airport transfers and handcrafted Rajasthan tours \u2014 powered by verified drivers, transparent pricing and 24×7 support.</p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                <a href="#book"><Button className="h-12 px-6 bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/40">Book a Cab <ArrowRight className="h-4 w-4 ml-2" /></Button></a>
-                <Link href="/tour-packages"><Button variant="outline" className="h-12 px-6 bg-white/10 border-white/30 text-white hover:bg-white hover:text-slate-900">Explore Tours</Button></Link>
-              </div>
-              <div className="mt-8 flex items-center gap-4 text-white/80 text-sm">
-                <div className="flex -space-x-2">
-                  {TESTIMONIALS.slice(0, 4).map(t => <img key={t.name} src={t.avatar} alt={t.name} className="h-9 w-9 rounded-full border-2 border-slate-900 object-cover" />)}
-                </div>
-                <div><span className="font-bold text-white">10,000+</span> happy travellers this year</div>
-              </div>
-            </motion.div>
+          <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+            <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="mx-auto max-w-5xl text-5xl font-black uppercase tracking-normal text-white sm:text-6xl lg:text-7xl">
+              Services Across 2000+ Cities
+            </motion.h1>
+            <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="mx-auto mt-4 max-w-2xl text-base font-medium text-white/85 sm:text-lg">
+              Book one way, round trip, local rental and airport taxis with verified drivers, clear fares and 24x7 support.
+            </motion.p>
+          </div>
 
-            <motion.div initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="order-1 lg:order-2 lg:pl-4">
-              <BookingWidget />
-            </motion.div>
+          <div className="relative mt-10">
+            <BookingWidget />
+          </div>
+
+          <div className="relative mx-auto mt-8 max-w-4xl px-4">
+            <div className="mx-auto flex flex-wrap items-center justify-center gap-3 text-sm font-semibold text-white">
+              <span className="flex items-center gap-2"><span className="text-2xl leading-none">{"{"}</span> India&apos;s top rated car rental service <span className="text-2xl leading-none">{"}"}</span></span>
+            </div>
+            <div className="mx-auto mt-5 grid max-w-3xl grid-cols-1 overflow-hidden rounded-full bg-white shadow-[0_18px_30px_rgba(15,23,42,0.25)] sm:grid-cols-3">
+              <RatingBadge title="App Store" score="4.2K+ Reviews" icon={<Apple className="h-10 w-10 text-sky-500" />} />
+              <RatingBadge title="Google" score="6.1K+ Reviews" icon={<span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-3xl font-black text-sky-600">G</span>} />
+              <RatingBadge title="Play Store" score="15.5K+ Reviews" icon={<Play className="h-11 w-11 fill-emerald-500 text-emerald-500" />} />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ---------- STATS ---------- */}
-      <section className="-mt-14 relative z-10">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {STATS.map((s, i) => (
-              <Reveal key={s.label} delay={i * 0.08} className="text-center px-4 py-3">
-                <div className="text-3xl md:text-4xl font-extrabold bg-gradient-to-br from-sky-600 to-orange-500 bg-clip-text text-transparent">{s.value}</div>
-                <div className="text-xs uppercase tracking-wider text-slate-500 mt-1 font-semibold">{s.label}</div>
+      <section className="-mt-1 bg-white pb-12 pt-24">
+        <div className="mx-auto grid max-w-7xl gap-4 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
+          <PromoCard title="Book Now" subtitle="at zero cost" note="Pay after cab confirmation" tone="sky" />
+          <PromoCard title="Premium Cabs" subtitle="for every route" note="Sedan, SUV and traveller options" image={FLEET[3]?.image} />
+          <PromoCard title="Free Cancellations" subtitle="before your trip" note="Flexible travel plans" tone="emerald" />
+        </div>
+      </section>
+
+      <section className="bg-slate-50 py-16 lg:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionTitle eyebrow="Cab Services" title="Choose the ride type you need" subtitle="Fast booking, clean cabs, and support that answers when your trip matters." />
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              ['One Way Taxi', 'Pay only for the drop route.', ArrowRight],
+              ['Round Trip', 'Keep the same cab for multi-day travel.', RouteIcon],
+              ['Local Rental', 'Hourly packages for city travel.', Clock],
+              ['Airport Transfer', 'Reliable pickups and drops.', CalendarCheck]
+            ].map(([title, desc, Icon], index) => (
+              <Reveal key={title} delay={index * 0.05}>
+                <Card className="h-full rounded-lg border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl">
+                  <CardContent className="p-6">
+                    <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-sky-50 text-sky-600"><Icon className="h-6 w-6" /></div>
+                    <h3 className="text-lg font-black text-slate-950">{title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{desc}</p>
+                    <Link href="/#book" className="mt-5 inline-flex items-center text-sm font-bold text-orange-600">Book now <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                  </CardContent>
+                </Card>
               </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ---------- WHY CHOOSE ---------- */}
-      <section className="py-20 lg:py-28">
+      <section className="bg-white py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionTitle eyebrow="Why ToursTaxi" title="Travel that feels first-class — every time" subtitle="From your first call to the final drop, every detail is designed for comfort, safety and zero surprises." />
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {WHY_CHOOSE.map((f, i) => {
-              const Icon = ICONS[f.icon] || ShieldCheck;
+          <SectionTitle eyebrow="Why ToursTaxi" title="A smoother way to book outstation cabs" subtitle="Transparent fares, verified drivers and clean vehicles across India." />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+            {WHY_CHOOSE.slice(0, 5).map((item, index) => {
+              const Icon = ICONS[item.icon] || ShieldCheck;
               return (
-                <Reveal key={f.title} delay={i * 0.06}>
-                  <Card className="h-full group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border-slate-200">
-                    <CardContent className="p-6">
-                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-sky-100 to-orange-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <Icon className="h-6 w-6 text-sky-600" />
-                      </div>
-                      <h3 className="font-bold text-lg text-slate-900 mb-1.5">{f.title}</h3>
-                      <p className="text-sm text-slate-600 leading-relaxed">{f.desc}</p>
-                    </CardContent>
-                  </Card>
+                <Reveal key={item.title} delay={index * 0.05}>
+                  <div className="h-full rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <Icon className="h-7 w-7 text-sky-500" />
+                    <h3 className="mt-4 font-black text-slate-950">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{item.desc}</p>
+                  </div>
                 </Reveal>
               );
             })}
@@ -91,192 +101,172 @@ function Home() {
         </div>
       </section>
 
-      {/* ---------- FLEET ---------- */}
-      <section className="py-20 lg:py-28 bg-white">
+      <section className="bg-slate-50 py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionTitle eyebrow="Our Fleet" title="Pick the perfect ride for your journey" subtitle="From nimble sedans to spacious tempo travellers \u2014 every cab is sanitised, GPS-tracked and serviced fortnightly." />
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {FLEET.map((v, i) => (
-              <Reveal key={v.slug} delay={i * 0.06}>
-                <Card className="overflow-hidden group hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 h-full">
-                  <div className="relative h-48 overflow-hidden bg-slate-100">
-                    <img src={v.image} alt={v.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-orange-500 text-white text-[11px] font-bold uppercase tracking-wide shadow">{v.badge}</div>
-                  </div>
+          <SectionTitle eyebrow="Our Fleet" title="Cars for solo rides, families and groups" subtitle="Every cab is kept clean, AC-ready and suitable for outstation travel." />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {FLEET.map((vehicle, index) => (
+              <Reveal key={vehicle.slug} delay={index * 0.04}>
+                <Card className="h-full overflow-hidden rounded-lg border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl">
+                  <img src={vehicle.image} alt={vehicle.name} className="h-48 w-full object-cover" />
                   <CardContent className="p-5">
-                    <div className="text-xs text-sky-600 font-semibold uppercase tracking-wider">{v.category}</div>
-                    <h3 className="text-xl font-bold mt-1 text-slate-900">{v.name}</h3>
-                    <div className="flex items-center gap-4 mt-3 text-sm text-slate-600">
-                      <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{v.seats}</span>
-                      <span className="flex items-center gap-1.5"><Briefcase className="h-4 w-4" />{v.luggage}</span>
-                      <span className="flex items-center gap-1.5">{v.ac ? 'AC' : 'Non-AC'}</span>
+                    <div className="text-xs font-black uppercase tracking-wide text-sky-600">{vehicle.category}</div>
+                    <h3 className="mt-1 text-xl font-black text-slate-950">{vehicle.name}</h3>
+                    <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-600">
+                      <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{vehicle.seats}</span>
+                      <span className="flex items-center gap-1.5"><Briefcase className="h-4 w-4" />{vehicle.luggage}</span>
                     </div>
-                    <div className="mt-4 flex items-end justify-between">
-                      <div>
-                        <div className="text-[11px] text-slate-500">Starting</div>
-                        <div className="text-2xl font-extrabold text-slate-900">\u20b9{v.startPrice.toLocaleString()}</div>
-                      </div>
-                      <Link href="/#book"><Button size="sm" className="bg-sky-500 hover:bg-sky-600">Book Now</Button></Link>
+                    <div className="mt-5 flex items-center justify-between">
+                      <div><span className="text-xs text-slate-500">Starting</span><div className="text-2xl font-black text-slate-950">Rs {vehicle.startPrice.toLocaleString()}</div></div>
+                      <Link href="/#book"><Button className="rounded bg-sky-500 hover:bg-sky-600">Book</Button></Link>
                     </div>
                   </CardContent>
                 </Card>
               </Reveal>
             ))}
           </div>
-          <div className="text-center mt-10">
-            <Link href="/fleet"><Button variant="outline" className="h-11 px-6 border-slate-300">View Full Fleet <ArrowRight className="h-4 w-4 ml-2" /></Button></Link>
-          </div>
         </div>
       </section>
 
-      {/* ---------- POPULAR ROUTES ---------- */}
-      <section className="py-20 lg:py-28">
+      <section className="bg-white py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionTitle eyebrow="Popular Routes" title="India\u2019s most-booked outstation cab routes" subtitle="Fixed, all-inclusive prices on India\u2019s most-loved routes." />
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {ROUTES.slice(0, 6).map((r, i) => (
-              <Reveal key={`${r.from}-${r.to}`} delay={i * 0.05}>
-                <Card className="overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                  <div className="relative h-40 overflow-hidden">
-                    <img src={r.image} alt={`${r.from} to ${r.to}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/10 to-transparent" />
-                    <div className="absolute bottom-3 left-4 right-4 text-white">
-                      <div className="flex items-center gap-2 text-xs opacity-80"><MapPin className="h-3 w-3" /> {r.distance} \u00b7 {r.duration}</div>
-                      <div className="text-xl font-bold flex items-center gap-2">{r.from} <ArrowRight className="h-4 w-4" /> {r.to}</div>
-                    </div>
+          <SectionTitle eyebrow="Popular Routes" title="Most booked taxi routes" subtitle="Fixed route pricing for common outstation journeys." />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {ROUTES.map((route, index) => (
+              <Reveal key={`${route.from}-${route.to}`} delay={index * 0.04}>
+                <Link href="/#book" className="group flex items-center justify-between rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-sky-300 hover:shadow-lg">
+                  <div>
+                    <div className="flex items-center gap-2 text-lg font-black text-slate-950">{route.from} <ArrowRight className="h-4 w-4 text-sky-500" /> {route.to}</div>
+                    <div className="mt-1 text-sm text-slate-500">{route.distance} · {route.duration}</div>
                   </div>
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                      <div className="text-[11px] text-slate-500">Cab from</div>
-                      <div className="text-xl font-extrabold text-slate-900">\u20b9{r.price.toLocaleString()}</div>
-                    </div>
-                    <Link href="/#book"><Button size="sm" variant="outline" className="hover:bg-sky-500 hover:text-white hover:border-sky-500">Book Cab</Button></Link>
-                  </CardContent>
-                </Card>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- TOUR PACKAGES ---------- */}
-      <section className="py-20 lg:py-28 bg-gradient-to-br from-slate-900 via-slate-950 to-sky-950 text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center max-w-2xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-orange-300 text-xs font-semibold uppercase tracking-wider mb-3"><span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse" /> Curated Tours</div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight">Handcrafted Rajasthan & Golden Triangle tours</h2>
-            <p className="mt-3 text-white/70 text-base md:text-lg">Stay, sightseeing and chauffeured cab \u2014 everything taken care of.</p>
-          </Reveal>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {PACKAGES.map((p, i) => (
-              <Reveal key={p.slug} delay={i * 0.06}>
-                <Card className="overflow-hidden bg-white/5 border-white/10 backdrop-blur group hover:-translate-y-1.5 transition-all duration-300 h-full">
-                  <div className="relative h-48 overflow-hidden">
-                    <img src={p.image} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-orange-500 text-white text-[11px] font-bold uppercase">{p.tag}</div>
+                  <div className="text-right">
+                    <div className="text-xs text-slate-500">From</div>
+                    <div className="text-xl font-black text-orange-600">Rs {route.price.toLocaleString()}</div>
                   </div>
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-1.5 text-xs text-white/60"><Clock className="h-3.5 w-3.5" />{p.duration}</div>
-                    <h3 className="text-lg font-bold mt-2 text-white">{p.title}</h3>
-                    <p className="text-sm text-white/70 mt-2 line-clamp-3">{p.description}</p>
-                    <div className="mt-4 flex items-end justify-between">
-                      <div>
-                        <div className="text-[11px] text-white/50">From</div>
-                        <div className="text-xl font-extrabold text-orange-400">\u20b9{p.price.toLocaleString()}</div>
-                      </div>
-                      <Link href="/tour-packages"><Button size="sm" className="bg-orange-500 hover:bg-orange-600">Book Now</Button></Link>
-                    </div>
-                  </CardContent>
-                </Card>
+                </Link>
               </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ---------- TESTIMONIALS ---------- */}
-      <section className="py-20 lg:py-28 bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionTitle eyebrow="Reviews" title="Loved by travellers across India" subtitle="Real stories from people who explored India with ToursTaxi." />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {TESTIMONIALS.map((t, i) => (
-              <Reveal key={t.name} delay={i * 0.06}>
-                <Card className="h-full hover:shadow-xl transition-all duration-300 border-slate-200">
-                  <CardContent className="p-6">
-                    <div className="flex gap-1 mb-3">{Array.from({ length: t.rating }).map((_, k) => <Star key={k} className="h-4 w-4 fill-orange-400 text-orange-400" />)}</div>
-                    <p className="text-sm text-slate-700 leading-relaxed mb-5">\u201c{t.text}\u201d</p>
-                    <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-                      <img src={t.avatar} alt={t.name} className="h-10 w-10 rounded-full object-cover" />
-                      <div>
-                        <div className="font-semibold text-slate-900 text-sm">{t.name}</div>
-                        <div className="text-xs text-slate-500">{t.city}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- APP DOWNLOAD ---------- */}
-      <section className="py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-600 via-sky-700 to-orange-600 text-white p-8 lg:p-14">
-            <div className="absolute inset-0 bg-grid opacity-30" />
-            <div className="relative grid lg:grid-cols-2 gap-10 items-center">
-              <Reveal>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-semibold uppercase tracking-wider mb-4"><Smartphone className="h-3.5 w-3.5" /> ToursTaxi App</div>
-                <h2 className="text-3xl md:text-5xl font-extrabold leading-tight">Book in 30 seconds.<br />Track your driver live.</h2>
-                <p className="mt-4 text-white/85 text-base lg:text-lg max-w-lg">Download the ToursTaxi app for instant fares, saved addresses, exclusive deals and one-tap support.</p>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <a href="#" className="inline-flex items-center gap-2 px-5 h-12 rounded-xl bg-slate-900 hover:bg-black transition-colors"><Apple className="h-5 w-5" /><div className="text-left leading-tight"><div className="text-[10px] opacity-80">Download on the</div><div className="font-semibold">App Store</div></div></a>
-                  <a href="#" className="inline-flex items-center gap-2 px-5 h-12 rounded-xl bg-slate-900 hover:bg-black transition-colors"><Play className="h-5 w-5" /><div className="text-left leading-tight"><div className="text-[10px] opacity-80">Get it on</div><div className="font-semibold">Google Play</div></div></a>
-                </div>
-                <ul className="mt-6 grid sm:grid-cols-2 gap-2 text-sm text-white/90">
-                  {['Instant fare estimates', 'Live cab tracking', 'Save addresses & cards', '24×7 in-app support'].map(x => <li key={x} className="flex items-center gap-2"><Check className="h-4 w-4" /> {x}</li>)}
-                </ul>
-              </Reveal>
-              <Reveal delay={0.15} className="relative">
-                <div className="relative mx-auto w-64 lg:w-80">
-                  <div className="absolute -inset-8 bg-white/20 blur-3xl rounded-full" />
-                  <img src="https://images.unsplash.com/photo-1604357209793-fca5dca89f97?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTV8MHwxfHNlYXJjaHwxfHxzbWFydHBob25lJTIwbWFwfGVufDB8fHx8MTc4MDcyNzY5Mnww&ixlib=rb-4.1.0&q=85" alt="app" className="relative w-full rounded-3xl border-4 border-white/30 shadow-2xl" />
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- FAQ ---------- */}
-      <section className="py-20 lg:py-28 bg-white">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <SectionTitle eyebrow="FAQ" title="Questions, answered" subtitle="Everything you wanted to know about booking with ToursTaxi." />
+      <section id="download-app" className="bg-slate-950 py-16 text-white lg:py-20">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_0.8fr] lg:px-8">
           <Reveal>
-            <Accordion type="single" collapsible className="w-full bg-slate-50 rounded-2xl border border-slate-200 px-4 sm:px-6">
-              {FAQS.map((f, i) => (
-                <AccordionItem key={i} value={`item-${i}`} className="border-slate-200">
-                  <AccordionTrigger className="text-left font-semibold text-slate-900 hover:no-underline">{f.q}</AccordionTrigger>
-                  <AccordionContent className="text-slate-600 leading-relaxed">{f.a}</AccordionContent>
-                </AccordionItem>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-sky-200"><Smartphone className="h-4 w-4" /> ToursTaxi App</div>
+            <h2 className="mt-5 text-4xl font-black tracking-normal sm:text-5xl">Download the app for quicker cab booking</h2>
+            <p className="mt-4 max-w-xl text-white/70">Save routes, compare cab choices, track support updates and manage bookings from one place.</p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a href="#" className="inline-flex h-12 items-center gap-2 rounded-lg bg-white px-5 font-bold text-slate-950"><Apple className="h-5 w-5" /> App Store</a>
+              <a href="#" className="inline-flex h-12 items-center gap-2 rounded-lg bg-white px-5 font-bold text-slate-950"><Download className="h-5 w-5" /> Google Play</a>
+            </div>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-6">
+              {['Instant fare estimates', '24x7 booking support', 'Verified drivers', 'Easy cancellation'].map((item) => (
+                <div key={item} className="flex items-center gap-3 border-b border-white/10 py-4 last:border-b-0"><Check className="h-5 w-5 text-emerald-400" /> {item}</div>
               ))}
-            </Accordion>
+            </div>
           </Reveal>
         </div>
       </section>
 
-      {/* ---------- CTA STRIP ---------- */}
-      <section className="py-10 bg-orange-500">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
-          <div className="text-center sm:text-left">
-            <div className="font-extrabold text-xl sm:text-2xl">Ready to ride?</div>
-            <div className="text-sm opacity-90">Call us anytime \u2014 our team books your cab in under 60 seconds.</div>
+      <section className="bg-white py-16 lg:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionTitle eyebrow="Tour Packages" title="Rajasthan and Golden Triangle trips" subtitle="Cab, sightseeing and travel support bundled into easy packages." />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {PACKAGES.map((pkg, index) => (
+              <Reveal key={pkg.slug} delay={index * 0.05}>
+                <Card className="h-full overflow-hidden rounded-lg border-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
+                  <img src={pkg.image} alt={pkg.title} className="h-44 w-full object-cover" />
+                  <CardContent className="p-5">
+                    <div className="text-xs font-bold uppercase tracking-wide text-sky-600">{pkg.duration}</div>
+                    <h3 className="mt-2 font-black text-slate-950">{pkg.title}</h3>
+                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{pkg.description}</p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-lg font-black text-orange-600">Rs {pkg.price.toLocaleString()}</span>
+                      <Link href="/tour-packages"><Button size="sm" variant="outline">Details</Button></Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Reveal>
+            ))}
           </div>
-          <a href="tel:+918955458128"><Button className="h-12 px-6 bg-white text-orange-600 hover:bg-slate-100 font-bold"><Phone className="h-4 w-4 mr-2" /> +91 8955458128</Button></a>
+        </div>
+      </section>
+
+      <section className="bg-slate-50 py-16 lg:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionTitle eyebrow="Reviews" title="Trusted by travellers" subtitle="A cleaner booking experience backed by real support." />
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {TESTIMONIALS.map((review, index) => (
+              <Reveal key={review.name} delay={index * 0.04}>
+                <Card className="h-full rounded-lg border-slate-200 bg-white">
+                  <CardContent className="p-6">
+                    <div className="mb-3 flex gap-1">{Array.from({ length: review.rating }).map((_, star) => <Star key={star} className="h-4 w-4 fill-orange-400 text-orange-400" />)}</div>
+                    <p className="text-sm leading-6 text-slate-700">&quot;{review.text}&quot;</p>
+                    <div className="mt-5 flex items-center gap-3 border-t border-slate-100 pt-4">
+                      <img src={review.avatar} alt={review.name} className="h-10 w-10 rounded-full object-cover" />
+                      <div><div className="font-bold text-slate-950">{review.name}</div><div className="text-xs text-slate-500">{review.city}</div></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white py-16 lg:py-20">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <SectionTitle eyebrow="FAQ" title="Questions, answered" subtitle="Important booking details before you ride." />
+          <Accordion type="single" collapsible className="rounded-lg border border-slate-200 bg-slate-50 px-4">
+            {FAQS.map((faq, index) => (
+              <AccordionItem key={faq.q} value={`faq-${index}`}>
+                <AccordionTrigger className="text-left font-bold text-slate-950 hover:no-underline">{faq.q}</AccordionTrigger>
+                <AccordionContent className="text-slate-600">{faq.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      <section className="bg-orange-500 py-9 text-white">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-center sm:flex-row sm:px-6 sm:text-left lg:px-8">
+          <div><div className="text-2xl font-black">Need help choosing a cab?</div><div className="text-sm opacity-90">Call our booking team and confirm your ride in minutes.</div></div>
+          <a href={`tel:${COMPANY.phoneRaw}`}><Button className="h-12 rounded bg-white px-6 font-black text-orange-600 hover:bg-slate-100">{COMPANY.phone}</Button></a>
         </div>
       </section>
     </>
+  );
+}
+
+function RatingBadge({ icon, title, score }) {
+  return (
+    <div className="flex items-center justify-center gap-3 border-b border-slate-100 px-5 py-4 sm:border-b-0 sm:border-r sm:last:border-r-0">
+      {icon}
+      <div className="text-left">
+        <div className="font-black text-slate-950">{title}</div>
+        <div className="flex text-lg leading-none text-orange-400">★★★★★</div>
+        <div className="text-xs font-bold text-slate-950">({score})</div>
+      </div>
+    </div>
+  );
+}
+
+function PromoCard({ title, subtitle, note, image, tone = 'orange' }) {
+  const toneClass = tone === 'sky' ? 'from-sky-100 to-white text-sky-500' : tone === 'emerald' ? 'from-emerald-100 to-white text-sky-500' : 'from-orange-100 to-white text-orange-500';
+  return (
+    <div className={`relative min-h-40 overflow-hidden rounded-[28px] bg-gradient-to-br ${toneClass} p-6 shadow-sm`}>
+      {image && <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-55" />}
+      <div className="relative">
+        <div className="text-4xl font-black leading-none">{title}</div>
+        <div className="text-2xl font-black text-slate-950">{subtitle}</div>
+        <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/85 px-3 py-1 text-xs font-bold text-slate-700">
+          {tone === 'emerald' ? <XCircle className="h-4 w-4 text-emerald-500" /> : <Check className="h-4 w-4 text-emerald-500" />} {note}
+        </div>
+      </div>
+    </div>
   );
 }
 
