@@ -15,7 +15,7 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const cabs = await listCabs({ fallbackToFleet: false });
+  const cabs = await listCabs({ fallbackToFleet: true });
 
   return (
     <html lang="en" className={inter.variable}>
