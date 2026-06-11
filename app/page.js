@@ -16,30 +16,30 @@ const ICONS = { ShieldCheck, BadgeIndianRupee, Headphones, Clock, Route: RouteIc
 function Home() {
   return (
     <>
-      <section className="relative overflow-hidden pt-[74px]">
-        <div className="relative min-h-[590px] pb-20 pt-20 sm:pt-24">
+      <section className="relative overflow-hidden pt-[70px] sm:pt-[74px]">
+        <div className="relative min-h-[720px] pb-12 pt-16 sm:min-h-[680px] sm:pb-20 sm:pt-24">
           <img src={HERO_BG} alt="city road for cab booking" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-slate-950/70" />
           <div className="absolute inset-0 bg-gradient-to-b from-slate-950/25 via-transparent to-slate-950/55" />
 
           <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-            <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="mx-auto max-w-5xl text-5xl font-black uppercase tracking-normal text-white sm:text-6xl lg:text-7xl">
+            <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="mx-auto max-w-5xl text-3xl font-black uppercase tracking-normal text-white sm:text-6xl lg:text-7xl">
               Services Across 2000+ Cities
             </motion.h1>
-            <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="mx-auto mt-4 max-w-2xl text-base font-medium text-white/85 sm:text-lg">
+            <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="mx-auto mt-3 hidden max-w-2xl text-base font-medium text-white/85 sm:block sm:text-lg">
               Book one way, round trip, local rental and airport taxis with verified drivers, clear fares and 24x7 support.
             </motion.p>
           </div>
 
-          <div className="relative mt-10">
+          <div className="relative mt-8 sm:mt-10">
             <BookingWidget />
           </div>
 
-          <div className="relative mx-auto mt-8 max-w-4xl px-4">
+          <div className="relative mx-auto mt-7 max-w-4xl px-4">
             <div className="mx-auto flex flex-wrap items-center justify-center gap-3 text-sm font-semibold text-white">
               <span className="flex items-center gap-2"><span className="text-2xl leading-none">{"{"}</span> India&apos;s top rated car rental service <span className="text-2xl leading-none">{"}"}</span></span>
             </div>
-            <div className="mx-auto mt-5 grid max-w-3xl grid-cols-1 overflow-hidden rounded-full bg-white shadow-[0_18px_30px_rgba(15,23,42,0.25)] sm:grid-cols-3">
+            <div className="mx-auto mt-5 hidden max-w-3xl grid-cols-1 overflow-hidden rounded-full bg-white shadow-[0_18px_30px_rgba(15,23,42,0.25)] sm:grid sm:grid-cols-3">
               <RatingBadge title="App Store" score="4.2K+ Reviews" icon={<Apple className="h-10 w-10 text-sky-500" />} />
               <RatingBadge title="Google" score="6.1K+ Reviews" icon={<span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-3xl font-black text-sky-600">G</span>} />
               <RatingBadge title="Play Store" score="15.5K+ Reviews" icon={<Play className="h-11 w-11 fill-emerald-500 text-emerald-500" />} />

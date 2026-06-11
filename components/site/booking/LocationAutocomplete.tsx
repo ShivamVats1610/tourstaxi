@@ -13,6 +13,7 @@ type LocationAutocompleteProps = {
   onSelect: (location: LocationResult) => void;
   showCurrentLocation?: boolean;
   className?: string;
+  variant?: 'line' | 'boxed';
 };
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
@@ -32,7 +33,8 @@ export default function LocationAutocomplete({
   onValueChange,
   onSelect,
   showCurrentLocation = false,
-  className = ''
+  className = '',
+  variant = 'line'
 }: LocationAutocompleteProps) {
   const [focused, setFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<LocationResult[]>([]);
@@ -97,18 +99,20 @@ export default function LocationAutocomplete({
 
   const showSuggestions = focused && value.trim().length >= 2 && suggestions.length > 0;
 
+  const boxed = variant === 'boxed';
+
   return (
     <label className={`relative block min-w-0 ${className}`}>
-      <span className="mb-2 block text-xl font-black uppercase tracking-wide text-slate-700">{label}</span>
-      <span className="flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500">
-        <MapPin className="h-5 w-5 shrink-0 text-slate-500" />
+      <span className={boxed ? 'mb-0 block text-xs font-black uppercase tracking-wide text-sky-500' : 'mb-2 block text-xl font-black uppercase tracking-wide text-slate-700'}>{label}</span>
+      <span className={boxed ? 'mt-1 flex h-9 min-w-0 items-center gap-3 text-slate-950' : 'flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500'}>
+        <MapPin className={boxed ? 'h-6 w-6 shrink-0 text-slate-400' : 'h-5 w-5 shrink-0 text-slate-500'} />
         <input
           value={value}
           onChange={(event) => onValueChange(event.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => window.setTimeout(() => setFocused(false), 140)}
           placeholder={placeholder}
-          className="min-w-0 flex-1 bg-transparent text-base font-semibold outline-none placeholder:text-slate-400"
+          className={boxed ? 'min-w-0 flex-1 bg-transparent text-[22px] font-normal leading-none text-slate-500 outline-none placeholder:text-slate-400 sm:text-base sm:font-semibold' : 'min-w-0 flex-1 bg-transparent text-base font-semibold outline-none placeholder:text-slate-400'}
         />
         {loading ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-slate-400" /> : <Search className="h-4 w-4 shrink-0 text-slate-400" />}
         {showCurrentLocation && (
