@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { ArrowLeftRight, CalendarDays, Clock, MapPin, Plane, PlusCircle, Repeat, Timer } from 'lucide-react';
+import { ArrowLeftRight, CalendarDays, Clock, Plane, Repeat, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useBooking } from '@/lib/booking-context';
+import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
 
 const TABS = [
   { id: 'one-way', label: 'One Way', icon: ArrowLeftRight },
@@ -27,6 +28,8 @@ export default function BookingWidget() {
   const [tab, setTab] = useState('one-way');
   const [pickup, setPickup] = useState('Sawai Madhopur, Rajasthan');
   const [drop, setDrop] = useState('Jaipur, Rajasthan');
+  const [pickupCoordinates, setPickupCoordinates] = useState(null);
+  const [dropCoordinates, setDropCoordinates] = useState(null);
   const [date, setDate] = useState(todayValue());
   const [time, setTime] = useState('07:00');
   const [passengers, setPassengers] = useState('2 Passengers');
@@ -53,6 +56,8 @@ export default function BookingWidget() {
   const swapPlaces = () => {
     setPickup(drop);
     setDrop(pickup);
+    setPickupCoordinates(dropCoordinates);
+    setDropCoordinates(pickupCoordinates);
   };
 
   const explore = () => open({
@@ -62,6 +67,8 @@ export default function BookingWidget() {
     date,
     time,
     passengers,
+    pickupCoordinates,
+    dropCoordinates,
     startStep: pickup && (tab === 'local' || drop) && date ? 2 : 1
   });
 
@@ -80,7 +87,20 @@ export default function BookingWidget() {
         </div>
 
         <div className="grid items-end gap-5 lg:grid-cols-[1fr_auto_1fr_1fr_1fr]">
-          <SearchField icon={MapPin} label="From" value={pickup} onChange={setPickup} placeholder="Pickup city" />
+          <LocationAutocomplete
+            label="From"
+            value={pickup}
+            onValueChange={(value) => {
+              setPickup(value);
+              setPickupCoordinates(null);
+            }}
+            onSelect={(place) => {
+              setPickup(place.label);
+              setPickupCoordinates(place.coordinates);
+            }}
+            placeholder="Pickup city"
+            showCurrentLocation
+          />
 
           <button onClick={swapPlaces} className="hidden h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-sky-600 transition hover:bg-sky-100 lg:flex" aria-label="Swap pickup and drop">
             <ArrowLeftRight className="h-5 w-5" />
@@ -89,7 +109,19 @@ export default function BookingWidget() {
           {tab === 'local' ? (
             <SelectField icon={Timer} label="Package" value={drop} onChange={setDrop} options={['4 hrs / 40 km', '8 hrs / 80 km', '12 hrs / 120 km']} />
           ) : (
-            <SearchField icon={MapPin} label="To" value={drop} onChange={setDrop} placeholder="Destination city" extraIcon={PlusCircle} />
+            <LocationAutocomplete
+              label="To"
+              value={drop}
+              onValueChange={(value) => {
+                setDrop(value);
+                setDropCoordinates(null);
+              }}
+              onSelect={(place) => {
+                setDrop(place.label);
+                setDropCoordinates(place.coordinates);
+              }}
+              placeholder="Destination city"
+            />
           )}
 
           <SearchField icon={CalendarDays} label="Pick Up Date" type="date" value={date} min={minDate} onChange={updateDate} />

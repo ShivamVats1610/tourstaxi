@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeftRight, Briefcase, Calendar, Check, ChevronDown, Clock, Copy, Headphones, MapPin, Phone, ShieldCheck, Star, User, X } from 'lucide-react';
 import { toast } from 'sonner';
+import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
+import RouteMap from '@/components/site/booking/RouteMap';
+import FareCalculator, { calculateFare, vehicleClassFromName } from '@/components/site/booking/FareCalculator';
 
 const TRIP_LABELS = {
   'one-way': 'One way',
@@ -35,7 +38,8 @@ function nextPickupTimeValue() {
 }
 
 function money(value) {
-  return `Rs ${Number(value || 0).toLocaleString('en-IN')}`;
+  const amount = Number(value || 0);
+  return `${amount < 0 ? '-' : ''}₹${Math.abs(amount).toLocaleString('en-IN')}`;
 }
 
 function prettyDate(value) {
@@ -43,11 +47,54 @@ function prettyDate(value) {
   return new Date(`${value}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function tripDistance(tripType) {
-  if (tripType === 'local') return 80;
-  if (tripType === 'airport') return 35;
-  if (tripType === 'round-trip') return 500;
-  return 125;
+function formatKm(value) {
+  const km = Number(value || 0);
+  return `${km.toLocaleString('en-IN', { maximumFractionDigits: 1 })} km`;
+}
+
+function formatDuration(minutes) {
+  const total = Number(minutes || 0);
+  if (!total) return '-';
+  const hrs = Math.floor(total / 60);
+  const mins = total % 60;
+  if (!hrs) return `${mins} min`;
+  return `${hrs} hr${hrs > 1 ? 's' : ''}${mins ? ` ${mins} min` : ''}`;
+}
+
+function routeDistance(data) {
+  if (data.tripType === 'local') {
+    const km = Number((data.rental || '').match(/\d+\s*hrs\s*\/\s*(\d+)/i)?.[1]);
+    return km || 80;
+  }
+  const roadKm = Number(data.distanceKm) || 0;
+  if (data.tripType === 'airport') return roadKm || 35;
+  return data.tripType === 'round-trip' ? roadKm * 2 : roadKm;
+}
+
+function cabFare(cab, data, selectedAddons = []) {
+  const distance = routeDistance(data);
+  const fare = calculateFare(distance, vehicleClassFromName(cab.name));
+  const fuelSurchargePerKm = data.fuelType === 'diesel' ? 1.1 : 0;
+  const fuelSurcharge = Math.round(distance * fuelSurchargePerKm);
+  const addons = selectedAddons.reduce((sum, id) => sum + (ADDONS.find((item) => item.id === id)?.price || 0), 0);
+  const total = fare.totalFare + fuelSurcharge + addons;
+  return {
+    distance,
+    durationMinutes: data.durationMinutes || 0,
+    base: fare.baseFare,
+    ratePerKm: fare.ratePerKm + fuelSurchargePerKm,
+    distanceFare: fare.distanceFare + fuelSurcharge,
+    fuelSurcharge,
+    driver: 0,
+    toll: 0,
+    discount: 0,
+    gst: 0,
+    addons,
+    total,
+    payLater: Math.max(total - Math.round(total * 0.25), 0),
+    partPay: Math.round(total * 0.25),
+    oldPrice: total
+  };
 }
 
 export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) {
@@ -66,6 +113,8 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
     const prefillDate = prefill.date || minDate;
     const prefillTime = prefill.time || '07:00';
 
+    // Reset the modal to the latest booking request whenever it opens.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setView(prefill.startStep >= 2 ? 'cars' : 'details');
     setData({
       tripType: prefill.tripType || 'one-way',
@@ -77,6 +126,12 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       rental: prefill.rental || '8 hrs / 80 km',
       passengers: prefill.passengers || '2 Passengers',
       vehicleSlug: prefill.vehicleSlug || '',
+      fuelType: prefill.fuelType || 'cng',
+      distanceKm: prefill.distanceKm || null,
+      durationMinutes: prefill.durationMinutes || null,
+      routeGeometry: prefill.routeGeometry || null,
+      pickupCoordinates: prefill.pickupCoordinates || null,
+      dropCoordinates: prefill.dropCoordinates || null,
       name: '',
       phone: '',
       email: '',
@@ -95,18 +150,35 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
 
   const fare = useMemo(() => {
     if (!vehicle) return null;
-    const distance = tripDistance(data.tripType);
-    const base = vehicle.startPrice > 0 ? vehicle.startPrice : vehicle.pricePerKm * distance;
-    const driver = data.tripType === 'round-trip' ? 600 : 300;
-    const toll = data.tripType === 'local' ? 0 : 200;
-    const subtotal = base + driver + toll;
-    const gst = Math.round(subtotal * 0.05);
-    const addons = selectedAddons.reduce((sum, id) => sum + (ADDONS.find((item) => item.id === id)?.price || 0), 0);
-    const total = subtotal + gst + addons;
-    return { distance, base, driver, toll, gst, addons, total, payLater: Math.max(total - Math.round(total * 0.25), 0), partPay: Math.round(total * 0.25) };
-  }, [vehicle, data.tripType, selectedAddons]);
+    return cabFare(vehicle, data, selectedAddons);
+  }, [vehicle, data, selectedAddons]);
 
-  const set = (key, value) => setData((current) => ({ ...current, [key]: value }));
+  const set = useCallback((key, value) => setData((current) => ({
+    ...current,
+    [key]: value,
+    ...(key === 'pickup' ? { pickupCoordinates: null, distanceKm: null, durationMinutes: null, routeGeometry: null } : {}),
+    ...(key === 'drop' ? { dropCoordinates: null, distanceKm: null, durationMinutes: null, routeGeometry: null } : {})
+  })), []);
+
+  const selectLocation = useCallback((type, location) => {
+    setData((current) => ({
+      ...current,
+      [type]: location.label,
+      [`${type}Coordinates`]: location.coordinates,
+      distanceKm: null,
+      durationMinutes: null,
+      routeGeometry: null
+    }));
+  }, []);
+
+  const handleRouteChange = useCallback((route) => {
+    setData((current) => ({
+      ...current,
+      distanceKm: route?.distanceKm || null,
+      durationMinutes: route?.durationMinutes || null,
+      routeGeometry: route?.geometry || null
+    }));
+  }, []);
 
   const routeLabel = data.tripType === 'local'
     ? `${data.pickup || 'Pickup city'} - Local rental`
@@ -156,7 +228,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
           <div className="max-h-[94vh] overflow-y-auto bg-white">
             <TripBar data={data} routeLabel={routeLabel} onModify={() => setView('details')} />
             {view === 'details' && (
-              <ModifyPanel data={data} set={set} onContinue={() => setView('cars')} />
+              <ModifyPanel data={data} set={set} onSelectLocation={selectLocation} onContinue={() => setView('cars')} />
             )}
             {view === 'cars' && (
               <CabSelection
@@ -186,6 +258,14 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 submitting={submitting}
               />
             )}
+            <FareCalculator
+              compact
+              pickupCoordinates={data.pickupCoordinates}
+              dropCoordinates={data.tripType === 'local' ? null : data.dropCoordinates}
+              pickupLabel={data.pickup || ''}
+              dropLabel={data.tripType === 'local' ? '' : data.drop || ''}
+              onRouteChange={handleRouteChange}
+            />
           </div>
         )}
       </DialogContent>
@@ -219,7 +299,7 @@ function Info({ label, value }) {
   );
 }
 
-function ModifyPanel({ data, set, onContinue }) {
+function ModifyPanel({ data, set, onSelectLocation, onContinue }) {
   const minDate = todayValue();
   const minTime = data.date === minDate ? nextPickupTimeValue() : undefined;
 
@@ -227,25 +307,51 @@ function ModifyPanel({ data, set, onContinue }) {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-8">
       <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid gap-4 lg:grid-cols-5">
-          <Field label="From" icon={MapPin}><Input value={data.pickup} onChange={(event) => set('pickup', event.target.value)} /></Field>
-          <Field label={data.tripType === 'local' ? 'Package' : 'To'} icon={MapPin}><Input value={data.tripType === 'local' ? data.rental : data.drop} onChange={(event) => set(data.tripType === 'local' ? 'rental' : 'drop', event.target.value)} /></Field>
+          <LocationAutocomplete label="From" value={data.pickup || ''} placeholder="Pickup location" onValueChange={(value) => set('pickup', value)} onSelect={(location) => onSelectLocation('pickup', location)} showCurrentLocation />
+          {data.tripType === 'local' ? (
+            <Field label="Package" icon={MapPin}><Input value={data.rental} onChange={(event) => set('rental', event.target.value)} /></Field>
+          ) : (
+            <LocationAutocomplete label="To" value={data.drop || ''} placeholder="Drop location" onValueChange={(value) => set('drop', value)} onSelect={(location) => onSelectLocation('drop', location)} />
+          )}
           <Field label="Pickup Date" icon={Calendar}><Input type="date" min={minDate} value={data.date} onChange={(event) => set('date', event.target.value)} /></Field>
           <Field label="Pickup Time" icon={Clock}><Input type="time" min={minTime} value={data.time} onChange={(event) => set('time', event.target.value)} /></Field>
           <Button onClick={onContinue} className="self-end bg-orange-500 font-black hover:bg-orange-600">Explore Cabs</Button>
         </div>
+        {data.tripType !== 'local' && (
+          <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_320px]">
+            <RouteMap
+              pickupCoordinates={data.pickupCoordinates}
+              dropCoordinates={data.dropCoordinates}
+              route={data.routeGeometry ? { distanceKm: data.distanceKm, durationMinutes: data.durationMinutes, geometry: data.routeGeometry } : null}
+              className="min-h-[280px]"
+            />
+            <RouteSummary data={data} />
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function CabSelection({ fleet, data, routeLabel, onCheckout }) {
+function CabSelection({ fleet, data, set, routeLabel, onCheckout }) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8">
       <FeatureStrip />
+      {data.tripType !== 'local' && (
+        <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_360px]">
+          <RouteMap
+            pickupCoordinates={data.pickupCoordinates}
+            dropCoordinates={data.dropCoordinates}
+            route={data.routeGeometry ? { distanceKm: data.distanceKm, durationMinutes: data.durationMinutes, geometry: data.routeGeometry } : null}
+            className="min-h-[300px]"
+          />
+          <RouteSummary data={data} />
+        </div>
+      )}
       <div className="mt-5 space-y-4">
         {!fleet.length && <div className="rounded-lg border border-slate-200 p-6 text-slate-600">No active cabs are available right now.</div>}
         {fleet.map((cab, index) => (
-          <CabCard key={cab.slug} cab={cab} data={data} routeLabel={routeLabel} index={index} onCheckout={onCheckout} />
+            <CabCard key={cab.slug} cab={cab} data={data} set={set} routeLabel={routeLabel} index={index} onCheckout={onCheckout} />
         ))}
       </div>
     </div>
@@ -271,12 +377,8 @@ function StripItem({ icon, title, text }) {
   );
 }
 
-function CabCard({ cab, data, index, routeLabel, onCheckout }) {
-  const distance = tripDistance(data.tripType);
-  const base = cab.startPrice > 0 ? cab.startPrice : cab.pricePerKm * distance;
-  const taxes = Math.round((base + 300 + (data.tripType === 'local' ? 0 : 200)) * 0.05);
-  const total = base + 300 + (data.tripType === 'local' ? 0 : 200) + taxes;
-  const oldPrice = Math.round(total * 1.07);
+function CabCard({ cab, data, set, index, onCheckout }) {
+  const fare = cabFare(cab, data);
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }} className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -293,13 +395,13 @@ function CabCard({ cab, data, index, routeLabel, onCheckout }) {
           <div className="mt-4 grid gap-3 text-sm text-slate-800 sm:grid-cols-2">
             <span className="flex items-center gap-2"><User className="h-5 w-5 text-sky-500" /> Driver allowance included</span>
             <span className="flex items-center gap-2"><Briefcase className="h-5 w-5 text-sky-500" /> {cab.luggage}</span>
-            <span className="flex items-center gap-2"><Check className="h-5 w-5 text-emerald-500" /> {distance} kms included</span>
+            <span className="flex items-center gap-2"><Check className="h-5 w-5 text-emerald-500" /> {formatKm(fare.distance)} included</span>
             <span className="flex items-center gap-2"><ArrowLeftRight className="h-5 w-5 text-sky-500" /> Post limit: Rs {cab.pricePerKm || 16}/km</span>
           </div>
-          <div className="mt-4 text-sm font-bold">Select Fuel Type</div>
-          <div className="mt-2 flex gap-4 text-sm">
-            <label className="flex items-center gap-2"><input type="radio" defaultChecked name={`fuel-${cab.slug}`} className="accent-orange-500" /> CNG</label>
-            <label className="flex items-center gap-2"><input type="radio" name={`fuel-${cab.slug}`} className="accent-orange-500" /> Diesel</label>
+          <div className="mt-4 text-sm font-bold text-black">Select Fuel Type</div>
+          <div className="mt-2 flex gap-4 text-sm font-semibold text-black">
+            <label className="flex items-center gap-2 text-black"><input type="radio" checked={(data.fuelType || 'cng') === 'cng'} onChange={() => set('fuelType', 'cng')} name={`fuel-${cab.slug}`} className="accent-orange-500" /> CNG</label>
+            <label className="flex items-center gap-2 text-black"><input type="radio" checked={data.fuelType === 'diesel'} onChange={() => set('fuelType', 'diesel')} name={`fuel-${cab.slug}`} className="accent-orange-500" /> Diesel</label>
           </div>
           <details className="mt-4 text-sm text-sky-600">
             <summary className="cursor-pointer font-semibold">Inclusions and Exclusions</summary>
@@ -307,9 +409,9 @@ function CabCard({ cab, data, index, routeLabel, onCheckout }) {
           </details>
         </div>
         <div className="text-left lg:text-right">
-          <div className="text-sm font-bold text-emerald-600">7% OFF <span className="text-slate-400 line-through">{money(oldPrice)}</span></div>
-          <div className="mt-3 text-4xl font-black text-sky-500">{money(total)}</div>
-          <div className="mt-1 text-sm text-black">+ {money(taxes)} Charges and Taxes</div>
+          <div className="text-sm font-bold text-emerald-600">5% OFF <span className="text-slate-400 line-through">{money(fare.oldPrice)}</span></div>
+          <div className="mt-3 text-4xl font-black text-sky-500">{money(fare.total)}</div>
+          <div className="mt-1 text-sm text-black">+ {money(fare.gst)} Charges and Taxes</div>
           <Button onClick={() => onCheckout(cab.slug)} className="mt-5 h-12 rounded bg-orange-500 px-8 text-lg font-black uppercase hover:bg-orange-600">Select Car</Button>
         </div>
       </div>
@@ -333,9 +435,10 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
           <div className="text-2xl text-black">{routeLabel} <span className="text-base font-normal text-black">({TRIP_LABELS[data.tripType]})</span></div>
           <div className="mt-3 grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
             <div>Car Type: <b>{vehicle.name} or Equivalent</b></div>
-            <div>Fuel Type: <b>CNG</b></div>
+            <div>Fuel Type: <b>{data.fuelType === 'diesel' ? 'Diesel' : 'CNG'}</b></div>
             <div>Pickup: <b>{prettyDate(data.date)}, {data.time}</b></div>
-            <div>Kms included: <b>{fare.distance} kms</b></div>
+            <div>Kms included: <b>{formatKm(fare.distance)}</b></div>
+            <div>Estimated time: <b>{formatDuration(fare.durationMinutes)}</b></div>
           </div>
         </Section>
 
@@ -420,13 +523,36 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
           <summary className="cursor-pointer font-bold text-sky-600">View Fare Break up</summary>
           <div className="mt-3 space-y-2 text-slate-700">
             <FareRow label="Base fare" value={fare.base} />
+            <FareRow label={`${formatKm(fare.distance)} x Rs ${fare.ratePerKm}/km`} value={fare.distanceFare} />
+            {fare.fuelSurcharge > 0 && <FareRow label="Diesel fuel surcharge" value={fare.fuelSurcharge} />}
             <FareRow label="Driver allowance" value={fare.driver} />
+            <FareRow label="Toll & state tax estimate" value={fare.toll} />
+            <FareRow label="5% discount" value={-fare.discount} />
             <FareRow label="Taxes" value={fare.gst} />
             <FareRow label="Add-ons" value={fare.addons} />
             <FareRow label="Total" value={fare.total} bold />
           </div>
         </details>
       </aside>
+    </div>
+  );
+}
+
+function RouteSummary({ data }) {
+  const hasRoute = Number(data.distanceKm) > 0 && Number(data.durationMinutes) > 0;
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="text-lg font-black text-slate-950">Route details</div>
+      {hasRoute ? (
+        <div className="mt-4 grid gap-3 text-sm text-slate-700">
+          <div><b className="block text-2xl text-sky-600">{formatKm(data.distanceKm)}</b>Road distance</div>
+          <div><b className="block text-2xl text-slate-950">{formatDuration(data.durationMinutes)}</b>Estimated travel time</div>
+          <div className="rounded-md bg-sky-50 px-3 py-2 font-semibold text-sky-900">Fare updates automatically for each vehicle rate.</div>
+        </div>
+      ) : (
+        <div className="mt-4 text-sm text-slate-500">Select pickup and drop suggestions to calculate exact road distance, duration and fare.</div>
+      )}
     </div>
   );
 }
