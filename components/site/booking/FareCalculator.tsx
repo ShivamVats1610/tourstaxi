@@ -55,6 +55,7 @@ export default function FareCalculator({
 }: FareCalculatorProps) {
   const [route, setRoute] = useState<RouteDetails | null>(null);
   const [loading, setLoading] = useState(false);
+  const [serviceMessage, setServiceMessage] = useState('');
 
   useEffect(() => {
     const hasCoordinates = Boolean(pickupCoordinates && dropCoordinates);
@@ -84,9 +85,32 @@ export default function FareCalculator({
           url.searchParams.set('destination', dropLabel);
         }
 
+        console.info('[mapbox:browser:route:request]', {
+          hasCoordinates: Boolean(pickupCoordinates && dropCoordinates),
+          hasLabels: Boolean(pickupLabel && dropLabel)
+        });
         const response = await fetch(url);
         const data = await response.json();
-        if (!response.ok || !Number.isFinite(Number(data.distanceKm))) throw new Error(data.error || 'Route not found');
+        console.info('[mapbox:browser:route:response]', {
+          ok: response.ok,
+          status: response.status,
+          source: data.source,
+          error: data.error,
+          warning: data.warning,
+          tokenExists: data.tokenStatus?.exists
+        });
+
+        if (response.status === 401 || response.status === 403 || data.mapboxError?.permissionIssue) {
+          setServiceMessage(data.mapboxError?.userMessage || 'Mapbox rejected the route token.');
+        } else if (data.error === 'missing-mapbox-token') {
+          setServiceMessage(data.userMessage || 'Route calculation is using fallback data because Mapbox is not configured.');
+        } else if (data.warning) {
+          setServiceMessage(`Using estimated route: ${data.warning}`);
+        } else {
+          setServiceMessage('');
+        }
+
+        if (!response.ok || !Number.isFinite(Number(data.distanceKm))) throw new Error(data.userMessage || data.error || 'Route not found');
 
         const nextRoute: RouteDetails = {
           distanceKm: Number(data.distanceKm),
@@ -97,7 +121,9 @@ export default function FareCalculator({
         setRoute(nextRoute);
         onRouteChange?.(nextRoute);
         onFareChange?.(calculateFare(nextRoute.distanceKm, vehicleClass));
-      } catch {
+      } catch (error) {
+        console.error('[mapbox:browser:route:error]', error);
+        setServiceMessage(error instanceof Error ? error.message : 'Route calculation is temporarily unavailable.');
         if (active) {
           setRoute(null);
           onRouteChange?.(null);
@@ -136,7 +162,7 @@ export default function FareCalculator({
         </div>
       ) : (
         <div className="mt-3 text-sm text-slate-500">
-          Select pickup and drop locations to calculate distance, duration and fare.
+          {serviceMessage || 'Select pickup and drop locations to calculate distance, duration and fare.'}
         </div>
       )}
     </motion.div>

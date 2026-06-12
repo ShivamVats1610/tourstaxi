@@ -1,6 +1,7 @@
 import { fallbackDistanceKm, findFallbackPlace } from '@/lib/location-fallback';
+import { buildDirectionsUrl, buildGeocodeUrl, fetchMapboxJson, getMapboxToken, logMapboxEvent, mapboxTokenStatus } from '@/lib/mapbox';
 
-const MAPBOX_GEOCODE_URL = 'https://api.mapbox.com/search/geocode/v6/forward';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -8,17 +9,29 @@ export async function GET(request) {
   const destination = searchParams.get('destination')?.trim() || '';
   const from = parseCoordinates(searchParams.get('fromLng'), searchParams.get('fromLat'));
   const to = parseCoordinates(searchParams.get('toLng'), searchParams.get('toLat'));
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const token = getMapboxToken();
+  logMapboxEvent('route:request', {
+    hasOrigin: Boolean(origin),
+    hasDestination: Boolean(destination),
+    hasCoordinates: Boolean(from && to)
+  });
 
   if ((!from || !to) && (!origin || !destination)) {
-    return Response.json({ distanceKm: null, source: 'missing' }, { status: 400 });
+    return Response.json({ distanceKm: null, source: 'missing', error: 'missing-route-input', tokenStatus: mapboxTokenStatus() }, { status: 400 });
   }
 
   if (!token) {
+    logMapboxEvent('route:missing-token');
     const fallback = estimateFallbackRoute(origin, destination, from, to, 'missing-mapbox-token');
     return fallback
-      ? Response.json(fallback)
-      : Response.json({ distanceKm: null, source: 'missing-mapbox-token', error: 'route-not-found' }, { status: 404 });
+      ? Response.json({ ...fallback, tokenStatus: mapboxTokenStatus() })
+      : Response.json({
+          distanceKm: null,
+          source: 'missing-mapbox-token',
+          error: 'route-not-found',
+          userMessage: 'Distance calculation needs NEXT_PUBLIC_MAPBOX_TOKEN in production.',
+          tokenStatus: mapboxTokenStatus()
+        }, { status: 404 });
   }
 
   try {
@@ -30,22 +43,28 @@ export async function GET(request) {
         : Response.json({ distanceKm: null, source: 'mapbox', error: 'location-not-found' }, { status: 404 });
     }
 
-    const coords = `${routeFrom[0]},${routeFrom[1]};${routeTo[0]},${routeTo[1]}`;
-    const url = new URL(`https://api.mapbox.com/directions/v5/mapbox/driving/${coords}`);
-    url.searchParams.set('geometries', 'geojson');
-    url.searchParams.set('overview', 'full');
-    url.searchParams.set('alternatives', 'false');
-    url.searchParams.set('steps', 'false');
-    url.searchParams.set('radiuses', 'unlimited;unlimited');
-    url.searchParams.set('access_token', token);
+    const result = await fetchMapboxJson(buildDirectionsUrl(routeFrom, routeTo, token), 'route');
+    if (!result.ok) {
+      const fallback = estimateFallbackRoute(origin, destination, from, to, result.error.message);
+      const body = fallback || estimateRoute(routeFrom, routeTo, result.error.message);
+      return Response.json({
+        ...body,
+        source: fallback?.source || 'mapbox-estimate',
+        error: result.error.code,
+        mapboxError: result.error,
+        tokenStatus: mapboxTokenStatus()
+      }, { status: result.error.permissionIssue ? result.error.status : 200 });
+    }
 
-    const response = await fetch(url, { cache: 'no-store' });
-    const data = await response.json();
+    const data = result.data;
     const route = data.routes?.[0];
 
-    if (!response.ok || !route) {
+    if (!route) {
       const fallback = estimateFallbackRoute(origin, destination, from, to, data.message || 'route-not-found');
-      return Response.json(fallback || estimateRoute(routeFrom, routeTo, data.message || 'route-not-found'));
+      return Response.json({
+        ...(fallback || estimateRoute(routeFrom, routeTo, data.message || 'route-not-found')),
+        tokenStatus: mapboxTokenStatus()
+      });
     }
 
     const distanceKm = Number((route.distance / 1000).toFixed(1));
@@ -62,13 +81,21 @@ export async function GET(request) {
       durationMinutes,
       durationText: formatDuration(durationMinutes),
       geometry: route.geometry || null,
-      source: 'mapbox'
+      source: 'mapbox',
+      tokenStatus: mapboxTokenStatus()
     });
-  } catch {
+  } catch (error) {
+    logMapboxEvent('route:exception', { message: error?.message || 'Unknown error' });
     const fallback = estimateFallbackRoute(origin, destination, from, to, 'mapbox-request-failed');
     return fallback
-      ? Response.json(fallback)
-      : Response.json({ distanceKm: null, source: 'mapbox', error: 'mapbox-request-failed' }, { status: 502 });
+      ? Response.json({ ...fallback, tokenStatus: mapboxTokenStatus() })
+      : Response.json({
+          distanceKm: null,
+          source: 'mapbox',
+          error: 'mapbox-request-failed',
+          userMessage: 'Route calculation could not reach Mapbox.',
+          tokenStatus: mapboxTokenStatus()
+        }, { status: 502 });
   }
 }
 
@@ -79,15 +106,9 @@ function parseCoordinates(lng, lat) {
 }
 
 async function geocode(query, token) {
-  const url = new URL(MAPBOX_GEOCODE_URL);
-  url.searchParams.set('q', query);
-  url.searchParams.set('country', 'in');
-  url.searchParams.set('limit', '1');
-  url.searchParams.set('access_token', token);
-
-  const response = await fetch(url, { cache: 'no-store' });
-  const data = await response.json();
-  return normalizeCoordinates(data.features?.[0]);
+  const result = await fetchMapboxJson(buildGeocodeUrl(query, token, '1'), 'route:geocode');
+  if (!result.ok) return null;
+  return normalizeCoordinates(result.data.features?.[0]);
 }
 
 function normalizeCoordinates(feature) {

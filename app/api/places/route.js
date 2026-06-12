@@ -1,6 +1,7 @@
 import { fallbackSuggestions } from '@/lib/location-fallback';
+import { buildGeocodeUrl, fetchMapboxJson, getMapboxToken, logMapboxEvent, mapboxTokenStatus } from '@/lib/mapbox';
 
-const MAPBOX_GEOCODE_URL = 'https://api.mapbox.com/search/geocode/v6/forward';
+export const dynamic = 'force-dynamic';
 
 function mapFeature(feature) {
   const properties = feature.properties || {};
@@ -27,34 +28,54 @@ function normalizeCoordinates(feature) {
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const input = searchParams.get('input')?.trim() || '';
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const token = getMapboxToken();
+  logMapboxEvent('autocomplete:request', { inputLength: input.length });
 
   if (input.length < 2) {
-    return Response.json({ predictions: fallbackSuggestions(input), source: 'fallback' });
+    return Response.json({ predictions: fallbackSuggestions(input), source: 'fallback', tokenStatus: mapboxTokenStatus() });
   }
 
   if (!token) {
-    return Response.json({ predictions: fallbackSuggestions(input), source: 'fallback', error: 'missing-mapbox-token' });
+    logMapboxEvent('autocomplete:missing-token');
+    return Response.json({
+      predictions: fallbackSuggestions(input),
+      source: 'fallback',
+      error: 'missing-mapbox-token',
+      userMessage: 'Location search is using fallback data because the production Mapbox token is missing.',
+      tokenStatus: mapboxTokenStatus()
+    });
   }
 
-  const url = new URL(MAPBOX_GEOCODE_URL);
-  url.searchParams.set('q', input);
-  url.searchParams.set('country', 'in');
-  url.searchParams.set('limit', '8');
-  url.searchParams.set('access_token', token);
-
   try {
-    const response = await fetch(url, { cache: 'no-store' });
-    const data = await response.json();
+    const result = await fetchMapboxJson(buildGeocodeUrl(input, token, '8'), 'autocomplete');
+    if (!result.ok) {
+      return Response.json({
+        predictions: fallbackSuggestions(input),
+        source: 'fallback',
+        error: result.error.code,
+        mapboxError: result.error,
+        tokenStatus: mapboxTokenStatus()
+      }, { status: result.error.permissionIssue ? result.error.status : 200 });
+    }
+
+    const data = result.data;
     const predictions = Array.isArray(data.features)
       ? data.features.map(mapFeature).filter((item) => Number.isFinite(item.coordinates[0]) && Number.isFinite(item.coordinates[1]))
       : [];
 
     return Response.json({
       predictions: predictions.length ? predictions : fallbackSuggestions(input),
-      source: predictions.length ? 'mapbox' : 'fallback'
+      source: predictions.length ? 'mapbox' : 'fallback',
+      tokenStatus: mapboxTokenStatus()
     });
-  } catch {
-    return Response.json({ predictions: fallbackSuggestions(input), source: 'fallback' });
+  } catch (error) {
+    logMapboxEvent('autocomplete:exception', { message: error?.message || 'Unknown error' });
+    return Response.json({
+      predictions: fallbackSuggestions(input),
+      source: 'fallback',
+      error: 'mapbox-request-failed',
+      userMessage: 'Location search is temporarily unavailable. Showing fallback suggestions.',
+      tokenStatus: mapboxTokenStatus()
+    });
   }
 }

@@ -16,8 +16,6 @@ type LocationAutocompleteProps = {
   variant?: 'line' | 'boxed';
 };
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
-
 type PlacePrediction = {
   id?: string;
   mainText?: string;
@@ -40,6 +38,7 @@ export default function LocationAutocomplete({
   const [suggestions, setSuggestions] = useState<LocationResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [serviceMessage, setServiceMessage] = useState('');
 
   useEffect(() => {
     if (!focused || value.trim().length < 2) return;
@@ -50,8 +49,25 @@ export default function LocationAutocomplete({
       try {
         const url = new URL('/api/places', window.location.origin);
         url.searchParams.set('input', value);
+        console.info('[mapbox:browser:autocomplete:request]', { inputLength: value.length });
         const response = await fetch(url);
         const data = await response.json();
+        console.info('[mapbox:browser:autocomplete:response]', {
+          ok: response.ok,
+          status: response.status,
+          source: data.source,
+          error: data.error,
+          tokenExists: data.tokenStatus?.exists
+        });
+
+        if (response.status === 401 || response.status === 403 || data.mapboxError?.permissionIssue) {
+          setServiceMessage(data.mapboxError?.userMessage || 'Mapbox rejected the location search token.');
+        } else if (data.error === 'missing-mapbox-token') {
+          setServiceMessage(data.userMessage || 'Location search is using fallback data because Mapbox is not configured.');
+        } else {
+          setServiceMessage('');
+        }
+
         const places = Array.isArray(data.predictions)
           ? data.predictions.map((place: PlacePrediction) => ({
               id: String(place.id || place.description),
@@ -62,7 +78,9 @@ export default function LocationAutocomplete({
             })).filter((item: LocationResult) => Number.isFinite(item.coordinates[0]) && Number.isFinite(item.coordinates[1]))
           : [];
         if (active) setSuggestions(places);
-      } catch {
+      } catch (error) {
+        console.error('[mapbox:browser:autocomplete:error]', error);
+        setServiceMessage('Location search is temporarily unavailable.');
         if (active) setSuggestions([]);
       } finally {
         if (active) setLoading(false);
@@ -76,7 +94,11 @@ export default function LocationAutocomplete({
   }, [focused, value]);
 
   const useCurrentLocation = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      console.warn('[mapbox:browser:geolocation:unsupported]');
+      setServiceMessage('Browser geolocation is not available on this device.');
+      return;
+    }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -92,7 +114,11 @@ export default function LocationAutocomplete({
         onSelect(result);
         setLocating(false);
       },
-      () => setLocating(false),
+      (error) => {
+        console.warn('[mapbox:browser:geolocation:error]', { code: error.code, message: error.message });
+        setServiceMessage('Unable to read current location. Please search manually.');
+        setLocating(false);
+      },
       { enableHighAccuracy: true, timeout: 12000 }
     );
   };
@@ -121,9 +147,9 @@ export default function LocationAutocomplete({
           </button>
         )}
       </span>
-      {!MAPBOX_TOKEN && focused && (
+      {serviceMessage && focused && (
         <div className="absolute left-0 top-full z-40 mt-1 w-full rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 shadow">
-          Add NEXT_PUBLIC_MAPBOX_TOKEN to enable Mapbox search.
+          {serviceMessage}
         </div>
       )}
       {showSuggestions && (
