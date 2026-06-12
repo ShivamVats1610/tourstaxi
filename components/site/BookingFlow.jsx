@@ -74,16 +74,18 @@ function routeDistance(data) {
 function cabFare(cab, data, selectedAddons = []) {
   const distance = routeDistance(data);
   const fare = calculateFare(distance, vehicleClassFromName(cab.name));
+  const cabRatePerKm = Number(cab.pricePerKm) > 0 ? Number(cab.pricePerKm) : fare.ratePerKm;
+  const cabDistanceFare = Math.round(distance * cabRatePerKm);
   const fuelSurchargePerKm = data.fuelType === 'diesel' ? 1.1 : 0;
   const fuelSurcharge = Math.round(distance * fuelSurchargePerKm);
   const addons = selectedAddons.reduce((sum, id) => sum + (ADDONS.find((item) => item.id === id)?.price || 0), 0);
-  const total = fare.totalFare + fuelSurcharge + addons;
+  const total = fare.baseFare + cabDistanceFare + fuelSurcharge + addons;
   return {
     distance,
     durationMinutes: data.durationMinutes || 0,
     base: fare.baseFare,
-    ratePerKm: fare.ratePerKm + fuelSurchargePerKm,
-    distanceFare: fare.distanceFare + fuelSurcharge,
+    ratePerKm: cabRatePerKm + fuelSurchargePerKm,
+    distanceFare: cabDistanceFare + fuelSurcharge,
     fuelSurcharge,
     driver: 0,
     toll: 0,
