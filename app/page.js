@@ -32,7 +32,7 @@ function Home() {
             <BookingWidget />
           </div>
 
-          <div className="relative mx-auto mt-6 max-w-4xl px-4">
+          <div className="relative mx-auto mt-14 max-w-4xl px-4 sm:mt-12">
             <div className="mx-auto flex flex-wrap items-center justify-center gap-3 text-base font-normal text-white sm:text-sm sm:font-semibold">
               <span className="flex items-center gap-2"><span className="text-2xl leading-none">{"{"}</span> India&apos;s top rated car rental service <span className="text-2xl leading-none">{"}"}</span></span>
             </div>

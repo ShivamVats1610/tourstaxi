@@ -429,3 +429,49 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
   nodeEnv: 'development'
 }
  GET /api/distance?fromLng=76.78427&fromLat=30.73958&toLng=75.85744&toLat=25.173758 200 in 703ms (next.js: 92ms, application-code: 611ms)
+[mapbox:route:request] {
+  hasOrigin: false,
+  hasDestination: false,
+  hasCoordinates: true,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/distance?fromLng=76.78427&fromLat=30.73958&toLng=75.85744&toLat=25.173758 200 in 151ms (next.js: 5ms, application-code: 146ms)
+[mapbox:route:request] {
+  hasOrigin: false,
+  hasDestination: false,
+  hasCoordinates: true,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/distance?fromLng=76.78427&fromLat=30.73958&toLng=75.85744&toLat=25.173758 200 in 71ms (next.js: 6ms, application-code: 65ms)
+ GET / 200 in 620ms (next.js: 12ms, application-code: 609ms)
+ GET /api/auth/me 200 in 35ms (next.js: 12ms, application-code: 22ms)
+✓ Compiled in 1211ms
+ GET / 200 in 867ms (next.js: 528ms, application-code: 339ms)
+✓ Compiled in 433ms
+ GET / 200 in 517ms (next.js: 277ms, application-code: 240ms)
+ GET / 200 in 1014ms (next.js: 11ms, application-code: 1002ms)
+ GET /api/auth/me 200 in 203ms (next.js: 166ms, application-code: 37ms)

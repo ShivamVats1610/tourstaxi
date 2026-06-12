@@ -166,7 +166,7 @@ export default function BookingWidget() {
         </div>
 
         <div className="pointer-events-none -mb-12 mt-7 flex justify-center lg:-mb-14">
-          <Button onClick={explore} className="pointer-events-auto h-[58px] w-full max-w-[335px] rounded bg-[#ff681f] text-xl font-black uppercase text-white hover:bg-[#f25f1b]">
+          <Button onClick={explore} className="pointer-events-auto h-[58px] w-full max-w-[335px] rounded !bg-[#ff681f] text-xl font-black uppercase !text-white hover:!bg-[#f25f1b]">
             Explore Cabs
           </Button>
         </div>
