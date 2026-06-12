@@ -1,0 +1,429 @@
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+  [90m 6 |[0m [36mimport[0m { [33mCard[0m, [33mCardContent[0m } [36mfrom[0m [32m'@/components/ui/card'[0m;
+  [90m 7 |[0m [36mimport[0m { [33mAccordion[0m, [33mAccordionContent[0m, [33mAccordionItem[0m, [33mAccordionTrigger[0m } [36mfrom[0m [32m'@/components...[0m
+[31m[1m>[0m [90m 8 |[0m [36mimport[0m [33mBookingWidget[0m [36mfrom[0m [32m'@/components/site/BookingWidget'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m 9 |[0m [36mimport[0m [33mReveal[0m [36mfrom[0m [32m'@/components/site/Reveal'[0m;
+  [90m10 |[0m [36mimport[0m [33mSectionTitle[0m [36mfrom[0m [32m'@/components/site/SectionTitle'[0m;
+  [90m11 |[0m [36mimport[0m { [33mCOMPANY[0m, [33mFAQS[0m, [33mFLEET[0m, [33mPACKAGES[0m, [33mROUTES[0m, [33mTESTIMONIALS[0m, [33mWHY_CHOOSE[0m } [36mfrom[0m [32m'@/lib/da...[0m
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[browser] Uncaught Error: ./app/page.js:8:1
+Module not found: Can't resolve '@/components/site/BookingWidget'
+   6 | import { Card, CardContent } from '@/components/ui/card';
+   7 | import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components...
+>  8 | import BookingWidget from '@/components/site/BookingWidget';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import Reveal from '@/components/site/Reveal';
+  10 | import SectionTitle from '@/components/site/SectionTitle';
+  11 | import { COMPANY, FAQS, FLEET, PACKAGES, ROUTES, TESTIMONIALS, WHY_CHOOSE } from '@/lib/da...
+
+Import map: aliased to relative './components/site/BookingWidget' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./app/page.js:8:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (Error: (./app/page.js:8:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)

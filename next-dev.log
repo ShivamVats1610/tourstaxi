@@ -290,3 +290,142 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
  GET / 200 in 419ms (next.js: 221ms, application-code: 198ms)
  GET / 200 in 1162ms (next.js: 46ms, application-code: 1116ms)
  GET /api/auth/me 200 in 250ms (next.js: 196ms, application-code: 54ms)
+ GET /login 200 in 938ms (next.js: 468ms, proxy.ts: 308ms, application-code: 162ms)
+ GET /api/auth/me 200 in 62ms (next.js: 22ms, application-code: 40ms)
+ POST /login 200 in 1278ms (next.js: 13ms, proxy.ts: 23ms, application-code: 1242ms)
+  └─ ƒ createFirebaseSession({"adminCode":"","email":"tourstaxi.com@gmail.com","firebaseUid":"kET2ExKYjYUYhtfYa8tdrec44y13","...":"2 items not stringified"}) in 1017ms app/actions/auth.js
+ GET /admin/dashboard 200 in 1068ms (next.js: 10ms, proxy.ts: 12ms, application-code: 1047ms)
+ GET /admin/dashboard 200 in 1453ms (next.js: 208ms, proxy.ts: 17ms, application-code: 1228ms)
+ GET /api/auth/me 200 in 41ms (next.js: 11ms, application-code: 30ms)
+ GET /admin/dashboard 200 in 2.6s (next.js: 44ms, proxy.ts: 83ms, application-code: 2.4s)
+ GET /api/auth/me 200 in 36ms (next.js: 10ms, application-code: 26ms)
+ GET / 200 in 66ms (next.js: 20ms, application-code: 46ms)
+ GET /api/auth/me 200 in 27ms (next.js: 9ms, application-code: 18ms)
+✓ Compiled in 3.5s
+ GET / 500 in 1477ms (next.js: 623ms, application-code: 854ms)
+ GET / 500 in 58ms (next.js: 26ms, application-code: 32ms)
+ GET / 500 in 84ms (next.js: 35ms, application-code: 49ms)
+ GET / 500 in 49ms (next.js: 15ms, application-code: 34ms)
+✓ Compiled in 766ms
+ GET / 200 in 1259ms (next.js: 378ms, application-code: 881ms)
+ GET /api/auth/me 200 in 198ms (next.js: 166ms, application-code: 32ms)
+✓ Compiled in 294ms
+ GET / 200 in 470ms (next.js: 242ms, application-code: 228ms)
+✓ Compiled in 782ms
+ GET / 200 in 780ms (next.js: 386ms, application-code: 393ms)
+ GET / 200 in 819ms (next.js: 17ms, application-code: 802ms)
+ GET /api/auth/me 200 in 286ms (next.js: 222ms, application-code: 64ms)
+✓ Compiled in 692ms
+ GET / 200 in 829ms (next.js: 287ms, application-code: 541ms)
+✓ Compiled in 390ms
+ GET / 200 in 505ms (next.js: 280ms, application-code: 224ms)
+ GET / 200 in 954ms (next.js: 26ms, application-code: 927ms)
+ GET /api/auth/me 200 in 219ms (next.js: 170ms, application-code: 49ms)
+ GET / 200 in 558ms (next.js: 12ms, application-code: 545ms)
+ GET /api/auth/me 200 in 30ms (next.js: 12ms, application-code: 18ms)
+ GET / 200 in 460ms (next.js: 12ms, application-code: 449ms)
+ GET /api/auth/me 200 in 46ms (next.js: 12ms, application-code: 34ms)
+[mapbox:autocomplete:request] {
+  inputLength: 2,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=ko 200 in 669ms (next.js: 403ms, application-code: 266ms)
+[mapbox:autocomplete:request] {
+  inputLength: 4,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=kota 200 in 76ms (next.js: 12ms, application-code: 65ms)
+[mapbox:autocomplete:request] {
+  inputLength: 5,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=india 200 in 186ms (next.js: 10ms, application-code: 175ms)
+[mapbox:autocomplete:request] {
+  inputLength: 5,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=chand 200 in 292ms (next.js: 16ms, application-code: 276ms)
+[mapbox:autocomplete:request] {
+  inputLength: 6,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=chandi 200 in 196ms (next.js: 12ms, application-code: 184ms)
+[mapbox:route:request] {
+  hasOrigin: false,
+  hasDestination: false,
+  hasCoordinates: true,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/distance?fromLng=76.78427&fromLat=30.73958&toLng=75.85744&toLat=25.173758 200 in 703ms (next.js: 92ms, application-code: 611ms)

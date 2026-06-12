@@ -1,20 +1,18 @@
 'use client';
 import { useState } from 'react';
-import { ArrowLeftRight, CalendarDays, CarFront, Clock, Headphones, IndianRupee, Plane, ShieldCheck, Timer } from 'lucide-react';
+import { ArrowLeftRight, CalendarDays, ChevronDown, Clock, Plane } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useBooking } from '@/lib/booking-context';
 import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
 
 const TABS = [
-  { id: 'one-way', label: 'Outstation', icon: CarFront },
-  { id: 'local', label: 'Local', icon: Timer },
-  { id: 'airport', label: 'Airport', icon: Plane }
+  { id: 'one-way', label: 'One Way' },
+  { id: 'round-trip', label: 'Round Trip' },
+  { id: 'local', label: 'Local' },
+  { id: 'airport', label: 'Airport' }
 ];
 
-const TRIP_MODES = [
-  { id: 'one-way', label: 'One Way', sub: 'Drop-off Only' },
-  { id: 'round-trip', label: 'Round Trip', sub: 'Return With Same Cab' }
-];
+const AIRPORT_TRIPS = ['Drop to Airport', 'Pickup from Airport'];
 
 function todayValue() {
   const now = new Date();
@@ -30,7 +28,8 @@ function nextPickupTimeValue() {
 
 function displayDate(value) {
   if (!value) return '';
-  return new Date(`${value}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  const [year, month, day] = value.split('-');
+  return `${day}-${month}-${year}`;
 }
 
 function displayTime(value) {
@@ -45,11 +44,13 @@ export default function BookingWidget() {
   const [tab, setTab] = useState('one-way');
   const [pickup, setPickup] = useState('');
   const [drop, setDrop] = useState('');
+  const [airportTrip, setAirportTrip] = useState(AIRPORT_TRIPS[0]);
+  const [airport, setAirport] = useState('');
   const [pickupCoordinates, setPickupCoordinates] = useState(null);
   const [dropCoordinates, setDropCoordinates] = useState(null);
   const [date, setDate] = useState(todayValue());
+  const [returnDate, setReturnDate] = useState(todayValue());
   const [time, setTime] = useState('07:00');
-  const [passengers, setPassengers] = useState('2 Passengers');
   const { open } = useBooking();
   const minDate = todayValue();
   const minTime = date === minDate ? nextPickupTimeValue() : undefined;
@@ -57,9 +58,14 @@ export default function BookingWidget() {
   const updateDate = (value) => {
     const nextDate = value && value < minDate ? minDate : value;
     setDate(nextDate);
+    if (returnDate < nextDate) setReturnDate(nextDate);
     if (nextDate === minDate && time < nextPickupTimeValue()) {
       setTime(nextPickupTimeValue());
     }
+  };
+
+  const updateReturnDate = (value) => {
+    setReturnDate(value && value < date ? date : value);
   };
 
   const updateTime = (value) => {
@@ -70,6 +76,12 @@ export default function BookingWidget() {
     setTime(value);
   };
 
+  const changeTab = (nextTab) => {
+    setTab(nextTab);
+    if (nextTab === 'local' && !drop) setDrop('8 hrs / 80 km');
+    if (nextTab !== 'local' && drop === '8 hrs / 80 km') setDrop('');
+  };
+
   const swapPlaces = () => {
     setPickup(drop);
     setDrop(pickup);
@@ -77,159 +89,165 @@ export default function BookingWidget() {
     setDropCoordinates(pickupCoordinates);
   };
 
-  const explore = () => open({
-    tripType: tab,
-    pickup,
-    drop,
-    date,
-    time,
-    passengers,
-    pickupCoordinates,
-    dropCoordinates,
-    startStep: pickup && (tab === 'local' || drop) && date ? 2 : 1
-  });
+  const explore = () => {
+    const airportPickup = airportTrip === 'Pickup from Airport';
+    open({
+      tripType: tab,
+      pickup: tab === 'airport' ? (airportPickup ? airport : pickup) : pickup,
+      drop: tab === 'airport' ? (airportPickup ? drop : airport) : drop,
+      date,
+      time,
+      returnDate: tab === 'round-trip' ? returnDate : '',
+      rental: tab === 'local' ? '8 hrs / 80 km' : undefined,
+      pickupCoordinates,
+      dropCoordinates,
+      startStep: 2
+    });
+  };
+
+  const commonDateFields = (
+    <>
+      <LineDate label="Pick Up Date" value={date} min={minDate} onChange={updateDate} />
+      {tab === 'round-trip' && <LineDate label="Return Date" value={returnDate} min={date} onChange={updateReturnDate} />}
+      <LineTime label="Pick Up Time" value={time} min={minTime} onChange={updateTime} />
+    </>
+  );
 
   return (
-    <div id="book" className="relative z-10 mx-auto w-full max-w-[1424px] px-4">
-      <div className="mx-auto max-w-[674px] rounded-[24px] bg-white px-5 pb-5 pt-5 shadow-[0_18px_40px_rgba(15,23,42,0.24)] sm:max-w-none sm:px-8 sm:pb-6 sm:pt-6 lg:px-10">
-        <div className="mx-auto grid h-11 max-w-[610px] grid-cols-3 overflow-hidden rounded-md border border-slate-400 text-center text-[clamp(13px,3.7vw,17px)] font-black uppercase tracking-normal sm:h-auto sm:text-sm">
-          {TABS.map((tabItem) => {
-            const active = tabItem.id === tab || (tab === 'round-trip' && tabItem.id === 'one-way');
-            return (
-              <button key={tabItem.id} onClick={() => setTab(tabItem.id)} className={`flex h-full items-center justify-center gap-2 border-r border-slate-400 px-2 transition-colors last:border-r-0 sm:h-12 ${active ? 'bg-sky-500 text-white' : 'bg-white text-slate-950 hover:bg-sky-50'}`}>
-                <tabItem.icon className="hidden h-4 w-4 sm:block" /> {tabItem.label}
-              </button>
-            );
-          })}
+    <div id="book" className="relative z-10 mx-auto w-full max-w-[1500px] px-4">
+      <div className="mx-auto max-w-[1425px] rounded-[18px] bg-white px-5 pb-6 pt-6 shadow-[0_18px_40px_rgba(15,23,42,0.24)] sm:rounded-[26px] sm:px-8 lg:px-10 xl:px-10">
+        <div className="mx-auto grid h-11 max-w-[610px] grid-cols-4 overflow-hidden rounded border border-slate-400 text-center text-[12px] font-black uppercase sm:text-sm">
+          {TABS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => changeTab(item.id)}
+              className={`border-r border-slate-400 px-2 last:border-r-0 ${tab === item.id ? 'bg-sky-500 text-white' : 'bg-white text-slate-950 hover:bg-sky-50'}`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
 
-        <div className="my-5 border-y-2 border-sky-400 py-2.5 text-center text-[clamp(18px,5.1vw,24px)] font-black uppercase leading-tight tracking-normal text-slate-800 sm:my-5 sm:py-2 sm:text-xl">
-          India&apos;s Premier Intercity Cabs
-        </div>
-
-        {tab !== 'local' && tab !== 'airport' && (
-          <div className="mx-auto mb-5 grid h-14 max-w-[450px] grid-cols-2 overflow-hidden rounded-md border border-slate-400 text-center sm:mb-6 sm:h-auto sm:max-w-[330px]">
-            {TRIP_MODES.map((mode) => (
-              <button key={mode.id} type="button" onClick={() => setTab(mode.id)} className={`h-full border-r border-slate-400 px-2 last:border-r-0 sm:h-[58px] ${tab === mode.id ? 'bg-sky-500 text-white' : 'bg-white text-slate-950'}`}>
-                <span className="block text-[clamp(13px,3.8vw,17px)] font-black uppercase tracking-normal sm:text-sm">{mode.label}</span>
-                <span className="mt-0.5 block text-[clamp(10px,2.9vw,13px)] font-semibold sm:text-[11px]">{mode.sub}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className="relative grid items-end gap-3 md:grid-cols-[1fr_1fr] xl:grid-cols-[1fr_auto_1fr_1fr_1fr]">
-          <LocationAutocomplete
-            label="From"
-            value={pickup}
-            onValueChange={(value) => {
-              setPickup(value);
-              setPickupCoordinates(null);
-            }}
-            onSelect={(place) => {
-              setPickup(place.label);
-              setPickupCoordinates(place.coordinates);
-            }}
-            placeholder="Enter Pickup Location"
-            showCurrentLocation
-            variant="boxed"
-            className="rounded-xl border-2 border-sky-100 bg-sky-50/60 px-4 py-3 shadow-sm sm:border sm:px-4 sm:py-3"
-          />
-
-          <button onClick={swapPlaces} className="absolute right-5 top-[62px] z-20 flex h-11 w-11 items-center justify-center rounded-full border-2 border-sky-100 bg-white text-sky-500 shadow-md transition hover:bg-sky-50 md:right-[calc(50%_-_22px)] md:top-9 xl:static xl:h-11 xl:w-11" aria-label="Swap pickup and drop">
-            <ArrowLeftRight className="h-5 w-5" />
-          </button>
-
-          {tab === 'local' ? (
-            <SelectField icon={Timer} label="Package" value={drop} onChange={setDrop} options={['4 hrs / 40 km', '8 hrs / 80 km', '12 hrs / 120 km']} boxed />
-          ) : (
-            <LocationAutocomplete
-              label="To"
-              value={drop}
-              onValueChange={(value) => {
-                setDrop(value);
-                setDropCoordinates(null);
-              }}
-              onSelect={(place) => {
-                setDrop(place.label);
-                setDropCoordinates(place.coordinates);
-              }}
-              placeholder="Enter Drop Location"
-              variant="boxed"
-              className="rounded-xl border-2 border-sky-100 bg-sky-50/60 px-4 py-3 shadow-sm sm:border sm:px-4 sm:py-3"
-            />
+        <div className="mt-7 lg:mt-6">
+          {tab === 'one-way' && (
+            <div className="grid items-end gap-5 lg:grid-cols-[1fr_auto_1fr_1fr_1fr] xl:gap-8">
+              <LineLocation label="From" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
+              <SwapButton onClick={swapPlaces} />
+              <LineLocation label="To" value={drop} setValue={setDrop} setCoordinates={setDropCoordinates} />
+              {commonDateFields}
+            </div>
           )}
 
-          <DateTimeField date={date} time={time} minDate={minDate} minTime={minTime} onDateChange={updateDate} onTimeChange={updateTime} />
-          <SearchField icon={Clock} label="Pick Up Time" type="time" value={time} min={minTime} onChange={updateTime} boxed className="hidden xl:block" />
+          {tab === 'round-trip' && (
+            <div className="grid items-end gap-5 lg:grid-cols-[1fr_auto_1fr_0.72fr_0.72fr_0.72fr] xl:gap-7">
+              <LineLocation label="From" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
+              <SwapButton onClick={swapPlaces} />
+              <LineLocation label="To" value={drop} setValue={setDrop} setCoordinates={setDropCoordinates} />
+              {commonDateFields}
+            </div>
+          )}
+
+          {tab === 'local' && (
+            <div className="grid items-end gap-7 md:grid-cols-3 xl:gap-9">
+              <LineLocation label="City" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
+              {commonDateFields}
+            </div>
+          )}
+
+          {tab === 'airport' && (
+            <div className="grid items-end gap-5 lg:grid-cols-[0.7fr_1.1fr_1.1fr_0.9fr_0.9fr] xl:gap-8">
+              <LineSelect label="Trip" value={airportTrip} onChange={setAirportTrip} options={AIRPORT_TRIPS} />
+              <LineLocation label="Pickup Address" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
+              <LineLocation label={airportTrip === 'Pickup from Airport' ? 'Pickup Airport' : 'Drop Airport'} value={airport} setValue={setAirport} setCoordinates={setDropCoordinates} placeholder="Enter Airport" />
+              {commonDateFields}
+            </div>
+          )}
         </div>
 
-        <div className="mt-5 grid gap-3 sm:mt-5 sm:grid-cols-[1fr_auto] sm:items-center">
-          <SelectField label="Travellers" value={passengers} onChange={setPassengers} options={['1 Passenger', '2 Passengers', '3 Passengers', '4 Passengers', '5+ Passengers']} boxed className="hidden sm:block" />
-          <Button onClick={explore} className="h-13 w-full rounded-md bg-orange-500 px-8 py-3 text-[clamp(17px,4.7vw,22px)] font-black uppercase tracking-normal text-white hover:bg-orange-600 sm:h-14 sm:min-w-[280px] sm:text-lg">
+        <div className="pointer-events-none -mb-12 mt-7 flex justify-center lg:-mb-14">
+          <Button onClick={explore} className="pointer-events-auto h-[58px] w-full max-w-[335px] rounded bg-[#ff681f] text-xl font-black uppercase text-white hover:bg-[#f25f1b]">
             Explore Cabs
           </Button>
-        </div>
-
-        <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[clamp(11px,3.2vw,13px)] font-bold text-slate-700 sm:mt-5 sm:text-[13px]">
-          <Trust icon={ShieldCheck} label="Verified Drivers" />
-          <Trust icon={IndianRupee} label="Transparent Pricing" />
-          <Trust icon={Headphones} label="24x7 Support" />
         </div>
       </div>
     </div>
   );
 }
 
-function DateTimeField({ date, time, minDate, minTime, onDateChange, onTimeChange }) {
+function SwapButton({ onClick }) {
   return (
-    <div className="relative block min-w-0 rounded-xl border-2 border-sky-100 bg-sky-50/60 px-4 py-3 shadow-sm sm:border sm:px-4 sm:py-3">
-      <span className="mb-0 block text-[clamp(13px,3.7vw,16px)] font-black uppercase tracking-wide text-sky-500 sm:text-xs">Trip Start</span>
-      <span className="mt-1.5 flex min-w-0 items-start gap-4 text-slate-950 sm:mt-1 sm:h-9 sm:items-center sm:gap-3">
-        <CalendarDays className="mt-1 h-6 w-6 shrink-0 text-sky-500 sm:mt-0 sm:h-6 sm:w-6" />
-        <span className="min-w-0">
-          <span className="block text-[clamp(15px,4vw,18px)] font-black leading-tight text-black sm:text-base">{displayDate(date)}</span>
-          <span className="mt-1 block text-[clamp(14px,3.8vw,17px)] font-normal leading-tight text-slate-500 sm:mt-0 sm:text-base">{displayTime(time)}</span>
-        </span>
-      </span>
-      <input type="date" value={date} min={minDate} onChange={(event) => onDateChange(event.target.value)} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" aria-label="Trip start date" />
-      <input type="time" value={time} min={minTime} onChange={(event) => onTimeChange(event.target.value)} className="sr-only" aria-label="Pickup time" />
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className="mx-auto hidden h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-sky-500 transition hover:bg-sky-50 lg:flex"
+      aria-label="Swap pickup and drop"
+    >
+      <ArrowLeftRight className="h-5 w-5" />
+    </button>
   );
 }
 
-function SearchField({ icon: Icon, extraIcon: ExtraIcon, label, value, onChange, placeholder, type = 'text', min, boxed = false, className = '' }) {
+function LineLocation({ label, value, setValue, setCoordinates, placeholder, showCurrentLocation = false }) {
   return (
-    <label className={`${boxed ? 'block min-w-0 rounded-xl border-2 border-sky-100 bg-sky-50/60 px-4 py-4 shadow-sm sm:border sm:px-4 sm:py-3' : 'block min-w-0'} ${className}`}>
-      <span className={boxed ? 'mb-0 block text-xs font-black uppercase tracking-wide text-sky-500' : 'mb-2 block text-xl font-black uppercase tracking-wide text-slate-700'}>{label}</span>
-      <span className={boxed ? 'mt-1 flex h-12 min-w-0 items-center gap-3 text-slate-950 sm:h-9' : 'flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500'}>
-        {Icon && <Icon className={boxed ? 'h-6 w-6 shrink-0 text-sky-500' : 'h-5 w-5 shrink-0 text-slate-500'} />}
-        <input type={type} value={value} onChange={(event) => onChange?.(event.target.value)} placeholder={placeholder} min={min} className="min-w-0 flex-1 bg-transparent text-[22px] font-black outline-none placeholder:text-slate-400 sm:text-base sm:font-semibold" />
-        {ExtraIcon && <ExtraIcon className="h-5 w-5 shrink-0 text-slate-500" />}
+    <LocationAutocomplete
+      label={label}
+      value={value}
+      onValueChange={(nextValue) => {
+        setValue(nextValue);
+        setCoordinates(null);
+      }}
+      onSelect={(place) => {
+        setValue(place.label);
+        setCoordinates(place.coordinates);
+      }}
+      placeholder={placeholder || (label === 'City' ? 'Enter City' : label === 'To' ? 'Enter Drop Location' : label === 'From' ? 'Enter Pickup Location' : `Enter ${label}`)}
+      showCurrentLocation={showCurrentLocation}
+      variant="line"
+      className="min-w-0"
+    />
+  );
+}
+
+function LineDate({ label, value, min, onChange }) {
+  return (
+    <label className="relative block min-w-0">
+      <span className="mb-2 block text-xl font-black uppercase tracking-wide text-slate-700">{label}</span>
+      <span className="flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500">
+        <CalendarDays className="h-5 w-5 shrink-0 text-sky-500 lg:hidden" />
+        <span className="min-w-0 flex-1 truncate text-base font-semibold text-black">{displayDate(value)}</span>
+        <ChevronDown className="h-5 w-5 shrink-0 text-sky-500" />
       </span>
+      <input type="date" value={value} min={min} onChange={(event) => onChange(event.target.value)} className="absolute inset-x-0 bottom-0 h-12 cursor-pointer opacity-0" />
     </label>
   );
 }
 
-function SelectField({ icon: Icon, label, value, onChange, options, className = '', boxed = false }) {
+function LineTime({ label, value, min, onChange }) {
   return (
-    <label className={`${boxed ? 'block min-w-0 rounded-xl border border-sky-200 bg-sky-50/45 px-4 py-3 shadow-sm' : 'block min-w-0'} ${className}`}>
-      {label && <span className={boxed ? 'mb-0 block text-xs font-black uppercase tracking-wide text-sky-500' : 'mb-2 block text-xl font-black uppercase tracking-wide text-slate-700'}>{label}</span>}
-      <span className={boxed ? 'mt-1 flex h-9 min-w-0 items-center gap-3 text-slate-950' : 'flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500'}>
-        {Icon && <Icon className="h-5 w-5 shrink-0 text-slate-500" />}
-        <select value={value || ''} onChange={(event) => onChange?.(event.target.value)} className="min-w-0 flex-1 bg-transparent text-base font-semibold outline-none">
+    <label className="relative block min-w-0">
+      <span className="mb-2 block text-xl font-black uppercase tracking-wide text-slate-700">{label}</span>
+      <span className="flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500">
+        <Clock className="h-5 w-5 shrink-0 text-sky-500 lg:hidden" />
+        <span className="min-w-0 flex-1 truncate text-base font-semibold text-black">{displayTime(value)}</span>
+        <ChevronDown className="h-5 w-5 shrink-0 text-sky-500" />
+      </span>
+      <input type="time" value={value} min={min} onChange={(event) => onChange(event.target.value)} className="absolute inset-x-0 bottom-0 h-12 cursor-pointer opacity-0" />
+    </label>
+  );
+}
+
+function LineSelect({ label, value, onChange, options }) {
+  return (
+    <label className="block min-w-0">
+      <span className="mb-2 block text-xl font-black uppercase tracking-wide text-slate-700">{label}</span>
+      <span className="flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500">
+        <Plane className="h-5 w-5 shrink-0 text-sky-500 lg:hidden" />
+        <select value={value} onChange={(event) => onChange(event.target.value)} className="min-w-0 flex-1 bg-transparent text-base font-semibold outline-none">
           {options.map((option) => <option key={option}>{option}</option>)}
         </select>
+        <ChevronDown className="h-5 w-5 shrink-0 text-sky-500" />
       </span>
     </label>
-  );
-}
-
-function Trust({ icon: Icon, label }) {
-  return (
-    <div className="flex min-w-0 items-center justify-center gap-1">
-      <Icon className="h-5 w-5 shrink-0 text-sky-500 sm:h-5 sm:w-5" />
-      <span className="min-w-0 leading-tight">{label}</span>
-    </div>
   );
 }

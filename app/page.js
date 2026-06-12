@@ -23,19 +23,16 @@ function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/80 via-slate-950/35 to-slate-950/70" />
 
           <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-            <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="mx-auto max-w-6xl text-balance text-[clamp(30px,7vw,88px)] font-black uppercase leading-[0.98] tracking-normal text-white">
+            <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="mx-auto max-w-full whitespace-nowrap text-[clamp(22px,5.2vw,68px)] font-black uppercase leading-none tracking-normal text-white">
               Services Across 2000+ Cities
             </motion.h1>
-            <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="mx-auto mt-3 hidden max-w-2xl text-base font-medium leading-8 text-white/85 sm:block sm:text-lg">
-              Book one way, round trip, local rental and airport taxis with verified drivers, clear fares and 24x7 support.
-            </motion.p>
           </div>
 
-          <div className="relative mt-8 sm:mt-10">
+          <div className="relative mt-7 sm:mt-8">
             <BookingWidget />
           </div>
 
-          <div className="relative mx-auto mt-7 max-w-4xl px-4">
+          <div className="relative mx-auto mt-6 max-w-4xl px-4">
             <div className="mx-auto flex flex-wrap items-center justify-center gap-3 text-base font-normal text-white sm:text-sm sm:font-semibold">
               <span className="flex items-center gap-2"><span className="text-2xl leading-none">{"{"}</span> India&apos;s top rated car rental service <span className="text-2xl leading-none">{"}"}</span></span>
             </div>
