@@ -91,8 +91,8 @@ export default function BookingWidget() {
 
   return (
     <div id="book" className="relative z-10 mx-auto w-full max-w-[1424px] px-4">
-      <div className="mx-auto max-w-[674px] rounded-[24px] bg-white px-4 pb-5 pt-6 shadow-[0_18px_40px_rgba(15,23,42,0.24)] sm:max-w-none sm:px-8 sm:pb-6 sm:pt-6 lg:px-10">
-        <div className="mx-auto grid h-12 max-w-[610px] grid-cols-3 overflow-hidden rounded-md border border-slate-400 text-center text-[clamp(14px,4.1vw,18px)] font-black uppercase tracking-normal sm:h-auto sm:text-sm">
+      <div className="mx-auto max-w-[674px] rounded-[24px] bg-white px-5 pb-5 pt-5 shadow-[0_18px_40px_rgba(15,23,42,0.24)] sm:max-w-none sm:px-8 sm:pb-6 sm:pt-6 lg:px-10">
+        <div className="mx-auto grid h-11 max-w-[610px] grid-cols-3 overflow-hidden rounded-md border border-slate-400 text-center text-[clamp(13px,3.7vw,17px)] font-black uppercase tracking-normal sm:h-auto sm:text-sm">
           {TABS.map((tabItem) => {
             const active = tabItem.id === tab || (tab === 'round-trip' && tabItem.id === 'one-way');
             return (
@@ -103,12 +103,12 @@ export default function BookingWidget() {
           })}
         </div>
 
-        <div className="my-6 border-y-2 border-sky-400 py-3 text-center text-[clamp(18px,5.4vw,26px)] font-black uppercase leading-tight tracking-normal text-slate-800 sm:my-5 sm:py-2 sm:text-xl">
+        <div className="my-5 border-y-2 border-sky-400 py-2.5 text-center text-[clamp(18px,5.1vw,24px)] font-black uppercase leading-tight tracking-normal text-slate-800 sm:my-5 sm:py-2 sm:text-xl">
           India&apos;s Premier Intercity Cabs
         </div>
 
         {tab !== 'local' && tab !== 'airport' && (
-          <div className="mx-auto mb-6 grid h-14 max-w-[450px] grid-cols-2 overflow-hidden rounded-md border border-slate-400 text-center sm:mb-6 sm:h-auto sm:max-w-[330px]">
+          <div className="mx-auto mb-5 grid h-14 max-w-[450px] grid-cols-2 overflow-hidden rounded-md border border-slate-400 text-center sm:mb-6 sm:h-auto sm:max-w-[330px]">
             {TRIP_MODES.map((mode) => (
               <button key={mode.id} type="button" onClick={() => setTab(mode.id)} className={`h-full border-r border-slate-400 px-2 last:border-r-0 sm:h-[58px] ${tab === mode.id ? 'bg-sky-500 text-white' : 'bg-white text-slate-950'}`}>
                 <span className="block text-[clamp(13px,3.8vw,17px)] font-black uppercase tracking-normal sm:text-sm">{mode.label}</span>
@@ -133,11 +133,11 @@ export default function BookingWidget() {
             placeholder="Enter Pickup Location"
             showCurrentLocation
             variant="boxed"
-            className="rounded-xl border-2 border-sky-100 bg-sky-50/60 px-4 py-4 shadow-sm sm:border sm:px-4 sm:py-3"
+            className="rounded-xl border-2 border-sky-100 bg-sky-50/60 px-4 py-3 shadow-sm sm:border sm:px-4 sm:py-3"
           />
 
-          <button onClick={swapPlaces} className="absolute right-5 top-[70px] z-20 flex h-12 w-12 items-center justify-center rounded-full border-2 border-sky-100 bg-white text-sky-500 shadow-md transition hover:bg-sky-50 md:right-[calc(50%_-_24px)] md:top-10 xl:static xl:h-11 xl:w-11" aria-label="Swap pickup and drop">
-            <ArrowLeftRight className="h-6 w-6 xl:h-5 xl:w-5" />
+          <button onClick={swapPlaces} className="absolute right-5 top-[62px] z-20 flex h-11 w-11 items-center justify-center rounded-full border-2 border-sky-100 bg-white text-sky-500 shadow-md transition hover:bg-sky-50 md:right-[calc(50%_-_22px)] md:top-9 xl:static xl:h-11 xl:w-11" aria-label="Swap pickup and drop">
+            <ArrowLeftRight className="h-5 w-5" />
           </button>
 
           {tab === 'local' ? (
@@ -156,7 +156,7 @@ export default function BookingWidget() {
               }}
               placeholder="Enter Drop Location"
               variant="boxed"
-              className="rounded-xl border-2 border-sky-100 bg-sky-50/60 px-4 py-4 shadow-sm sm:border sm:px-4 sm:py-3"
+              className="rounded-xl border-2 border-sky-100 bg-sky-50/60 px-4 py-3 shadow-sm sm:border sm:px-4 sm:py-3"
             />
           )}
 
@@ -164,14 +164,14 @@ export default function BookingWidget() {
           <SearchField icon={Clock} label="Pick Up Time" type="time" value={time} min={minTime} onChange={updateTime} boxed className="hidden xl:block" />
         </div>
 
-        <div className="mt-6 grid gap-3 sm:mt-5 sm:grid-cols-[1fr_auto] sm:items-center">
+        <div className="mt-5 grid gap-3 sm:mt-5 sm:grid-cols-[1fr_auto] sm:items-center">
           <SelectField label="Travellers" value={passengers} onChange={setPassengers} options={['1 Passenger', '2 Passengers', '3 Passengers', '4 Passengers', '5+ Passengers']} boxed className="hidden sm:block" />
-          <Button onClick={explore} className="h-14 w-full rounded-md bg-orange-500 px-8 text-[clamp(18px,5vw,24px)] font-black uppercase tracking-normal text-white hover:bg-orange-600 sm:h-14 sm:min-w-[280px] sm:text-lg">
+          <Button onClick={explore} className="h-13 w-full rounded-md bg-orange-500 px-8 py-3 text-[clamp(17px,4.7vw,22px)] font-black uppercase tracking-normal text-white hover:bg-orange-600 sm:h-14 sm:min-w-[280px] sm:text-lg">
             Explore Cabs
           </Button>
         </div>
 
-        <div className="mt-5 grid grid-cols-3 gap-2 text-center text-[clamp(11px,3.4vw,14px)] font-bold text-slate-700 sm:mt-5 sm:text-[13px]">
+        <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[clamp(11px,3.2vw,13px)] font-bold text-slate-700 sm:mt-5 sm:text-[13px]">
           <Trust icon={ShieldCheck} label="Verified Drivers" />
           <Trust icon={IndianRupee} label="Transparent Pricing" />
           <Trust icon={Headphones} label="24x7 Support" />
