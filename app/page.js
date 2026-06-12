@@ -23,7 +23,7 @@ function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/80 via-slate-950/35 to-slate-950/70" />
 
           <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-            <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="mx-auto max-w-full whitespace-nowrap text-[clamp(22px,5.2vw,68px)] font-black uppercase leading-none tracking-normal text-white">
+            <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="mx-auto max-w-[22rem] text-[clamp(30px,10vw,44px)] font-black uppercase leading-[1.05] tracking-normal text-white sm:max-w-full sm:whitespace-nowrap sm:text-[clamp(36px,5.2vw,68px)]">
               Services Across 2000+ Cities
             </motion.h1>
           </div>
