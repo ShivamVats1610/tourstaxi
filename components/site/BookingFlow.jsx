@@ -334,8 +334,18 @@ function ModifyPanel({ data, set, onSelectLocation, onContinue }) {
 }
 
 function CabSelection({ fleet, data, set, routeLabel, onCheckout }) {
+  const selectedCab = fleet.find((cab) => cab.slug === data.vehicleSlug) || fleet[0] || null;
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8">
+      {!!fleet.length && (
+        <CabOptionRail
+          fleet={fleet}
+          data={data}
+          selectedSlug={selectedCab?.slug}
+          onSelect={(slug) => set('vehicleSlug', slug)}
+        />
+      )}
       <FeatureStrip />
       {data.tripType !== 'local' && (
         <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_360px]">
@@ -350,9 +360,49 @@ function CabSelection({ fleet, data, set, routeLabel, onCheckout }) {
       )}
       <div className="mt-5 space-y-4">
         {!fleet.length && <div className="rounded-lg border border-slate-200 p-6 text-slate-600">No active cabs are available right now.</div>}
-        {fleet.map((cab, index) => (
-            <CabCard key={cab.slug} cab={cab} data={data} set={set} routeLabel={routeLabel} index={index} onCheckout={onCheckout} />
-        ))}
+        {selectedCab && (
+          <CabCard key={selectedCab.slug} cab={selectedCab} data={data} set={set} routeLabel={routeLabel} index={0} onCheckout={onCheckout} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CabOptionRail({ fleet, data, selectedSlug, onSelect }) {
+  return (
+    <div className="mb-5 overflow-hidden border-b border-slate-100 bg-white">
+      <div className="flex gap-4 overflow-x-auto px-1 pb-4 pt-1 [scrollbar-width:none] sm:gap-6">
+        {fleet.map((cab) => {
+          const fare = cabFare(cab, data);
+          const active = cab.slug === selectedSlug;
+          const fuel = data.fuelType === 'diesel' ? 'DSL' : 'CNG';
+          const category = cab.category?.split(/[·|]/)[0]?.trim() || (cab.seats > 6 ? 'Traveller' : cab.seats > 4 ? 'SUV' : 'Sedan');
+
+          return (
+            <button
+              key={cab.slug}
+              type="button"
+              onClick={() => onSelect(cab.slug)}
+              className="group w-[104px] shrink-0 text-center sm:w-[132px]"
+              aria-pressed={active}
+            >
+              <div className={`text-sm font-black leading-tight transition-colors ${active ? 'text-sky-500' : 'text-slate-500 group-hover:text-slate-800'}`}>
+                {category}
+              </div>
+              <div className="relative mx-auto mt-2 h-[76px] w-[76px] sm:h-[92px] sm:w-[92px]">
+                <span className={`absolute left-1/2 top-0 z-10 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-black text-white ${active ? 'bg-sky-600' : 'bg-slate-400'}`}>
+                  {fuel}
+                </span>
+                <span className={`flex h-full w-full items-center justify-center rounded-full border-4 bg-white p-2 transition ${active ? 'border-sky-500 shadow-[0_0_0_4px_rgba(14,165,233,0.10)]' : 'border-slate-300 group-hover:border-sky-200'}`}>
+                  <img src={cab.image} alt={cab.name} className="h-full w-full rounded-full object-contain" />
+                </span>
+              </div>
+              <div className={`mt-2 text-sm font-black ${active ? 'text-sky-500' : 'text-slate-600'}`}>
+                {money(fare.total)}
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

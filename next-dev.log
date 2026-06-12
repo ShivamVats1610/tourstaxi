@@ -1,12 +1,58 @@
 
 > tourstaxi@0.1.0 dev
-> next dev
+> next dev --hostname 127.0.0.1 --port 3000
 
 ▲ Next.js 16.2.7 (Turbopack)
-- Local:         http://localhost:3000
-- Network:       http://172.20.10.2:3000
-✓ Ready in 1821ms
+- Local:         http://127.0.0.1:3000
+- Network:       http://127.0.0.1:3000
+- Environments: .env.local
+✓ Ready in 2.1s
+[mapbox:build] {
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
 Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: true }
+- Experiments (use with caution):
+  · serverActions
 
- GET / 200 in 2.2s (next.js: 712ms, application-code: 1496ms)
-✓ Finished writing to filesystem cache in 11.7s
+ GET / 200 in 523ms (next.js: 42ms, application-code: 481ms)
+ GET / 200 in 834ms (next.js: 5ms, application-code: 829ms)
+ GET /api/auth/me 200 in 521ms (next.js: 418ms, application-code: 103ms)
+[mapbox:route:request] {
+  hasOrigin: true,
+  hasDestination: true,
+  hasCoordinates: false,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:geocode:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:geocode:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/distance?origin=Sawai+Madhopur%2C+Rajasthan&destination=Jaipur%2C+Rajasthan 200 in 2.6s (next.js: 91ms, application-code: 2.5s)
