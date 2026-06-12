@@ -56,3 +56,231 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
   nodeEnv: 'development'
 }
  GET /api/distance?origin=Sawai+Madhopur%2C+Rajasthan&destination=Jaipur%2C+Rajasthan 200 in 2.6s (next.js: 91ms, application-code: 2.5s)
+[mapbox:route:request] {
+  hasOrigin: true,
+  hasDestination: true,
+  hasCoordinates: false,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:geocode:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:geocode:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/distance?origin=Sawai+Madhopur%2C+Rajasthan&destination=Jaipur%2C+Rajasthan 200 in 873ms (next.js: 30ms, application-code: 843ms)
+[mapbox:route:request] {
+  hasOrigin: true,
+  hasDestination: true,
+  hasCoordinates: false,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:geocode:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:geocode:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/distance?origin=Sawai+Madhopur%2C+Rajasthan&destination=Jaipur%2C+Rajasthan 200 in 640ms (next.js: 38ms, application-code: 602ms)
+✓ Compiled in 1824ms
+[mapbox:route:request] {
+  hasOrigin: true,
+  hasDestination: true,
+  hasCoordinates: false,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET / 200 in 1566ms (next.js: 916ms, application-code: 650ms)
+[mapbox:route:geocode:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:geocode:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/distance?origin=Sawai+Madhopur%2C+Rajasthan&destination=Jaipur%2C+Rajasthan 200 in 3.8s (next.js: 102ms, application-code: 3.7s)
+ GET / 200 in 2.8s (next.js: 303ms, application-code: 2.5s)
+ GET /api/auth/me 200 in 363ms (next.js: 260ms, application-code: 103ms)
+[mapbox:route:request] {
+  hasOrigin: true,
+  hasDestination: true,
+  hasCoordinates: false,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:exception] {
+  message: 'fetch failed',
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/distance?origin=Sawai+Madhopur%2C+Rajasthan&destination=Jaipur%2C+Rajasthan 200 in 9.5s (next.js: 23ms, application-code: 9.4s)
+✓ Compiled in 1174ms
+[mapbox:route:request] {
+  hasOrigin: true,
+  hasDestination: true,
+  hasCoordinates: false,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:geocode:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:geocode:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/distance?origin=Sawai+Madhopur%2C+Rajasthan&destination=Jaipur%2C+Rajasthan 200 in 1367ms (next.js: 188ms, application-code: 1179ms)
+ GET / 200 in 2.5s (next.js: 423ms, application-code: 2.1s)
+✓ Compiled in 1002ms
+ GET / 200 in 1277ms (next.js: 569ms, application-code: 708ms)
+✓ Compiled in 525ms
+ GET / 200 in 903ms (next.js: 330ms, application-code: 573ms)
+✓ Compiled in 1192ms
+ GET / 200 in 1780ms (next.js: 663ms, application-code: 1118ms)
+✓ Compiled in 941ms
+ GET / 200 in 1146ms (next.js: 512ms, application-code: 633ms)
+ GET / 200 in 1317ms (next.js: 89ms, application-code: 1228ms)
+ GET /api/auth/me 200 in 252ms (next.js: 177ms, application-code: 75ms)
+✓ Compiled in 941ms
+ GET / 200 in 1116ms (next.js: 527ms, application-code: 589ms)
+✓ Compiled in 315ms
+ GET / 200 in 560ms (next.js: 350ms, application-code: 211ms)
+✓ Compiled in 381ms
+ GET / 200 in 621ms (next.js: 264ms, application-code: 358ms)
+✓ Compiled in 460ms
+ GET / 200 in 521ms (next.js: 253ms, application-code: 268ms)
+✓ Compiled in 283ms
+ GET / 200 in 510ms (next.js: 290ms, application-code: 219ms)
+✓ Compiled in 312ms
+ GET / 200 in 585ms (next.js: 337ms, application-code: 248ms)
+✓ Compiled in 319ms
+ GET / 200 in 590ms (next.js: 298ms, application-code: 292ms)
+ GET / 200 in 1290ms (next.js: 26ms, application-code: 1265ms)
+ GET /api/auth/me 200 in 259ms (next.js: 193ms, application-code: 67ms)
+ GET / 200 in 629ms (next.js: 12ms, application-code: 616ms)
+ GET /api/auth/me 200 in 41ms (next.js: 16ms, application-code: 25ms)
+✓ Compiled in 494ms
+ GET / 200 in 1025ms (next.js: 325ms, application-code: 700ms)
+✓ Compiled in 373ms
+ GET / 200 in 721ms (next.js: 335ms, application-code: 386ms)
+✓ Compiled in 323ms
+ GET / 200 in 608ms (next.js: 307ms, application-code: 301ms)
+✓ Compiled in 425ms
+ GET / 200 in 699ms (next.js: 403ms, application-code: 297ms)
+✓ Compiled in 311ms
+ GET / 200 in 567ms (next.js: 289ms, application-code: 278ms)
+ GET / 200 in 1228ms (next.js: 81ms, application-code: 1148ms)
+ GET /api/auth/me 200 in 313ms (next.js: 244ms, application-code: 68ms)
+✓ Compiled in 798ms
+ GET / 200 in 633ms (next.js: 343ms, application-code: 290ms)
+✓ Compiled in 360ms
+ GET / 200 in 984ms (next.js: 302ms, application-code: 682ms)
+✓ Compiled in 413ms
+ GET / 200 in 1189ms (next.js: 285ms, application-code: 904ms)
+ GET / 200 in 1224ms (next.js: 20ms, application-code: 1204ms)
+ GET /api/auth/me 200 in 277ms (next.js: 193ms, application-code: 84ms)
+ GET / 200 in 587ms (next.js: 16ms, application-code: 571ms)
+ GET /api/auth/me 200 in 33ms (next.js: 12ms, application-code: 21ms)
+✓ Compiled in 888ms
+✓ Compiled in 369ms
+ GET / 200 in 673ms (next.js: 359ms, application-code: 314ms)
+✓ Compiled in 298ms
+ GET / 200 in 488ms (next.js: 258ms, application-code: 230ms)
+✓ Compiled in 305ms
+ GET / 200 in 589ms (next.js: 282ms, application-code: 307ms)
+✓ Compiled in 390ms
+ GET / 200 in 740ms (next.js: 299ms, application-code: 441ms)
+✓ Compiled in 177ms
+ GET / 200 in 633ms (next.js: 341ms, application-code: 292ms)
+✓ Compiled in 398ms
+ GET / 200 in 732ms (next.js: 333ms, application-code: 399ms)

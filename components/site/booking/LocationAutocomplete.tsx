@@ -129,21 +129,21 @@ export default function LocationAutocomplete({
 
   return (
     <label className={`relative block min-w-0 ${className}`}>
-      <span className={boxed ? 'mb-0 block text-xs font-black uppercase tracking-wide text-sky-500' : 'mb-2 block text-xl font-black uppercase tracking-wide text-slate-700'}>{label}</span>
-      <span className={boxed ? 'mt-1 flex h-9 min-w-0 items-center gap-3 text-slate-950' : 'flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500'}>
-        <MapPin className={boxed ? 'h-6 w-6 shrink-0 text-slate-400' : 'h-5 w-5 shrink-0 text-slate-500'} />
+      <span className={boxed ? 'mb-0 block text-[clamp(13px,3.7vw,16px)] font-black uppercase tracking-wide text-sky-500 sm:text-xs' : 'mb-2 block text-xl font-black uppercase tracking-wide text-slate-700'}>{label}</span>
+      <span className={boxed ? 'mt-1.5 flex h-9 min-w-0 items-center gap-3 text-slate-950 sm:mt-1 sm:h-9' : 'flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500'}>
+        <MapPin className={boxed ? 'h-7 w-7 shrink-0 text-slate-400 sm:h-6 sm:w-6' : 'h-5 w-5 shrink-0 text-slate-500'} />
         <input
           value={value}
           onChange={(event) => onValueChange(event.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => window.setTimeout(() => setFocused(false), 140)}
           placeholder={placeholder}
-          className={boxed ? 'min-w-0 flex-1 bg-transparent text-[22px] font-normal leading-none text-slate-500 outline-none placeholder:text-slate-400 sm:text-base sm:font-semibold' : 'min-w-0 flex-1 bg-transparent text-base font-semibold outline-none placeholder:text-slate-400'}
+          className={boxed ? 'min-w-0 flex-1 bg-transparent text-[clamp(17px,4.8vw,22px)] font-normal leading-none text-slate-500 outline-none placeholder:text-slate-400 sm:text-base sm:font-semibold' : 'min-w-0 flex-1 bg-transparent text-base font-semibold outline-none placeholder:text-slate-400'}
         />
-        {loading ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-slate-400" /> : <Search className="h-4 w-4 shrink-0 text-slate-400" />}
+        {loading ? <Loader2 className="h-5 w-5 shrink-0 animate-spin text-slate-400 sm:h-4 sm:w-4" /> : <Search className="h-5 w-5 shrink-0 text-slate-400 sm:h-4 sm:w-4" />}
         {showCurrentLocation && (
           <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={useCurrentLocation} className="rounded-full p-1 text-sky-600 hover:bg-sky-50" aria-label="Use current location">
-            {locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crosshair className="h-4 w-4" />}
+            {locating ? <Loader2 className="h-5 w-5 animate-spin sm:h-4 sm:w-4" /> : <Crosshair className="h-5 w-5 sm:h-4 sm:w-4" />}
           </button>
         )}
       </span>

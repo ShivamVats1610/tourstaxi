@@ -37,19 +37,19 @@ export default function Header() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white text-slate-950 shadow-[0_2px_18px_rgba(15,23,42,0.08)]">
-      <div className="mx-auto flex h-[70px] max-w-7xl items-center justify-between gap-3 px-3 sm:h-[74px] sm:px-6 lg:px-8">
-        <Link href="/" className="group flex items-center" aria-label="ToursTaxi home">
-          <span className="rounded-md bg-sky-500 px-2 py-1 text-xl font-black italic leading-none tracking-wide text-white shadow-sm transition-colors group-hover:bg-sky-600 sm:px-2.5 sm:text-2xl">
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-2 px-3 sm:h-[74px] sm:gap-3 sm:px-6 lg:px-8">
+        <Link href="/" className="group flex min-w-0 shrink-0 items-center" aria-label="ToursTaxi home">
+          <span className="rounded-md bg-sky-500 px-2 py-1 text-[clamp(18px,6vw,22px)] font-black italic leading-none tracking-wide text-white shadow-sm transition-colors group-hover:bg-sky-600 sm:px-2.5 sm:text-2xl">
             TOURS<span className="text-slate-950">TAXI</span>
           </span>
         </Link>
 
-        <a href={`tel:${COMPANY.phoneRaw}`} className="flex items-center justify-center gap-2 rounded-full border border-sky-400 bg-white px-3 py-2 text-xs font-semibold text-sky-600 sm:text-sm md:items-stretch md:overflow-hidden md:rounded-md md:p-0">
+        <a href={`tel:${COMPANY.phoneRaw}`} className="flex h-10 min-w-0 items-center justify-center gap-1.5 rounded-full border-2 border-sky-400 bg-white px-2 text-xs font-bold text-sky-600 max-[359px]:w-10 max-[359px]:px-0 min-[390px]:px-3 min-[390px]:text-sm sm:h-11 md:items-stretch md:overflow-hidden md:rounded-md md:p-0">
           <span className="hidden items-center gap-1.5 bg-white px-3 text-slate-950 md:flex">
             <Phone className="h-4 w-4 text-sky-500" /> 24x7
           </span>
-          <Phone className="h-4 w-4 md:hidden" />
-          <span className="md:bg-sky-500 md:px-3 md:py-2 md:text-white">{COMPANY.phone.replace('+91 ', '')}</span>
+          <Phone className="h-5 w-5 md:hidden" />
+          <span className="truncate max-[359px]:hidden md:bg-sky-500 md:px-3 md:py-2 md:text-white">{COMPANY.phone.replace('+91 ', '')}</span>
         </a>
 
         <nav className="hidden items-center gap-1 xl:flex">
@@ -73,13 +73,13 @@ export default function Header() {
           </Link>
         </div>
 
-        <Link href={session ? dashboardHref : '/login'} className="lg:hidden">
-          <Button className="h-10 rounded-full bg-sky-500 px-4 text-white hover:bg-sky-600">
+        <Link href={session ? dashboardHref : '/login'} className="shrink-0 lg:hidden">
+          <Button className="h-10 rounded-full bg-sky-500 px-3 text-sm font-medium text-white hover:bg-sky-600 min-[390px]:h-11 min-[390px]:px-4 min-[390px]:text-base sm:h-10">
             {session ? 'Dashboard' : 'Login'}
           </Button>
         </Link>
 
-        <button onClick={() => setOpen(!open)} className="hidden rounded-md p-2 text-slate-900 sm:block lg:hidden" aria-label="Toggle menu">
+        <button onClick={() => setOpen(!open)} className="hidden shrink-0 rounded-md p-2 text-slate-900 sm:block lg:hidden" aria-label="Toggle menu">
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
