@@ -338,14 +338,6 @@ function CabSelection({ fleet, data, set, routeLabel, onCheckout }) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8">
-      {!!fleet.length && (
-        <CabOptionRail
-          fleet={fleet}
-          data={data}
-          selectedSlug={selectedCab?.slug}
-          onSelect={(slug) => set('vehicleSlug', slug)}
-        />
-      )}
       <FeatureStrip />
       {data.tripType !== 'local' && (
         <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_360px]">
@@ -357,6 +349,14 @@ function CabSelection({ fleet, data, set, routeLabel, onCheckout }) {
           />
           <RouteSummary data={data} />
         </div>
+      )}
+      {!!fleet.length && (
+        <CabOptionRail
+          fleet={fleet}
+          data={data}
+          selectedSlug={selectedCab?.slug}
+          onSelect={(slug) => set('vehicleSlug', slug)}
+        />
       )}
       <div className="mt-5 space-y-4">
         {!fleet.length && <div className="rounded-lg border border-slate-200 p-6 text-slate-600">No active cabs are available right now.</div>}
@@ -370,7 +370,7 @@ function CabSelection({ fleet, data, set, routeLabel, onCheckout }) {
 
 function CabOptionRail({ fleet, data, selectedSlug, onSelect }) {
   return (
-    <div className="mb-5 overflow-hidden border-b border-slate-100 bg-white">
+    <div className="mt-5 overflow-hidden border-b border-slate-100 bg-white">
       <div className="flex gap-4 overflow-x-auto px-1 pb-4 pt-1 [scrollbar-width:none] sm:gap-6">
         {fleet.map((cab) => {
           const fare = cabFare(cab, data);
