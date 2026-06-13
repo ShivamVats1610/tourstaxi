@@ -10,10 +10,10 @@ export const metadata = { title: 'Popular Routes — ToursTaxi' };
 export default function RoutesPage() {
   return (
     <div className="pt-24">
-      <section className="py-20 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 text-white">
+      <section className="bg-gradient-to-br from-[#12233f] via-[#0f3f3b] to-[#071527] py-16 text-white sm:py-20">
         <div className="max-w-5xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-orange-300 text-xs font-semibold uppercase tracking-wider mb-4">Popular Routes</div>
-          <h1 className="text-4xl md:text-6xl font-extrabold">India\u2019s favourite outstation routes</h1>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">Popular Routes</div>
+          <h1 className="text-3xl md:text-5xl font-extrabold">India\u2019s favourite outstation routes</h1>
           <p className="mt-4 text-white/80 text-lg">All-inclusive fares. Verified drivers. Zero hidden surcharges.</p>
         </div>
       </section>
@@ -37,7 +37,7 @@ export default function RoutesPage() {
                     <div className="text-2xl font-extrabold text-slate-900">\u20b9{r.price.toLocaleString()}</div>
                     <div className="text-xs text-slate-500">incl. driver, fuel, tax</div>
                   </div>
-                  <Link href="/#book"><Button className="bg-sky-500 hover:bg-sky-600">Book Cab</Button></Link>
+                  <Link href="/#book"><Button className="bg-[#12233f] hover:bg-[#0f1c33]">Book Cab</Button></Link>
                 </CardContent>
               </Card>
             </Reveal>

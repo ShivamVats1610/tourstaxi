@@ -40,7 +40,7 @@ export function AccordionTrigger({ children, className = '' }) {
       type="button"
       aria-expanded={open}
       onClick={() => accordion?.toggle(value)}
-      className={`flex w-full items-center justify-between py-4 text-sm font-medium transition hover:text-sky-600 ${className}`}
+      className={`flex w-full items-center justify-between py-4 text-sm font-medium transition hover:text-teal-700 ${className}`}
     >
       <span>{children}</span>
       <span className={`ml-4 text-lg leading-none transition-transform ${open ? 'rotate-45' : ''}`}>+</span>

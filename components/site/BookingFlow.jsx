@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeftRight, Briefcase, Calendar, Check, ChevronDown, Clock, Copy, Headphones, MapPin, Phone, ShieldCheck, Star, User, X } from 'lucide-react';
+import { ArrowLeftRight, Briefcase, Calendar, Check, ChevronDown, Clock, Copy, Headphones, MapPin, Phone, Plus, ShieldCheck, Star, Trash2, User, X } from 'lucide-react';
 import { toast } from 'sonner';
 import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
 import RouteMap from '@/components/site/booking/RouteMap';
@@ -61,6 +61,15 @@ function formatDuration(minutes) {
   return `${hrs} hr${hrs > 1 ? 's' : ''}${mins ? ` ${mins} min` : ''}`;
 }
 
+function dateTimeValue(date, time) {
+  return `${date || todayValue()}T${time || '07:00'}`;
+}
+
+function splitDateTime(value) {
+  const [nextDate, nextTime = '07:00'] = String(value || '').split('T');
+  return { nextDate, nextTime: nextTime.slice(0, 5) };
+}
+
 function routeDistance(data) {
   if (data.tripType === 'local') {
     const km = Number((data.rental || '').match(/\d+\s*hrs\s*\/\s*(\d+)/i)?.[1]);
@@ -74,9 +83,12 @@ function routeDistance(data) {
 function cabFare(cab, data, selectedAddons = []) {
   const distance = routeDistance(data);
   const fare = calculateFare(distance, vehicleClassFromName(cab.name));
-  const cabRatePerKm = Number(cab.pricePerKm) > 0 ? Number(cab.pricePerKm) : fare.ratePerKm;
+  const tripRate = data.tripType === 'local' ? cab.localPricePerKm : cab.pricePerKm;
+  const cabRatePerKm = Number(tripRate) > 0 ? Number(tripRate) : fare.ratePerKm;
   const cabDistanceFare = Math.round(distance * cabRatePerKm);
-  const fuelSurchargePerKm = data.fuelType === 'diesel' ? 1.1 : 0;
+  const allowedFuel = fuelOptions(cab);
+  const activeFuel = allowedFuel.includes(data.fuelType) ? data.fuelType : allowedFuel[0];
+  const fuelSurchargePerKm = activeFuel === 'diesel' ? 1.1 : 0;
   const fuelSurcharge = Math.round(distance * fuelSurchargePerKm);
   const addons = selectedAddons.reduce((sum, id) => sum + (ADDONS.find((item) => item.id === id)?.price || 0), 0);
   const total = fare.baseFare + cabDistanceFare + fuelSurcharge + addons;
@@ -97,6 +109,15 @@ function cabFare(cab, data, selectedAddons = []) {
     partPay: Math.round(total * 0.25),
     oldPrice: total
   };
+}
+
+function fuelOptions(cab) {
+  const options = Array.isArray(cab?.fuelOptions) && cab.fuelOptions.length ? cab.fuelOptions : ['cng', 'diesel'];
+  return [...new Set(options.map((item) => String(item).toLowerCase()).filter((item) => ['cng', 'diesel'].includes(item)))];
+}
+
+function fuelLabel(value) {
+  return value === 'diesel' ? 'Diesel' : 'CNG';
 }
 
 export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) {
@@ -125,6 +146,8 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       date: prefillDate,
       time: prefillDate === minDate && prefillTime < minTime ? minTime : prefillTime,
       returnDate: prefill.returnDate || '',
+      returnTime: prefill.returnTime || '18:00',
+      stops: Array.isArray(prefill.stops) ? prefill.stops : [],
       rental: prefill.rental || '8 hrs / 80 km',
       passengers: prefill.passengers || '2 Passengers',
       vehicleSlug: prefill.vehicleSlug || '',
@@ -183,7 +206,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
   }, []);
 
   const routeLabel = data.tripType === 'local'
-    ? `${data.pickup || 'Pickup city'} - Local rental`
+    ? `${data.pickup || 'Pickup'} - ${data.drop || 'Drop'}`
     : `${data.pickup || 'Pickup'} - ${data.drop || 'Drop'}`;
 
   const submit = async () => {
@@ -209,6 +232,9 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
         return;
       }
       setBookingId(result.booking.bookingId);
+      toast.success('Booking request received', {
+        description: `Reference ${result.booking.bookingId}. Our team will call shortly.`
+      });
       setView('confirmed');
     } catch {
       toast.error('Unable to connect to booking server');
@@ -219,7 +245,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-h-[94vh] max-w-[1500px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl">
+      <DialogContent className="max-h-[96vh] w-[calc(100vw-16px)] max-w-[1500px] overflow-hidden rounded-lg border border-slate-200 bg-white p-0 shadow-2xl sm:w-[calc(100vw-32px)]">
         <button onClick={onClose} className="absolute right-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-700 shadow hover:bg-slate-100" aria-label="Close booking">
           <X className="h-5 w-5" />
         </button>
@@ -227,7 +253,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
         {view === 'confirmed' ? (
           <Confirmed bookingId={bookingId} data={data} vehicle={vehicle} fare={fare} onClose={onClose} />
         ) : (
-          <div className="max-h-[94vh] overflow-y-auto bg-white">
+          <div className="max-h-[96vh] overflow-y-auto bg-slate-50">
             <TripBar data={data} routeLabel={routeLabel} onModify={() => setView('details')} />
             {view === 'details' && (
               <ModifyPanel data={data} set={set} onSelectLocation={selectLocation} onContinue={() => setView('cars')} />
@@ -239,6 +265,9 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 set={set}
                 routeLabel={routeLabel}
                 onCheckout={(slug) => {
+                  const cab = fleet.find((item) => item.slug === slug);
+                  const allowed = fuelOptions(cab);
+                  if (!allowed.includes(data.fuelType)) set('fuelType', allowed[0] || 'cng');
                   set('vehicleSlug', slug);
                   setView('checkout');
                 }}
@@ -277,26 +306,26 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
 
 function TripBar({ data, routeLabel, onModify }) {
   return (
-    <div className="bg-sky-50 px-4 py-4 sm:px-8">
-      <div className="mx-auto grid max-w-7xl gap-4 text-slate-900 md:grid-cols-[1.5fr_1fr_1fr_1fr_auto] md:items-center">
+    <div className="bg-slate-950 px-4 py-3 text-white sm:px-8">
+      <div className="mx-auto grid max-w-7xl gap-3 md:grid-cols-[1.5fr_1fr_1fr_1fr_auto] md:items-center">
         <div>
-          <div className="text-xs text-black">Home &gt; Select Car</div>
-          <div className="mt-3 text-xl font-black">{routeLabel}</div>
+          <div className="text-[11px] font-bold uppercase tracking-wide text-teal-200">Select Car</div>
+          <div className="mt-1 text-base font-black leading-tight sm:text-lg">{routeLabel}</div>
         </div>
-        <Info label="Trip Type" value={TRIP_LABELS[data.tripType] || 'One way'} />
-        <Info label="Pick up" value={prettyDate(data.date)} />
-        <Info label="Time" value={data.time || '07:00'} />
-        <Button variant="outline" onClick={onModify} className="rounded-full bg-white text-sky-600">Modify Booking</Button>
+        <Info label="Trip Type" value={TRIP_LABELS[data.tripType] || 'One way'} invert />
+        <Info label="Pick up" value={prettyDate(data.date)} invert />
+        <Info label="Time" value={`${data.time || '07:00'}${data.returnTime ? ` / ${data.returnTime}` : ''}`} invert />
+        <Button variant="outline" onClick={onModify} className="h-10 rounded-md border-white/20 bg-white text-slate-950">Modify</Button>
       </div>
     </div>
   );
 }
 
-function Info({ label, value }) {
+function Info({ label, value, invert = false }) {
   return (
     <div>
-      <div className="text-sm text-slate-600">{label}</div>
-      <div className="text-lg font-bold">{value}</div>
+      <div className={`text-[11px] font-bold uppercase tracking-wide ${invert ? 'text-white/60' : 'text-slate-600'}`}>{label}</div>
+      <div className={`text-sm font-bold ${invert ? 'text-white' : 'text-slate-950'}`}>{value}</div>
     </div>
   );
 }
@@ -304,21 +333,59 @@ function Info({ label, value }) {
 function ModifyPanel({ data, set, onSelectLocation, onContinue }) {
   const minDate = todayValue();
   const minTime = data.date === minDate ? nextPickupTimeValue() : undefined;
+  const canAddStop = ['one-way', 'round-trip'].includes(data.tripType);
+  const updateStop = (index, value) => set('stops', (data.stops || []).map((stop, itemIndex) => itemIndex === index ? value : stop));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-8">
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="grid gap-4 lg:grid-cols-5">
-          <LocationAutocomplete label="From" value={data.pickup || ''} placeholder="Pickup location" onValueChange={(value) => set('pickup', value)} onSelect={(location) => onSelectLocation('pickup', location)} showCurrentLocation />
-          {data.tripType === 'local' ? (
-            <Field label="Package" icon={MapPin}><Input value={data.rental} onChange={(event) => set('rental', event.target.value)} /></Field>
-          ) : (
-            <LocationAutocomplete label="To" value={data.drop || ''} placeholder="Drop location" onValueChange={(value) => set('drop', value)} onSelect={(location) => onSelectLocation('drop', location)} />
-          )}
-          <Field label="Pickup Date" icon={Calendar}><Input type="date" min={minDate} value={data.date} onChange={(event) => set('date', event.target.value)} /></Field>
-          <Field label="Pickup Time" icon={Clock}><Input type="time" min={minTime} value={data.time} onChange={(event) => set('time', event.target.value)} /></Field>
-          <Button onClick={onContinue} className="self-end bg-orange-500 font-black hover:bg-orange-600">Explore Cabs</Button>
+    <div className="mx-auto max-w-7xl px-3 py-4 sm:px-8 sm:py-6">
+      <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="grid gap-3 lg:grid-cols-5">
+          <LocationAutocomplete label={data.tripType === 'local' ? 'Pickup Location' : 'From'} value={data.pickup || ''} placeholder="Pickup location" onValueChange={(value) => set('pickup', value)} onSelect={(location) => onSelectLocation('pickup', location)} showCurrentLocation />
+          <LocationAutocomplete label={data.tripType === 'local' ? 'Drop Location' : 'To'} value={data.drop || ''} placeholder="Drop location" onValueChange={(value) => set('drop', value)} onSelect={(location) => onSelectLocation('drop', location)} />
+          <div className="grid gap-3 rounded-lg bg-slate-50 p-3 lg:col-span-2">
+            <DateTimeField
+              label="Pickup Date & Time"
+              date={data.date}
+              time={data.time}
+              minDate={minDate}
+              minTime={minTime}
+              onChange={(value) => {
+                const { nextDate, nextTime } = splitDateTime(value);
+                set('date', nextDate);
+                set('time', nextTime);
+              }}
+            />
+            {data.tripType === 'round-trip' && (
+              <DateTimeField
+                label="Return Date & Time"
+                date={data.returnDate || data.date}
+                time={data.returnTime || '18:00'}
+                minDate={data.date || minDate}
+                onChange={(value) => {
+                  const { nextDate, nextTime } = splitDateTime(value);
+                  set('returnDate', nextDate);
+                  set('returnTime', nextTime);
+                }}
+              />
+            )}
+          </div>
+          <Button onClick={onContinue} className="h-11 self-end bg-amber-500 text-sm font-black text-slate-950 hover:bg-amber-400">Explore Cabs</Button>
         </div>
+        {canAddStop && (
+          <div className="mt-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm font-black text-slate-950">Stops on the way</div>
+              <Button type="button" variant="outline" onClick={() => set('stops', [...(data.stops || []), ''])} className="h-9 rounded-md bg-white text-xs font-black"><Plus className="h-4 w-4" /> Add Stop</Button>
+            </div>
+            {(data.stops || []).map((stop, index) => (
+              <div key={index} className="mt-3 flex gap-2">
+                <Input value={stop} onChange={(event) => updateStop(index, event.target.value)} placeholder={`Stop ${index + 1} location`} className="h-10" />
+                <button type="button" onClick={() => set('stops', (data.stops || []).filter((_, itemIndex) => itemIndex !== index))} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-red-200 bg-white text-red-600"><Trash2 className="h-4 w-4" /></button>
+              </div>
+            ))}
+          </div>
+        )}
+        {data.tripType === 'local' && <div className="mt-3"><Field label="Local Package" icon={MapPin}><Input value={data.rental} onChange={(event) => set('rental', event.target.value)} /></Field></div>}
         {data.tripType !== 'local' && (
           <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_320px]">
             <RouteMap
@@ -340,24 +407,17 @@ function CabSelection({ fleet, data, set, routeLabel, onCheckout }) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8">
-      <FeatureStrip />
-      {data.tripType !== 'local' && (
-        <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_360px]">
-          <RouteMap
-            pickupCoordinates={data.pickupCoordinates}
-            dropCoordinates={data.dropCoordinates}
-            route={data.routeGeometry ? { distanceKm: data.distanceKm, durationMinutes: data.durationMinutes, geometry: data.routeGeometry } : null}
-            className="min-h-[300px]"
-          />
-          <RouteSummary data={data} />
-        </div>
-      )}
       {!!fleet.length && (
         <CabOptionRail
           fleet={fleet}
           data={data}
           selectedSlug={selectedCab?.slug}
-          onSelect={(slug) => set('vehicleSlug', slug)}
+          onSelect={(slug) => {
+            const cab = fleet.find((item) => item.slug === slug);
+            const allowed = fuelOptions(cab);
+            if (!allowed.includes(data.fuelType)) set('fuelType', allowed[0] || 'cng');
+            set('vehicleSlug', slug);
+          }}
         />
       )}
       <div className="mt-5 space-y-4">
@@ -366,6 +426,20 @@ function CabSelection({ fleet, data, set, routeLabel, onCheckout }) {
           <CabCard key={selectedCab.slug} cab={selectedCab} data={data} set={set} routeLabel={routeLabel} index={0} onCheckout={onCheckout} />
         )}
       </div>
+      <div className="mt-5">
+        <FeatureStrip />
+      </div>
+      {data.tripType !== 'local' && (
+        <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_360px]">
+          <RouteMap
+            pickupCoordinates={data.pickupCoordinates}
+            dropCoordinates={data.dropCoordinates}
+            route={data.routeGeometry ? { distanceKm: data.distanceKm, durationMinutes: data.durationMinutes, geometry: data.routeGeometry } : null}
+            className="min-h-[240px] sm:min-h-[300px]"
+          />
+          <RouteSummary data={data} />
+        </div>
+      )}
     </div>
   );
 }
@@ -377,7 +451,8 @@ function CabOptionRail({ fleet, data, selectedSlug, onSelect }) {
         {fleet.map((cab) => {
           const fare = cabFare(cab, data);
           const active = cab.slug === selectedSlug;
-          const fuel = data.fuelType === 'diesel' ? 'DSL' : 'CNG';
+          const allowedFuel = fuelOptions(cab);
+          const fuel = allowedFuel.length > 1 ? 'CNG/DSL' : allowedFuel[0] === 'diesel' ? 'DSL' : 'CNG';
           const category = cab.category?.split(/[·|]/)[0]?.trim() || (cab.seats > 6 ? 'Traveller' : cab.seats > 4 ? 'SUV' : 'Sedan');
 
           return (
@@ -388,18 +463,18 @@ function CabOptionRail({ fleet, data, selectedSlug, onSelect }) {
               className="group w-[104px] shrink-0 text-center sm:w-[132px]"
               aria-pressed={active}
             >
-              <div className={`text-sm font-black leading-tight transition-colors ${active ? 'text-sky-500' : 'text-slate-500 group-hover:text-slate-800'}`}>
+              <div className={`text-sm font-black leading-tight transition-colors ${active ? 'text-teal-700' : 'text-slate-500 group-hover:text-slate-800'}`}>
                 {category}
               </div>
               <div className="relative mx-auto mt-2 h-[76px] w-[76px] sm:h-[92px] sm:w-[92px]">
-                <span className={`absolute left-1/2 top-0 z-10 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-black text-white ${active ? 'bg-sky-600' : 'bg-slate-400'}`}>
+                <span className={`absolute left-1/2 top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[9px] font-black text-white ${active ? 'bg-teal-700' : 'bg-slate-400'}`}>
                   {fuel}
                 </span>
-                <span className={`flex h-full w-full items-center justify-center rounded-full border-4 bg-white p-2 transition ${active ? 'border-sky-500 shadow-[0_0_0_4px_rgba(14,165,233,0.10)]' : 'border-slate-300 group-hover:border-sky-200'}`}>
+                <span className={`flex h-full w-full items-center justify-center rounded-full border-4 bg-white p-2 transition ${active ? 'border-teal-600 shadow-[0_0_0_4px_rgba(15,118,110,0.12)]' : 'border-slate-300 group-hover:border-teal-200'}`}>
                   <img src={cab.image} alt={cab.name} className="h-full w-full rounded-full object-contain" />
                 </span>
               </div>
-              <div className={`mt-2 text-sm font-black ${active ? 'text-sky-500' : 'text-slate-600'}`}>
+              <div className={`mt-2 text-sm font-black ${active ? 'text-teal-700' : 'text-slate-600'}`}>
                 {money(fare.total)}
               </div>
             </button>
@@ -412,62 +487,67 @@ function CabOptionRail({ fleet, data, selectedSlug, onSelect }) {
 
 function FeatureStrip() {
   return (
-    <div className="grid overflow-hidden rounded-md bg-gradient-to-r from-sky-500 to-sky-800 text-white shadow-sm md:grid-cols-3">
+    <div className="grid overflow-hidden rounded-md bg-slate-950 text-white shadow-sm sm:grid-cols-3">
       <StripItem icon="Rs" title="Book Now" text="at Zero Cost" />
-      <StripItem icon={<ShieldCheck className="h-10 w-10" />} title="Free Cancellations" text="Upto 1 Hour" />
-      <StripItem icon={<Headphones className="h-10 w-10" />} title="24x7 Customer" text="Support" />
+      <StripItem icon={<ShieldCheck className="h-5 w-5 sm:h-8 sm:w-8" />} title="Free Cancellations" text="Upto 1 Hour" />
+      <StripItem icon={<Headphones className="h-5 w-5 sm:h-8 sm:w-8" />} title="24x7 Customer" text="Support" />
     </div>
   );
 }
 
 function StripItem({ icon, title, text }) {
   return (
-    <div className="flex items-center justify-center gap-4 px-6 py-5 font-bold">
-      <div className="text-5xl font-black leading-none">{icon}</div>
-      <div>{title}<br />{text}</div>
+    <div className="flex items-center justify-center gap-3 border-b border-white/10 px-4 py-3 text-sm font-bold last:border-b-0 sm:border-b-0 sm:border-r sm:px-6 sm:py-5 sm:text-base sm:last:border-r-0">
+      <div className="text-2xl font-black leading-none text-amber-300 sm:text-4xl">{icon}</div>
+      <div>{title}<br /><span className="text-white/70">{text}</span></div>
     </div>
   );
 }
 
 function CabCard({ cab, data, set, index, onCheckout }) {
   const fare = cabFare(cab, data);
+  const fuels = fuelOptions(cab);
+  const activeFuel = fuels.includes(data.fuelType) ? data.fuelType : fuels[0];
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }} className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-      <div className="grid gap-5 p-5 lg:grid-cols-[280px_1fr_240px] lg:items-center">
-        <div className="flex h-44 items-center justify-center rounded bg-slate-50 p-3">
+      <div className="grid gap-4 p-4 lg:grid-cols-[240px_1fr_220px] lg:items-center sm:p-5">
+        <div className="flex h-36 items-center justify-center rounded bg-slate-50 p-3 sm:h-44">
           <img src={cab.image} alt={cab.name} className="max-h-full max-w-full object-contain" />
         </div>
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-2xl font-black text-slate-800">{cab.name}</h3>
+            <h3 className="text-xl font-black text-slate-800 sm:text-2xl">{cab.name}</h3>
             <span className="rounded bg-slate-950 px-2 py-1 text-xs font-bold text-white">4.8 <Star className="inline h-3 w-3 fill-yellow-400 text-yellow-400" /></span>
           </div>
           <p className="mt-1 text-sm italic text-slate-600">or equivalent | {cab.seats} seater AC Cab</p>
-          <div className="mt-4 grid gap-3 text-sm text-slate-800 sm:grid-cols-2">
-            <span className="flex items-center gap-2"><User className="h-5 w-5 text-sky-500" /> Driver allowance included</span>
-            <span className="flex items-center gap-2"><Briefcase className="h-5 w-5 text-sky-500" /> {cab.luggage}</span>
+          <div className="mt-4 grid gap-2 text-sm text-slate-800 sm:grid-cols-2">
+            <span className="flex items-center gap-2"><User className="h-5 w-5 text-teal-600" /> Driver allowance included</span>
+            <span className="flex items-center gap-2"><Briefcase className="h-5 w-5 text-teal-600" /> {cab.luggage}</span>
             <span className="flex items-center gap-2"><Check className="h-5 w-5 text-emerald-500" /> {formatKm(fare.distance)} included</span>
-            <span className="flex items-center gap-2"><ArrowLeftRight className="h-5 w-5 text-sky-500" /> Post limit: Rs {cab.pricePerKm || 16}/km</span>
+            <span className="flex items-center gap-2"><ArrowLeftRight className="h-5 w-5 text-teal-600" /> Post limit: Rs {cab.pricePerKm || 16}/km</span>
           </div>
-          <div className="mt-4 text-sm font-bold text-black">Select Fuel Type</div>
-          <div className="mt-2 flex gap-4 text-sm font-semibold text-black">
-            <label className="flex items-center gap-2 text-black"><input type="radio" checked={(data.fuelType || 'cng') === 'cng'} onChange={() => set('fuelType', 'cng')} name={`fuel-${cab.slug}`} className="accent-orange-500" /> CNG</label>
-            <label className="flex items-center gap-2 text-black"><input type="radio" checked={data.fuelType === 'diesel'} onChange={() => set('fuelType', 'diesel')} name={`fuel-${cab.slug}`} className="accent-orange-500" /> Diesel</label>
+          <div className="mt-4 text-sm font-bold text-black">Fuel Type</div>
+          <div className="mt-2 flex gap-2 text-sm font-semibold text-black">
+            {fuels.map((fuel) => (
+              <label key={fuel} className={`flex h-9 items-center gap-2 rounded-md border px-3 ${activeFuel === fuel ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-slate-200 text-black'}`}>
+                <input type="radio" checked={activeFuel === fuel} onChange={() => set('fuelType', fuel)} name={`fuel-${cab.slug}`} className="accent-amber-500" /> {fuelLabel(fuel)}
+              </label>
+            ))}
           </div>
-          <details className="mt-4 text-sm text-sky-600">
+          <details className="mt-4 text-sm text-teal-700">
             <summary className="cursor-pointer font-semibold">Inclusions and Exclusions</summary>
             <div className="mt-2 text-slate-600">Includes base fare, fuel, driver allowance and GST. Excludes extra pickups, parking and distance beyond package limit.</div>
           </details>
         </div>
         <div className="text-left lg:text-right">
           <div className="text-sm font-bold text-emerald-600">5% OFF <span className="text-slate-400 line-through">{money(fare.oldPrice)}</span></div>
-          <div className="mt-3 text-4xl font-black text-sky-500">{money(fare.total)}</div>
+          <div className="mt-2 text-3xl font-black text-teal-700 sm:text-4xl">{money(fare.total)}</div>
           <div className="mt-1 text-sm text-black">+ {money(fare.gst)} Charges and Taxes</div>
-          <Button onClick={() => onCheckout(cab.slug)} className="mt-5 h-12 rounded bg-orange-500 px-8 text-lg font-black uppercase hover:bg-orange-600">Select Car</Button>
+          <Button onClick={() => onCheckout(cab.slug)} className="mt-4 h-11 w-full rounded bg-amber-500 px-6 text-sm font-black uppercase text-slate-950 hover:bg-amber-400 lg:w-auto">Select Car</Button>
         </div>
       </div>
-      <div className="bg-sky-100 px-5 py-3 text-sm font-bold text-slate-900">New Car Promise - Model that is 2023 or newer @ Rs 249</div>
+      <div className="bg-teal-50 px-5 py-3 text-sm font-bold text-slate-900">New Car Promise - Model that is 2023 or newer @ Rs 249</div>
     </motion.div>
   );
 }
@@ -480,15 +560,17 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
   };
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-8 px-4 py-7 lg:grid-cols-[1fr_440px] sm:px-8">
+    <div className="mx-auto grid max-w-7xl gap-5 px-3 py-5 lg:grid-cols-[1fr_420px] sm:px-8 sm:py-7">
       <div className="space-y-5">
-        <button onClick={onBack} className="text-sm font-bold text-sky-600">Back to cabs</button>
+        <button onClick={onBack} className="text-sm font-bold text-teal-700">Back to cabs</button>
         <Section title="Review Your Booking" tone="blue">
-          <div className="text-2xl text-black">{routeLabel} <span className="text-base font-normal text-black">({TRIP_LABELS[data.tripType]})</span></div>
+          <div className="text-lg font-black text-black sm:text-2xl">{routeLabel} <span className="text-sm font-normal text-black">({TRIP_LABELS[data.tripType]})</span></div>
           <div className="mt-3 grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
             <div>Car Type: <b>{vehicle.name} or Equivalent</b></div>
-            <div>Fuel Type: <b>{data.fuelType === 'diesel' ? 'Diesel' : 'CNG'}</b></div>
+            <div>Fuel Type: <b>{fuelLabel(data.fuelType)}</b></div>
             <div>Pickup: <b>{prettyDate(data.date)}, {data.time}</b></div>
+            {data.tripType === 'round-trip' && <div>Return: <b>{prettyDate(data.returnDate)}, {data.returnTime || '-'}</b></div>}
+            {!!data.stops?.length && <div className="sm:col-span-2">Stops: <b>{data.stops.filter(Boolean).join(' | ') || '-'}</b></div>}
             <div>Kms included: <b>{formatKm(fare.distance)}</b></div>
             <div>Estimated time: <b>{formatDuration(fare.durationMinutes)}</b></div>
           </div>
@@ -496,12 +578,12 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
 
         <Section title="Contact & Pickup Details">
           <div className="grid gap-4 sm:grid-cols-[1fr_110px_1fr]">
-            <Input value={data.name} onChange={(event) => set('name', event.target.value)} placeholder="Full Name" className="h-14 bg-slate-100 font-semibold text-black placeholder:text-black" />
-            <select className="h-14 rounded-md border border-slate-200 bg-slate-500 px-3 font-semibold"><option>+91</option></select>
-            <Input value={data.phone} onChange={(event) => set('phone', event.target.value)} placeholder="Mobile No." className="h-14 bg-slate-100 font-semibold text-black placeholder:text-black" />
-            <Input value={data.email} onChange={(event) => set('email', event.target.value)} placeholder="Email ID" className="h-14 bg-slate-100 font-semibold text-black placeholder:text-black sm:col-span-3" />
-            <Input value={data.address} onChange={(event) => set('address', event.target.value)} placeholder="Pickup Location" className="h-14 bg-slate-100 font-semibold text-black placeholder:text-black sm:col-span-3" />
-            <Input value={data.dropAddress} onChange={(event) => set('dropAddress', event.target.value)} placeholder="Drop Location" className="h-14 bg-slate-100 font-semibold text-black placeholder:text-black sm:col-span-3" />
+            <Input value={data.name} onChange={(event) => set('name', event.target.value)} placeholder="Full Name" className="h-11 bg-slate-100 font-semibold text-black placeholder:text-black" />
+            <select className="h-11 rounded-md border border-slate-200 bg-white px-3 font-semibold text-slate-950"><option>+91</option></select>
+            <Input value={data.phone} onChange={(event) => set('phone', event.target.value)} placeholder="Mobile No." className="h-11 bg-slate-100 font-semibold text-black placeholder:text-black" />
+            <Input value={data.email} onChange={(event) => set('email', event.target.value)} placeholder="Email ID" className="h-11 bg-slate-100 font-semibold text-black placeholder:text-black sm:col-span-3" />
+            <Input value={data.address} onChange={(event) => set('address', event.target.value)} placeholder="Pickup Location" className="h-11 bg-slate-100 font-semibold text-black placeholder:text-black sm:col-span-3" />
+            <Input value={data.dropAddress} onChange={(event) => set('dropAddress', event.target.value)} placeholder="Drop Location" className="h-11 bg-slate-100 font-semibold text-black placeholder:text-black sm:col-span-3" />
             <Textarea value={data.notes} onChange={(event) => set('notes', event.target.value)} placeholder="Any notes for driver" className="bg-slate-100 sm:col-span-3" />
           </div>
         </Section>
@@ -518,8 +600,8 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
       <span
         className={`h-7 w-7 rounded-md border-2 ${
           selectedAddons.includes(addon.id)
-            ? 'border-sky-500 bg-sky-500 text-white'
-            : 'border-sky-300'
+            ? 'border-teal-600 bg-teal-600 text-white'
+            : 'border-teal-300'
         }`}
       >
         {selectedAddons.includes(addon.id) && (
@@ -532,7 +614,7 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
       </b>
 
       {addon.tag && (
-        <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-600">
+        <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
           {addon.tag}
         </span>
       )}
@@ -566,13 +648,13 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
         <PaymentOption active={payment === 'full'} onClick={() => setPayment('full')} title="Full Pay" subtitle="Full amount" price={money(fare.total)} />
         <div className="mt-5 border-t border-slate-100 pt-5">
           <div className="text-black">Coupon & Offers</div>
-          <div className="mt-3 flex gap-2"><Input placeholder="ENTER A COUPON" /><Button className="bg-sky-500 hover:bg-sky-600">APPLY</Button></div>
+          <div className="mt-3 flex gap-2"><Input placeholder="ENTER A COUPON" /><Button className="bg-teal-700 hover:bg-teal-800">APPLY</Button></div>
         </div>
-        <Button onClick={onSubmit} disabled={submitting} className="mt-5 h-14 w-full rounded-lg bg-orange-500 text-lg font-black uppercase hover:bg-orange-600">
+        <Button onClick={onSubmit} disabled={submitting} className="mt-5 h-14 w-full rounded-lg bg-amber-500 text-lg font-black uppercase text-slate-950 hover:bg-amber-400">
           {submitting ? 'Proceeding...' : 'Proceed'}
         </Button>
         <details className="mt-4 text-sm">
-          <summary className="cursor-pointer font-bold text-sky-600">View Fare Break up</summary>
+          <summary className="cursor-pointer font-bold text-teal-700">View Fare Break up</summary>
           <div className="mt-3 space-y-2 text-slate-700">
             <FareRow label="Base fare" value={fare.base} />
             <FareRow label={`${formatKm(fare.distance)} x Rs ${fare.ratePerKm}/km`} value={fare.distanceFare} />
@@ -598,9 +680,9 @@ function RouteSummary({ data }) {
       <div className="text-lg font-black text-slate-950">Route details</div>
       {hasRoute ? (
         <div className="mt-4 grid gap-3 text-sm text-slate-700">
-          <div><b className="block text-2xl text-sky-600">{formatKm(data.distanceKm)}</b>Road distance</div>
+          <div><b className="block text-2xl text-teal-700">{formatKm(data.distanceKm)}</b>Road distance</div>
           <div><b className="block text-2xl text-slate-950">{formatDuration(data.durationMinutes)}</b>Estimated travel time</div>
-          <div className="rounded-md bg-sky-50 px-3 py-2 font-semibold text-sky-900">Fare updates automatically for each vehicle rate.</div>
+          <div className="rounded-md bg-teal-50 px-3 py-2 font-semibold text-teal-900">Fare updates automatically for each vehicle rate.</div>
         </div>
       ) : (
         <div className="mt-4 text-sm text-slate-500">Select pickup and drop suggestions to calculate exact road distance, duration and fare.</div>
@@ -612,11 +694,11 @@ function RouteSummary({ data }) {
 function Section({ title, subtitle, tone, children }) {
   return (
     <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-      <div className={`${tone === 'blue' ? 'bg-sky-500 text-white' : 'border-b border-slate-100 bg-white text-slate-950'} px-5 py-4`}>
-        <h2 className="text-xl font-black">{title}</h2>
+      <div className={`${tone === 'blue' ? 'bg-teal-700 text-white' : 'border-b border-slate-100 bg-white text-slate-950'} px-4 py-3 sm:px-5 sm:py-4`}>
+        <h2 className="text-base font-black sm:text-xl">{title}</h2>
         {subtitle && <p className="mt-1 text-sm text-black">{subtitle}</p>}
       </div>
-      <div className="p-5">{children}</div>
+      <div className="p-4 sm:p-5">{children}</div>
     </section>
   );
 }
@@ -627,7 +709,7 @@ function PaymentOption({ active, onClick, title, subtitle, price }) {
       onClick={onClick}
       className={`mt-4 flex w-full items-center justify-between rounded-lg border p-4 text-left ${
         active
-          ? 'border-sky-300 bg-sky-50 ring-2 ring-sky-100'
+          ? 'border-teal-300 bg-teal-50 ring-2 ring-teal-100'
           : 'border-slate-200 bg-white'
       }`}
     >
@@ -635,18 +717,18 @@ function PaymentOption({ active, onClick, title, subtitle, price }) {
         <span
           className={`h-6 w-6 rounded-full border-2 ${
             active
-              ? 'border-sky-500 bg-sky-500 ring-2 ring-sky-200'
-              : 'border-sky-400'
+              ? 'border-teal-600 bg-teal-600 ring-2 ring-teal-200'
+              : 'border-teal-500'
           }`}
         />
         <span>
-          <b className="text-lg text-black">{title}</b>
+          <b className="text-base text-black sm:text-lg">{title}</b>
           <br />
           <span className="text-sm text-black">{subtitle}</span>
         </span>
       </span>
 
-      <b className="text-xl text-black">{price}</b>
+      <b className="text-lg text-black sm:text-xl">{price}</b>
     </button>
   );
 }
@@ -669,8 +751,31 @@ function List({ title, items, good }) {
 function Field({ icon: Icon, label, children }) {
   return (
     <label>
-      <span className="mb-2 flex items-center gap-2 text-sm font-black uppercase text-slate-600"><Icon className="h-4 w-4 text-sky-500" /> {label}</span>
+      <span className="mb-1.5 flex items-center gap-2 text-xs font-black uppercase text-slate-600"><Icon className="h-4 w-4 text-teal-600" /> {label}</span>
       {children}
+    </label>
+  );
+}
+
+function DateTimeField({ label, date, time, minDate, minTime, onChange }) {
+  const min = minDate ? dateTimeValue(minDate, minTime || '00:00') : undefined;
+
+  return (
+    <label className="relative block rounded-md border border-slate-200 bg-white px-3 py-2 shadow-sm">
+      <span className="mb-1 flex items-center gap-2 text-xs font-black uppercase text-slate-600">
+        <Calendar className="h-4 w-4 text-teal-600" /> {label}
+      </span>
+      <span className="flex h-8 items-center justify-between gap-3 text-sm font-black text-slate-950">
+        <span className="truncate">{prettyDate(date)} · {time || '07:00'}</span>
+        <Clock className="h-4 w-4 shrink-0 text-teal-600" />
+      </span>
+      <input
+        type="datetime-local"
+        value={dateTimeValue(date, time)}
+        min={min}
+        onChange={(event) => onChange(event.target.value)}
+        className="absolute inset-0 cursor-pointer opacity-0"
+      />
     </label>
   );
 }
@@ -694,7 +799,7 @@ function Confirmed({ bookingId, data, vehicle, fare, onClose }) {
         </div>
       </div>
       <a href="tel:+918955458128" className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-black text-slate-950 shadow"><Phone className="h-5 w-5" /> Talk to us</a>
-      <div><Button onClick={onClose} className="mt-5 bg-orange-500 hover:bg-orange-600">Close</Button></div>
+      <div><Button onClick={onClose} className="mt-5 bg-amber-500 text-slate-950 hover:bg-amber-400">Close</Button></div>
     </div>
   );
 }

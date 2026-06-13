@@ -3,6 +3,7 @@ import { logoutAction } from '@/app/actions/auth';
 import { deleteBookingAction, deleteCabAction, deleteUserAction, saveCabAction, updateBookingAction, updateUserAction } from '@/app/actions/crm';
 import { requireUser } from '@/lib/auth';
 import { adminStats, listAdminBookings, listCabs, listUsers } from '@/lib/crm';
+import ToastSubmitButton from '@/components/ui/toast-submit-button';
 
 export const metadata = { title: 'Admin CRM | ToursTaxi' };
 export const dynamic = 'force-dynamic';
@@ -41,7 +42,7 @@ export default async function AdminDashboard() {
 
 function CabManager({ cabs }) {
   return (
-    <section className="mt-6 grid gap-4 xl:grid-cols-[420px_1fr]">
+    <section className="mt-4 grid gap-4 xl:mt-6 xl:grid-cols-[380px_1fr]">
       <Panel title="Add Cab" subtitle="Create a website-ready cab with price, image, and package details." icon={Plus}>
         <CabForm />
       </Panel>
@@ -61,11 +62,11 @@ function CabManager({ cabs }) {
                       <StatusBadge status={cab.status || 'active'} />
                     </div>
                     <div className="mt-1 text-sm font-semibold text-slate-700">
-                      {cab.category || 'Category not set'} | {cab.seats || 4} seats | Rs {cab.pricePerKm || 0}/km | Rs {cab.startPrice || 0} start
+                      {cab.category || 'Category not set'} | {cab.seats || 4} seats | Rs {cab.pricePerKm || 0}/km | Local Rs {cab.localPricePerKm || cab.pricePerKm || 0}/km | {(cab.fuelOptions || []).join(', ') || 'fuel not set'}
                     </div>
                     <div className="mt-1 truncate text-xs font-medium text-slate-500">{cab.features?.join?.(', ') || 'No features added yet'}</div>
                   </div>
-                  <div className="text-xs font-bold uppercase tracking-wide text-sky-700">Open editor</div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-teal-700">Open editor</div>
                 </div>
               </summary>
               <div className="border-t border-slate-200 bg-slate-50 p-4">
@@ -96,11 +97,12 @@ function CabForm({ cab = {} }) {
         <Field name="seats" label="Seats" type="number" min="1" defaultValue={cab.seats || 4} />
         <Field name="luggage" label="Luggage" defaultValue={cab.luggage} placeholder="2 Bags" />
         <Field name="pricePerKm" label="Price Per Km" type="number" min="0" step="0.1" defaultValue={cab.pricePerKm || 0} />
+        <Field name="localPricePerKm" label="Local Price Per Km" type="number" min="0" step="0.1" defaultValue={cab.localPricePerKm || cab.pricePerKm || 0} />
         <Field name="startPrice" label="Start Price" type="number" min="0" defaultValue={cab.startPrice || 0} />
       </div>
       <Field name="image" label="Image URL" defaultValue={cab.image} placeholder="https://res.cloudinary.com/.../cab.jpg" />
       <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-        <span className="mb-1 flex items-center gap-1.5"><Upload className="h-3.5 w-3.5 text-sky-500" /> Upload Cab Image</span>
+        <span className="mb-1 flex items-center gap-1.5"><Upload className="h-3.5 w-3.5 text-teal-600" /> Upload Cab Image</span>
         <input name="imageFile" type="file" accept="image/*" className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 file:mr-3 file:rounded-md file:border-0 file:bg-slate-950 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white" />
       </label>
       <Field name="features" label="Features" defaultValue={cab.features?.join?.(', ') || ''} placeholder="Music System, Push-Back Seats, USB Charging" />
@@ -108,10 +110,14 @@ function CabForm({ cab = {} }) {
         Description
         <textarea name="description" defaultValue={cab.description || ''} placeholder="Comfortable cab for city, airport, and outstation trips." className="mt-1 min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-950 placeholder:text-slate-500" />
       </label>
-      <div className="grid gap-3 sm:grid-cols-[1fr_2fr]">
+      <div className="grid gap-3 sm:grid-cols-[1fr_1fr_2fr]">
         <label className="flex h-10 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold text-slate-950">
-          <input type="checkbox" name="ac" defaultChecked={cab.ac !== false} className="accent-sky-600" /> AC cab
+          <input type="checkbox" name="ac" defaultChecked={cab.ac !== false} className="accent-teal-600" /> AC cab
         </label>
+        <div className="flex h-10 items-center gap-3 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold text-slate-950">
+          <label className="flex items-center gap-1.5"><input type="checkbox" name="fuelOptions" value="cng" defaultChecked={!cab.fuelOptions?.length || cab.fuelOptions?.includes('cng')} className="accent-teal-600" /> CNG</label>
+          <label className="flex items-center gap-1.5"><input type="checkbox" name="fuelOptions" value="diesel" defaultChecked={!cab.fuelOptions?.length || cab.fuelOptions?.includes('diesel')} className="accent-teal-600" /> Diesel</label>
+        </div>
         <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
           Status
           <select name="status" defaultValue={cab.status || 'active'} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold normal-case tracking-normal text-slate-950">
@@ -120,9 +126,9 @@ function CabForm({ cab = {} }) {
           </select>
         </label>
       </div>
-      <button className="inline-flex h-11 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800">
+      <ToastSubmitButton message="Saving cab details" description="Fleet details are being updated." className="inline-flex h-11 items-center justify-center rounded-md bg-[#12233f] px-4 text-sm font-black text-white transition hover:bg-[#0f1c33]">
         <CheckCircle2 className="mr-2 h-4 w-4" /> Save Cab
-      </button>
+      </ToastSubmitButton>
     </form>
   );
 }
@@ -130,7 +136,42 @@ function CabForm({ cab = {} }) {
 function Bookings({ bookings }) {
   return (
     <Panel title="Booking Pipeline" subtitle="Update fare, assign status, add notes, and remove test enquiries." icon={CalendarClock} className="mt-6">
-      <div className="overflow-x-auto">
+      <div className="grid gap-3 lg:hidden">
+        {bookings.map((booking) => (
+          <article key={booking.id} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="font-mono text-sm font-black text-teal-700">{booking.bookingId}</div>
+                <div className="mt-1 text-xs font-medium text-slate-600">{formatDate(booking.createdAt)}</div>
+              </div>
+              <StatusBadge status={booking.status} />
+            </div>
+            <div className="mt-3">
+              <b className="text-slate-950">{booking.customer?.name || 'Guest'}</b>
+              <div className="text-xs font-medium text-slate-700">{booking.customer?.phone || 'No phone'}</div>
+              <div className="mt-2 text-xs font-medium text-slate-700">{booking.pickup} to {booking.tripType === 'local' ? booking.rental : booking.drop}</div>
+              <div className="mt-1 text-xs font-semibold text-slate-900">{booking.vehicleName || booking.vehicleSlug || 'Vehicle pending'}</div>
+              <div className="mt-2 text-lg font-black text-teal-700">{booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div>
+            </div>
+            <form action={updateBookingAction} className="mt-3 grid gap-2">
+              <input type="hidden" name="id" value={booking.id} />
+              <div className="grid grid-cols-2 gap-2">
+                <input name="totalFare" type="number" min="0" defaultValue={booking.fare?.total || ''} placeholder="Total fare" className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm font-semibold text-slate-950 placeholder:text-slate-500" />
+                <select name="status" defaultValue={booking.status} className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm font-semibold capitalize text-slate-950">
+                  {STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+                </select>
+              </div>
+              <input name="notes" defaultValue={booking.notes || ''} placeholder="Admin notes" className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm font-medium text-slate-950 placeholder:text-slate-500" />
+              <div className="flex gap-2">
+                <ToastSubmitButton message="Updating booking" description="Booking changes are being saved." className="h-9 flex-1 rounded-md bg-teal-700 px-3 text-xs font-black text-white hover:bg-teal-800">Update</ToastSubmitButton>
+                <ToastSubmitButton formAction={deleteBookingAction} message="Deleting booking" description="Removing this booking from CRM." className="inline-flex h-9 items-center rounded-md border border-red-200 bg-red-50 px-3 text-xs font-bold text-red-700 hover:bg-red-100"><Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete</ToastSubmitButton>
+              </div>
+            </form>
+          </article>
+        ))}
+        {!bookings.length && <EmptyState title="No bookings yet" text="New website booking enquiries will appear here." />}
+      </div>
+      <div className="hidden overflow-x-auto lg:block">
         <table className="w-full min-w-[1040px] text-left text-sm text-slate-950">
           <thead className="bg-slate-100 text-[11px] uppercase tracking-wider text-slate-700">
             <tr>
@@ -162,7 +203,7 @@ function Bookings({ bookings }) {
                   <div className="text-xs font-medium text-slate-600">{booking.pickupDate || '-'} at {booking.pickupTime || '-'}</div>
                 </td>
                 <td className="px-4 py-4">
-                  <div className="text-lg font-black text-sky-700">{booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div>
+                  <div className="text-lg font-black text-teal-700">{booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div>
                   <div className="text-xs font-medium text-slate-600">{booking.passengers || 'Passengers not set'}</div>
                 </td>
                 <td className="px-4 py-4">
@@ -173,7 +214,7 @@ function Bookings({ bookings }) {
                       {STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
                     </select>
                     <input name="notes" defaultValue={booking.notes || ''} placeholder="Admin notes" className="h-9 rounded-md border border-slate-300 bg-white px-2 font-medium text-slate-950 placeholder:text-slate-500" />
-                    <button className="h-9 rounded-md bg-sky-600 px-3 text-xs font-black text-white hover:bg-sky-700">Update Booking</button>
+                    <ToastSubmitButton message="Updating booking" description="Booking changes are being saved." className="h-9 rounded-md bg-teal-700 px-3 text-xs font-black text-white hover:bg-teal-800">Update Booking</ToastSubmitButton>
                   </form>
                 </td>
                 <td className="px-4 py-4">
@@ -219,7 +260,7 @@ function Customers({ users }) {
               </label>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button className="h-9 rounded-md bg-slate-950 px-3 text-xs font-black text-white hover:bg-slate-800">Save User</button>
+              <ToastSubmitButton message="Saving user" description="Customer details are being updated." className="h-9 rounded-md bg-[#12233f] px-3 text-xs font-black text-white hover:bg-[#0f1c33]">Save User</ToastSubmitButton>
               <button formAction={deleteUserAction} className="inline-flex h-9 items-center rounded-md border border-red-200 bg-red-50 px-3 text-xs font-bold text-red-700 hover:bg-red-100"><Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete</button>
             </div>
           </form>
@@ -232,15 +273,15 @@ function Customers({ users }) {
 
 function DashboardShell({ user, children }) {
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="border-b border-slate-200 bg-slate-950 px-4 pb-24 pt-24 text-white sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#f7faf9]">
+      <section className="border-b border-slate-200 bg-[#12233f] px-4 pb-20 pt-20 text-white sm:px-6 sm:pb-24 sm:pt-24 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider">
-                <Sparkles className="h-3.5 w-3.5 text-orange-400" /> Admin CRM
+                <Sparkles className="h-3.5 w-3.5 text-amber-300" /> Admin CRM
               </div>
-              <h1 className="text-4xl font-black leading-tight sm:text-5xl">Operations Dashboard</h1>
+              <h1 className="text-3xl font-black leading-tight sm:text-5xl">Operations Dashboard</h1>
               <p className="mt-3 max-w-2xl text-sm font-medium text-slate-300">Welcome, {user.name}. Manage bookings, fleet inventory, pricing, and customer records from one focused workspace.</p>
             </div>
             <form action={logoutAction}>
@@ -251,7 +292,7 @@ function DashboardShell({ user, children }) {
           </div>
         </div>
       </section>
-      <section className="relative -mt-16 px-4 pb-16 sm:px-6 lg:px-8">
+      <section className="relative -mt-12 px-3 pb-12 sm:-mt-16 sm:px-6 sm:pb-16 lg:px-8">
         <div className="mx-auto max-w-7xl">{children}</div>
       </section>
     </main>
@@ -260,12 +301,12 @@ function DashboardShell({ user, children }) {
 
 function Stat({ icon: Icon, label, value, hint }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
       <div className="flex items-center justify-between">
-        <div className="text-sm font-bold text-slate-600">{label}</div>
-        <span className="flex h-10 w-10 items-center justify-center rounded-md bg-sky-50 text-sky-600"><Icon className="h-5 w-5" /></span>
+        <div className="text-xs font-bold text-slate-600 sm:text-sm">{label}</div>
+        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-teal-50 text-teal-700 sm:h-10 sm:w-10"><Icon className="h-4 w-4 sm:h-5 sm:w-5" /></span>
       </div>
-      <div className="mt-3 text-3xl font-black text-slate-950">{value}</div>
+      <div className="mt-2 text-2xl font-black text-slate-950 sm:mt-3 sm:text-3xl">{value}</div>
       {hint && <div className="mt-1 text-xs font-semibold text-slate-500">{hint}</div>}
     </div>
   );
@@ -275,7 +316,7 @@ function Panel({ title, subtitle, icon: Icon, children, className = '' }) {
   return (
     <section className={`overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm ${className}`}>
       <div className="flex items-start gap-3 border-b border-slate-200 bg-white px-5 py-4">
-        {Icon && <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-md bg-slate-950 text-white"><Icon className="h-4 w-4" /></span>}
+        {Icon && <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-md bg-[#12233f] text-white"><Icon className="h-4 w-4" /></span>}
         <div>
           <h2 className="font-black text-slate-950">{title}</h2>
           <p className="text-sm font-medium text-slate-600">{subtitle}</p>
@@ -290,7 +331,7 @@ function Field({ label, ...props }) {
   return (
     <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
       {label}
-      <input {...props} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-medium normal-case tracking-normal text-slate-950 outline-none placeholder:text-slate-500 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15" />
+      <input {...props} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-medium normal-case tracking-normal text-slate-950 outline-none placeholder:text-slate-500 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15" />
     </label>
   );
 }
@@ -300,13 +341,13 @@ function StatusBadge({ status, className = '' }) {
   const tones = {
     active: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
     inactive: 'bg-slate-100 text-slate-600 ring-slate-200',
-    new: 'bg-orange-50 text-orange-700 ring-orange-200',
-    assigned: 'bg-sky-50 text-sky-700 ring-sky-200',
+    new: 'bg-amber-50 text-amber-700 ring-amber-200',
+    assigned: 'bg-teal-50 text-teal-700 ring-teal-200',
     confirmed: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
     completed: 'bg-slate-950 text-white ring-slate-950',
     cancelled: 'bg-red-50 text-red-700 ring-red-200',
-    admin: 'bg-violet-50 text-violet-700 ring-violet-200',
-    customer: 'bg-sky-50 text-sky-700 ring-sky-200'
+    admin: 'bg-teal-50 text-teal-700 ring-teal-200',
+    customer: 'bg-slate-100 text-slate-700 ring-slate-200'
   };
   return <span className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wide ring-1 ${tones[value] || tones.new} ${className}`}>{value}</span>;
 }

@@ -24,7 +24,7 @@ export default function BlogSinglePage({ params }) {
           <div className="absolute bottom-0 inset-x-0 pb-12">
             <div className="max-w-4xl mx-auto px-4 text-white">
               <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white mb-4"><ArrowLeft className="h-4 w-4" /> Back to Blog</Link>
-              <div className="inline-block px-3 py-1 rounded-full bg-orange-500 text-white text-xs font-bold uppercase">{post.category}</div>
+              <div className="inline-block px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-bold uppercase">{post.category}</div>
               <h1 className="mt-3 text-3xl md:text-5xl font-extrabold leading-tight max-w-3xl">{post.title}</h1>
               <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-white/80">
                 <span className="flex items-center gap-1.5"><User className="h-4 w-4" />{post.author}</span>
@@ -58,7 +58,7 @@ export default function BlogSinglePage({ params }) {
             <Card><CardContent className="p-5">
               <h4 className="font-bold text-slate-900 mb-3">Categories</h4>
               <ul className="space-y-2">
-                {BLOG_CATEGORIES.map(c => <li key={c.name}><Link href="/blog" className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-slate-50 text-sm text-slate-700 hover:text-sky-600"><span>{c.name}</span><span className="text-xs text-slate-400 bg-slate-100 rounded-full px-2 py-0.5">{c.count}</span></Link></li>)}
+                {BLOG_CATEGORIES.map(c => <li key={c.name}><Link href="/blog" className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-teal-50 text-sm text-slate-700 hover:text-teal-700"><span>{c.name}</span><span className="text-xs text-slate-400 bg-slate-100 rounded-full px-2 py-0.5">{c.count}</span></Link></li>)}
               </ul>
             </CardContent></Card>
             <Card><CardContent className="p-5">
@@ -67,15 +67,15 @@ export default function BlogSinglePage({ params }) {
                 {BLOG_POSTS.filter(p => p.slug !== post.slug).slice(0, 4).map(p => (
                   <li key={p.slug}><Link href={`/blog/${p.slug}`} className="flex gap-3 group">
                     <img src={p.image} alt={p.title} className="h-16 w-16 rounded-lg object-cover shrink-0" />
-                    <div><div className="text-sm font-semibold text-slate-800 group-hover:text-sky-600 line-clamp-2">{p.title}</div><div className="text-xs text-slate-500 mt-1">{p.date}</div></div>
+                    <div><div className="text-sm font-semibold text-slate-800 group-hover:text-teal-700 line-clamp-2">{p.title}</div><div className="text-xs text-slate-500 mt-1">{p.date}</div></div>
                   </Link></li>
                 ))}
               </ul>
             </CardContent></Card>
-            <Card className="bg-gradient-to-br from-sky-500 to-orange-500 text-white border-0"><CardContent className="p-5">
+            <Card className="bg-[#12233f] text-white border-0"><CardContent className="p-5">
               <h4 className="font-bold text-lg">Plan this trip</h4>
               <p className="text-sm opacity-90 mt-1">Speak to our tour desk \u2014 we\u2019ll handle everything.</p>
-              <Link href="/contact"><Button className="mt-4 w-full bg-white text-sky-600 hover:bg-slate-100 font-bold">Contact Us <ArrowRight className="h-4 w-4 ml-2" /></Button></Link>
+              <Link href="/contact"><Button className="mt-4 w-full bg-amber-400 text-slate-950 hover:bg-amber-300 font-bold">Contact Us <ArrowRight className="h-4 w-4 ml-2" /></Button></Link>
             </CardContent></Card>
           </aside>
         </div>

@@ -475,3 +475,9 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
  GET / 200 in 517ms (next.js: 277ms, application-code: 240ms)
  GET / 200 in 1014ms (next.js: 11ms, application-code: 1002ms)
  GET /api/auth/me 200 in 203ms (next.js: 166ms, application-code: 37ms)
+✓ Compiled in 539ms
+ GET / 200 in 738ms (next.js: 386ms, application-code: 352ms)
+ GET / 200 in 1087ms (next.js: 18ms, application-code: 1069ms)
+ GET /api/auth/me 200 in 266ms (next.js: 227ms, application-code: 40ms)
+ GET / 200 in 294ms (next.js: 23ms, application-code: 271ms)
+ GET /api/auth/me 200 in 57ms (next.js: 16ms, application-code: 41ms)

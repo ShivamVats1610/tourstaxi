@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { ArrowLeftRight, CalendarDays, ChevronDown, Clock, Plane } from 'lucide-react';
+import { ArrowLeftRight, CalendarDays, ChevronDown, Plane } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useBooking } from '@/lib/booking-context';
 import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
@@ -40,6 +40,15 @@ function displayTime(value) {
   return date.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
+function dateTimeValue(date, time) {
+  return `${date || todayValue()}T${time || '07:00'}`;
+}
+
+function splitDateTime(value) {
+  const [nextDate, nextTime = '07:00'] = String(value || '').split('T');
+  return { nextDate, nextTime: nextTime.slice(0, 5) };
+}
+
 export default function BookingWidget() {
   const [tab, setTab] = useState('one-way');
   const [pickup, setPickup] = useState('');
@@ -50,7 +59,8 @@ export default function BookingWidget() {
   const [dropCoordinates, setDropCoordinates] = useState(null);
   const [date, setDate] = useState(todayValue());
   const [returnDate, setReturnDate] = useState(todayValue());
-  const [time, setTime] = useState('07:00');
+  const [time, setTime] = useState(nextPickupTimeValue());
+  const [returnTime, setReturnTime] = useState('18:00');
   const { open } = useBooking();
   const minDate = todayValue();
   const minTime = date === minDate ? nextPickupTimeValue() : undefined;
@@ -78,7 +88,6 @@ export default function BookingWidget() {
 
   const changeTab = (nextTab) => {
     setTab(nextTab);
-    if (nextTab === 'local' && !drop) setDrop('8 hrs / 80 km');
     if (nextTab !== 'local' && drop === '8 hrs / 80 km') setDrop('');
   };
 
@@ -97,6 +106,7 @@ export default function BookingWidget() {
       drop: tab === 'airport' ? (airportPickup ? drop : airport) : drop,
       date,
       time,
+      returnTime: tab === 'round-trip' ? returnTime : '',
       returnDate: tab === 'round-trip' ? returnDate : '',
       rental: tab === 'local' ? '8 hrs / 80 km' : undefined,
       pickupCoordinates,
@@ -107,31 +117,53 @@ export default function BookingWidget() {
 
   const commonDateFields = (
     <>
-      <LineDate label="Pick Up Date" value={date} min={minDate} onChange={updateDate} />
-      {tab === 'round-trip' && <LineDate label="Return Date" value={returnDate} min={date} onChange={updateReturnDate} />}
-      <LineTime label="Pick Up Time" value={time} min={minTime} onChange={updateTime} />
+      <LineDateTime
+        label="Pickup Date & Time"
+        date={date}
+        time={time}
+        minDate={minDate}
+        minTime={minTime}
+        onChange={(value) => {
+          const { nextDate, nextTime } = splitDateTime(value);
+          updateDate(nextDate);
+          updateTime(nextTime);
+        }}
+      />
+      {tab === 'round-trip' && (
+        <LineDateTime
+          label="Return Date & Time"
+          date={returnDate}
+          time={returnTime}
+          minDate={date}
+          onChange={(value) => {
+            const { nextDate, nextTime } = splitDateTime(value);
+            updateReturnDate(nextDate);
+            setReturnTime(nextTime);
+          }}
+        />
+      )}
     </>
   );
 
   return (
-    <div id="book" className="relative z-10 mx-auto w-full max-w-[1500px] px-4">
-      <div className="mx-auto max-w-[1425px] rounded-[18px] bg-white px-5 pb-6 pt-6 shadow-[0_18px_40px_rgba(15,23,42,0.24)] sm:rounded-[26px] sm:px-8 lg:px-10 xl:px-10">
-        <div className="mx-auto grid h-11 max-w-[610px] grid-cols-4 overflow-hidden rounded border border-slate-400 text-center text-[12px] font-black uppercase sm:text-sm">
+    <div id="book" className="relative z-10 mx-auto w-full max-w-[1240px] px-3 sm:px-4">
+      <div className="mx-auto max-w-[1180px] rounded-[22px] border border-white/70 bg-white/95 px-4 pb-5 pt-4 shadow-[0_18px_50px_rgba(2,8,23,0.28)] backdrop-blur sm:rounded-[26px] sm:px-8 sm:pb-6 sm:pt-6 lg:px-8 xl:px-9">
+        <div className="mx-auto grid h-10 max-w-[610px] grid-cols-4 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-center text-[11px] font-black sm:h-11 sm:text-sm">
           {TABS.map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => changeTab(item.id)}
-              className={`border-r border-slate-400 px-2 last:border-r-0 ${tab === item.id ? 'bg-sky-500 text-white' : 'bg-white text-slate-950 hover:bg-sky-50'}`}
+              className={`rounded-md px-1 leading-tight transition ${tab === item.id ? 'bg-[#12233f] text-white shadow-sm' : 'text-slate-700 hover:bg-white hover:text-teal-700'}`}
             >
               {item.label}
             </button>
           ))}
         </div>
 
-        <div className="mt-7 lg:mt-6">
+        <div className="mt-5 lg:mt-6">
           {tab === 'one-way' && (
-            <div className="grid items-end gap-5 lg:grid-cols-[1fr_auto_1fr_1fr_1fr] xl:gap-8">
+            <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto_1fr_290px] xl:gap-7">
               <LineLocation label="From" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
               <SwapButton onClick={swapPlaces} />
               <LineLocation label="To" value={drop} setValue={setDrop} setCoordinates={setDropCoordinates} />
@@ -140,7 +172,7 @@ export default function BookingWidget() {
           )}
 
           {tab === 'round-trip' && (
-            <div className="grid items-end gap-5 lg:grid-cols-[1fr_auto_1fr_0.72fr_0.72fr_0.72fr] xl:gap-7">
+            <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto_1fr_230px_230px] xl:gap-6">
               <LineLocation label="From" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
               <SwapButton onClick={swapPlaces} />
               <LineLocation label="To" value={drop} setValue={setDrop} setCoordinates={setDropCoordinates} />
@@ -149,14 +181,15 @@ export default function BookingWidget() {
           )}
 
           {tab === 'local' && (
-            <div className="grid items-end gap-7 md:grid-cols-3 xl:gap-9">
-              <LineLocation label="City" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
+            <div className="grid items-end gap-4 md:grid-cols-3 xl:gap-7">
+              <LineLocation label="Pickup Location" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
+              <LineLocation label="Drop Location" value={drop} setValue={setDrop} setCoordinates={setDropCoordinates} />
               {commonDateFields}
             </div>
           )}
 
           {tab === 'airport' && (
-            <div className="grid items-end gap-5 lg:grid-cols-[0.7fr_1.1fr_1.1fr_0.9fr_0.9fr] xl:gap-8">
+            <div className="grid items-end gap-4 lg:grid-cols-[220px_1fr_1fr_270px] xl:gap-7">
               <LineSelect label="Trip" value={airportTrip} onChange={setAirportTrip} options={AIRPORT_TRIPS} />
               <LineLocation label="Pickup Address" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
               <LineLocation label={airportTrip === 'Pickup from Airport' ? 'Pickup Airport' : 'Drop Airport'} value={airport} setValue={setAirport} setCoordinates={setDropCoordinates} placeholder="Enter Airport" />
@@ -165,8 +198,8 @@ export default function BookingWidget() {
           )}
         </div>
 
-        <div className="pointer-events-none -mb-12 mt-7 flex justify-center lg:-mb-14">
-          <Button onClick={explore} className="pointer-events-auto h-[58px] w-full max-w-[335px] rounded !bg-[#ff681f] text-xl font-black uppercase !text-white hover:!bg-[#f25f1b]">
+        <div className="pointer-events-none -mb-10 mt-5 flex justify-center lg:-mb-11 lg:mt-6">
+          <Button onClick={explore} className="pointer-events-auto h-12 w-full max-w-[300px] rounded-lg !bg-[#f59e0b] text-sm font-black uppercase !text-[#12233f] shadow-lg shadow-amber-500/25 hover:!bg-[#fbbf24] sm:h-14 sm:max-w-[320px] sm:text-lg">
             Explore Cabs
           </Button>
         </div>
@@ -180,7 +213,7 @@ function SwapButton({ onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="mx-auto hidden h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-sky-500 transition hover:bg-sky-50 lg:flex"
+      className="mx-auto hidden h-10 w-10 items-center justify-center rounded-full bg-teal-50 text-teal-700 transition hover:bg-teal-100 lg:flex"
       aria-label="Swap pickup and drop"
     >
       <ArrowLeftRight className="h-5 w-5" />
@@ -209,30 +242,17 @@ function LineLocation({ label, value, setValue, setCoordinates, placeholder, sho
   );
 }
 
-function LineDate({ label, value, min, onChange }) {
+function LineDateTime({ label, date, time, minDate, minTime, onChange }) {
+  const min = minDate ? dateTimeValue(minDate, minTime || '00:00') : undefined;
   return (
     <label className="relative block min-w-0">
-      <span className="mb-2 block text-xl font-black uppercase tracking-wide text-slate-700">{label}</span>
-      <span className="flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500">
-        <CalendarDays className="h-5 w-5 shrink-0 text-sky-500 lg:hidden" />
-        <span className="min-w-0 flex-1 truncate text-base font-semibold text-black">{displayDate(value)}</span>
-        <ChevronDown className="h-5 w-5 shrink-0 text-sky-500" />
+      <span className="mb-1.5 block text-[13px] font-black uppercase tracking-wide text-slate-700 sm:text-sm">{label}</span>
+      <span className="flex h-10 min-w-0 items-center gap-2.5 border-b border-slate-200 text-slate-950 focus-within:border-teal-600">
+        <CalendarDays className="h-4 w-4 shrink-0 text-teal-700 lg:hidden" />
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-black sm:text-base">{displayDate(date)} · {displayTime(time)}</span>
+        <ChevronDown className="h-4 w-4 shrink-0 text-teal-700" />
       </span>
-      <input type="date" value={value} min={min} onChange={(event) => onChange(event.target.value)} className="absolute inset-x-0 bottom-0 h-12 cursor-pointer opacity-0" />
-    </label>
-  );
-}
-
-function LineTime({ label, value, min, onChange }) {
-  return (
-    <label className="relative block min-w-0">
-      <span className="mb-2 block text-xl font-black uppercase tracking-wide text-slate-700">{label}</span>
-      <span className="flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500">
-        <Clock className="h-5 w-5 shrink-0 text-sky-500 lg:hidden" />
-        <span className="min-w-0 flex-1 truncate text-base font-semibold text-black">{displayTime(value)}</span>
-        <ChevronDown className="h-5 w-5 shrink-0 text-sky-500" />
-      </span>
-      <input type="time" value={value} min={min} onChange={(event) => onChange(event.target.value)} className="absolute inset-x-0 bottom-0 h-12 cursor-pointer opacity-0" />
+      <input type="datetime-local" value={dateTimeValue(date, time)} min={min} onChange={(event) => onChange(event.target.value)} className="absolute inset-x-0 bottom-0 h-10 cursor-pointer opacity-0" />
     </label>
   );
 }
@@ -240,13 +260,13 @@ function LineTime({ label, value, min, onChange }) {
 function LineSelect({ label, value, onChange, options }) {
   return (
     <label className="block min-w-0">
-      <span className="mb-2 block text-xl font-black uppercase tracking-wide text-slate-700">{label}</span>
-      <span className="flex h-12 min-w-0 items-center gap-3 border-b border-slate-300 text-slate-950 focus-within:border-sky-500">
-        <Plane className="h-5 w-5 shrink-0 text-sky-500 lg:hidden" />
-        <select value={value} onChange={(event) => onChange(event.target.value)} className="min-w-0 flex-1 bg-transparent text-base font-semibold outline-none">
+      <span className="mb-1.5 block text-[13px] font-black uppercase tracking-wide text-slate-700 sm:text-sm">{label}</span>
+      <span className="flex h-10 min-w-0 items-center gap-2.5 border-b border-slate-200 text-slate-950 focus-within:border-teal-600">
+        <Plane className="h-4 w-4 shrink-0 text-teal-700 lg:hidden" />
+        <select value={value} onChange={(event) => onChange(event.target.value)} className="min-w-0 flex-1 bg-transparent text-sm font-semibold outline-none sm:text-base">
           {options.map((option) => <option key={option}>{option}</option>)}
         </select>
-        <ChevronDown className="h-5 w-5 shrink-0 text-sky-500" />
+        <ChevronDown className="h-4 w-4 shrink-0 text-teal-700" />
       </span>
     </label>
   );

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createFirebaseSession, verifyLegacyLogin } from '@/app/actions/auth';
 import { firebaseAuth } from '@/lib/firebase';
+import { toast } from 'sonner';
 
 export default function AuthForm({ mode }) {
   const isRegister = mode === 'register';
@@ -48,14 +49,21 @@ export default function AuthForm({ mode }) {
         });
 
         if (!result?.ok) {
-          setError(safeAuthMessage(result?.message || 'Unable to start your session.'));
+          const message = safeAuthMessage(result?.message || 'Unable to start your session.');
+          setError(message);
+          toast.error('Login failed', { description: message });
           return;
         }
 
+        toast.success(isRegister ? 'Account created' : 'Login successful', {
+          description: 'Opening your dashboard now.'
+        });
         router.push(result.redirectTo);
         router.refresh();
       } catch (firebaseError) {
-        setError(safeAuthMessage(firebaseErrorMessage(firebaseError)));
+        const message = safeAuthMessage(firebaseErrorMessage(firebaseError));
+        setError(message);
+        toast.error('Authentication failed', { description: message });
       }
     });
   }
@@ -64,14 +72,14 @@ export default function AuthForm({ mode }) {
     <main className="relative min-h-screen overflow-hidden pt-24">
       <div className="absolute inset-0">
         <img src="https://images.unsplash.com/photo-1625037669075-e5472e080265?crop=entropy&cs=srgb&fm=jpg&ixlib=rb-4.1.0&q=85" alt="ToursTaxi cab" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/75 to-sky-900/60" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#071527]/90 via-[#12233f]/78 to-[#0f3f3b]/65" />
         <div className="absolute inset-0 bg-grid opacity-40" />
       </div>
 
       <div className="relative mx-auto grid min-h-[calc(100vh-6rem)] max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
         <section className="text-white">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5 text-orange-400" /> ToursTaxi dashboard
+            <Sparkles className="h-3.5 w-3.5 text-amber-300" /> ToursTaxi dashboard
           </div>
           <h1 className="max-w-xl text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
             {isRegister ? 'Create your travel account.' : 'Welcome back to your journeys.'}
@@ -88,7 +96,7 @@ export default function AuthForm({ mode }) {
 
         <section className="rounded-2xl border border-white/20 bg-white p-6 shadow-2xl shadow-slate-950/30 sm:p-8">
           <div className="mb-6">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-orange-500 text-white shadow-lg shadow-sky-500/30">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#12233f] text-white shadow-lg shadow-slate-950/20">
               <Car className="h-5 w-5" />
             </div>
             <h2 className="text-3xl font-extrabold text-slate-950">{isRegister ? 'Create account' : 'Login'}</h2>
@@ -130,7 +138,7 @@ export default function AuthForm({ mode }) {
                       key={option}
                       type="button"
                       onClick={() => setRole(option)}
-                      className={`h-10 rounded text-sm font-semibold capitalize transition ${role === option ? 'bg-white text-sky-700 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+                      className={`h-10 rounded text-sm font-semibold capitalize transition ${role === option ? 'bg-white text-teal-700 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
                     >
                       {option}
                     </button>
@@ -145,7 +153,7 @@ export default function AuthForm({ mode }) {
               </>
             )}
 
-            <Button type="submit" disabled={pending} className="mt-2 h-12 bg-orange-500 font-bold text-white shadow-lg shadow-orange-500/30 hover:bg-orange-600">
+            <Button type="submit" disabled={pending} className="mt-2 h-12 bg-amber-400 font-bold text-slate-950 shadow-lg shadow-amber-500/20 hover:bg-amber-300">
               {pending ? 'Please wait...' : isRegister ? 'Create Account' : 'Login'}
               {!pending && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
@@ -153,7 +161,7 @@ export default function AuthForm({ mode }) {
 
           <div className="mt-6 text-center text-sm text-slate-500">
             {isRegister ? 'Already have an account?' : 'New to ToursTaxi?'}{' '}
-            <Link href={isRegister ? '/login' : '/register'} className="font-semibold text-sky-700 hover:text-sky-800">
+            <Link href={isRegister ? '/login' : '/register'} className="font-semibold text-teal-700 hover:text-teal-800">
               {isRegister ? 'Sign in' : 'Create account'}
             </Link>
           </div>
@@ -210,7 +218,7 @@ function Field({ icon: Icon, label, children }) {
   return (
     <label className="grid gap-1.5">
       <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-        <Icon className="h-3.5 w-3.5 text-sky-500" /> {label}
+        <Icon className="h-3.5 w-3.5 text-teal-600" /> {label}
       </span>
       {children}
     </label>
@@ -220,9 +228,9 @@ function Field({ icon: Icon, label, children }) {
 function Panel({ icon: Icon, title, text }) {
   return (
     <div className="rounded-xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-      <Icon className="h-5 w-5 text-orange-400" />
+      <Icon className="h-5 w-5 text-amber-300" />
       <div className="mt-3 font-bold text-white">{title}</div>
-      <div className="mt-1 flex items-start gap-2 text-sm leading-6 text-white/70"><Check className="mt-1 h-3.5 w-3.5 shrink-0 text-sky-300" />{text}</div>
+      <div className="mt-1 flex items-start gap-2 text-sm leading-6 text-white/70"><Check className="mt-1 h-3.5 w-3.5 shrink-0 text-teal-200" />{text}</div>
     </div>
   );
 }

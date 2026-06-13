@@ -16,29 +16,29 @@ const ICONS = { ShieldCheck, BadgeIndianRupee, Headphones, Clock, Route: RouteIc
 function Home() {
   return (
     <>
-      <section className="relative overflow-hidden pt-[72px] sm:pt-[74px]">
-        <div className="relative min-h-[720px] pb-10 pt-16 sm:min-h-[680px] sm:pb-20 sm:pt-24">
+      <section className="relative overflow-hidden pt-16 sm:pt-[74px]">
+        <div className="relative min-h-[640px] pb-10 pt-10 sm:min-h-[680px] sm:pb-20 sm:pt-20 lg:min-h-[650px] lg:pt-20">
           <img src={HERO_BG} alt="city road for cab booking" className="absolute inset-0 h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-slate-950/62" />
-          <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/80 via-slate-950/35 to-slate-950/70" />
+          <div className="absolute inset-0 bg-[#071527]/68" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0f3f3b]/80 via-[#12233f]/35 to-[#071527]/80" />
 
-          <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-            <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="mx-auto max-w-[22rem] text-[clamp(30px,10vw,44px)] font-black uppercase leading-[1.05] tracking-normal text-white sm:max-w-full sm:whitespace-nowrap sm:text-[clamp(36px,5.2vw,68px)]">
+          <div className="relative mx-auto max-w-7xl px-3 text-center sm:px-6 lg:px-8">
+            <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="mx-auto max-w-full whitespace-nowrap text-[clamp(14px,4.4vw,24px)] font-black uppercase leading-none tracking-normal text-white sm:text-[clamp(34px,4.3vw,58px)]">
               Services Across 2000+ Cities
             </motion.h1>
           </div>
 
-          <div className="relative mt-7 sm:mt-8">
+          <div className="relative mt-5 sm:mt-8 lg:mt-9">
             <BookingWidget />
           </div>
 
-          <div className="relative mx-auto mt-14 max-w-4xl px-4 sm:mt-12">
-            <div className="mx-auto flex flex-wrap items-center justify-center gap-3 text-base font-normal text-white sm:text-sm sm:font-semibold">
+          <div className="relative mx-auto mt-10 max-w-4xl px-4 sm:mt-12 lg:mt-10">
+            <div className="mx-auto flex flex-wrap items-center justify-center gap-3 text-sm font-normal text-white sm:font-semibold">
               <span className="flex items-center gap-2"><span className="text-2xl leading-none">{"{"}</span> India&apos;s top rated car rental service <span className="text-2xl leading-none">{"}"}</span></span>
             </div>
             <div className="mx-auto mt-5 hidden max-w-3xl grid-cols-1 overflow-hidden rounded-full bg-white shadow-[0_18px_30px_rgba(15,23,42,0.25)] sm:grid sm:grid-cols-3">
-              <RatingBadge title="App Store" score="4.2K+ Reviews" icon={<Apple className="h-10 w-10 text-sky-500" />} />
-              <RatingBadge title="Google" score="6.1K+ Reviews" icon={<span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-3xl font-black text-sky-600">G</span>} />
+              <RatingBadge title="App Store" score="4.2K+ Reviews" icon={<Apple className="h-10 w-10 text-teal-600" />} />
+              <RatingBadge title="Google" score="6.1K+ Reviews" icon={<span className="flex h-12 w-12 items-center justify-center rounded-full bg-teal-50 text-3xl font-black text-teal-700">G</span>} />
               <RatingBadge title="Play Store" score="15.5K+ Reviews" icon={<Play className="h-11 w-11 fill-emerald-500 text-emerald-500" />} />
             </div>
           </div>
@@ -66,10 +66,10 @@ function Home() {
               <Reveal key={title} delay={index * 0.05}>
                 <Card className="h-full rounded-lg border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl">
                   <CardContent className="p-6">
-                    <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-sky-50 text-sky-600"><Icon className="h-6 w-6" /></div>
+                    <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50 text-teal-700"><Icon className="h-6 w-6" /></div>
                     <h3 className="text-lg font-black text-slate-950">{title}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{desc}</p>
-                    <Link href="/#book" className="mt-5 inline-flex items-center text-sm font-bold text-orange-600">Book now <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                    <Link href="/#book" className="mt-5 inline-flex items-center text-sm font-bold text-teal-700">Book now <ArrowRight className="ml-1 h-4 w-4" /></Link>
                   </CardContent>
                 </Card>
               </Reveal>
@@ -87,7 +87,7 @@ function Home() {
               return (
                 <Reveal key={item.title} delay={index * 0.05}>
                   <div className="h-full rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                    <Icon className="h-7 w-7 text-sky-500" />
+                    <Icon className="h-7 w-7 text-teal-600" />
                     <h3 className="mt-4 font-black text-slate-950">{item.title}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{item.desc}</p>
                   </div>
@@ -107,7 +107,7 @@ function Home() {
                 <Card className="h-full overflow-hidden rounded-lg border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl">
                   <img src={vehicle.image} alt={vehicle.name} className="h-48 w-full object-cover" />
                   <CardContent className="p-5">
-                    <div className="text-xs font-black uppercase tracking-wide text-sky-600">{vehicle.category}</div>
+                    <div className="text-xs font-black uppercase tracking-wide text-teal-700">{vehicle.category}</div>
                     <h3 className="mt-1 text-xl font-black text-slate-950">{vehicle.name}</h3>
                     <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-600">
                       <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{vehicle.seats}</span>
@@ -115,7 +115,7 @@ function Home() {
                     </div>
                     <div className="mt-5 flex items-center justify-between">
                       <div><span className="text-xs text-slate-500">Starting</span><div className="text-2xl font-black text-slate-950">Rs {vehicle.startPrice.toLocaleString()}</div></div>
-                      <Link href="/#book"><Button className="rounded bg-sky-500 hover:bg-sky-600">Book</Button></Link>
+                      <Link href="/#book"><Button className="rounded bg-[#12233f] hover:bg-[#0f1c33]">Book</Button></Link>
                     </div>
                   </CardContent>
                 </Card>
@@ -131,14 +131,14 @@ function Home() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {ROUTES.map((route, index) => (
               <Reveal key={`${route.from}-${route.to}`} delay={index * 0.04}>
-                <Link href="/#book" className="group flex items-center justify-between rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-sky-300 hover:shadow-lg">
+                <Link href="/#book" className="group flex items-center justify-between rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-300 hover:shadow-lg">
                   <div>
-                    <div className="flex items-center gap-2 text-lg font-black text-slate-950">{route.from} <ArrowRight className="h-4 w-4 text-sky-500" /> {route.to}</div>
+                    <div className="flex items-center gap-2 text-lg font-black text-slate-950">{route.from} <ArrowRight className="h-4 w-4 text-teal-600" /> {route.to}</div>
                     <div className="mt-1 text-sm text-slate-500">{route.distance} · {route.duration}</div>
                   </div>
                   <div className="text-right">
                     <div className="text-xs text-slate-500">From</div>
-                    <div className="text-xl font-black text-orange-600">Rs {route.price.toLocaleString()}</div>
+                    <div className="text-xl font-black text-amber-600">Rs {route.price.toLocaleString()}</div>
                   </div>
                 </Link>
               </Reveal>
@@ -150,7 +150,7 @@ function Home() {
       <section id="download-app" className="bg-slate-950 py-16 text-white lg:py-20">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_0.8fr] lg:px-8">
           <Reveal>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-sky-200"><Smartphone className="h-4 w-4" /> ToursTaxi App</div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-teal-100"><Smartphone className="h-4 w-4" /> ToursTaxi App</div>
             <h2 className="mt-5 text-4xl font-black tracking-normal sm:text-5xl">Download the app for quicker cab booking</h2>
             <p className="mt-4 max-w-xl text-white/70">Save routes, compare cab choices, track support updates and manage bookings from one place.</p>
             <div className="mt-7 flex flex-wrap gap-3">
@@ -177,11 +177,11 @@ function Home() {
                 <Card className="h-full overflow-hidden rounded-lg border-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
                   <img src={pkg.image} alt={pkg.title} className="h-44 w-full object-cover" />
                   <CardContent className="p-5">
-                    <div className="text-xs font-bold uppercase tracking-wide text-sky-600">{pkg.duration}</div>
+                    <div className="text-xs font-bold uppercase tracking-wide text-teal-700">{pkg.duration}</div>
                     <h3 className="mt-2 font-black text-slate-950">{pkg.title}</h3>
                     <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{pkg.description}</p>
                     <div className="mt-4 flex items-center justify-between">
-                      <span className="text-lg font-black text-orange-600">Rs {pkg.price.toLocaleString()}</span>
+                      <span className="text-lg font-black text-amber-600">Rs {pkg.price.toLocaleString()}</span>
                       <Link href="/tour-packages"><Button size="sm" variant="outline">Details</Button></Link>
                     </div>
                   </CardContent>
@@ -200,7 +200,7 @@ function Home() {
               <Reveal key={review.name} delay={index * 0.04}>
                 <Card className="h-full rounded-lg border-slate-200 bg-white">
                   <CardContent className="p-6">
-                    <div className="mb-3 flex gap-1">{Array.from({ length: review.rating }).map((_, star) => <Star key={star} className="h-4 w-4 fill-orange-400 text-orange-400" />)}</div>
+                    <div className="mb-3 flex gap-1">{Array.from({ length: review.rating }).map((_, star) => <Star key={star} className="h-4 w-4 fill-amber-400 text-amber-400" />)}</div>
                     <p className="text-sm leading-6 text-slate-700">&quot;{review.text}&quot;</p>
                     <div className="mt-5 flex items-center gap-3 border-t border-slate-100 pt-4">
                       <img src={review.avatar} alt={review.name} className="h-10 w-10 rounded-full object-cover" />
@@ -228,10 +228,10 @@ function Home() {
         </div>
       </section>
 
-      <section className="bg-orange-500 py-9 text-white">
+      <section className="bg-[#12233f] py-9 text-white">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-center sm:flex-row sm:px-6 sm:text-left lg:px-8">
           <div><div className="text-2xl font-black">Need help choosing a cab?</div><div className="text-sm opacity-90">Call our booking team and confirm your ride in minutes.</div></div>
-          <a href={`tel:${COMPANY.phoneRaw}`}><Button className="h-12 rounded bg-white px-6 font-black text-orange-600 hover:bg-slate-100">{COMPANY.phone}</Button></a>
+          <a href={`tel:${COMPANY.phoneRaw}`}><Button className="h-12 rounded bg-amber-400 px-6 font-black text-slate-950 hover:bg-amber-300">{COMPANY.phone}</Button></a>
         </div>
       </section>
     </>
@@ -244,7 +244,7 @@ function RatingBadge({ icon, title, score }) {
       {icon}
       <div className="text-left">
         <div className="font-black text-slate-950">{title}</div>
-        <div className="flex text-lg leading-none text-orange-400">★★★★★</div>
+        <div className="flex text-lg leading-none text-amber-400">★★★★★</div>
         <div className="text-xs font-bold text-slate-950">({score})</div>
       </div>
     </div>
@@ -252,7 +252,7 @@ function RatingBadge({ icon, title, score }) {
 }
 
 function PromoCard({ title, subtitle, note, image, tone = 'orange' }) {
-  const toneClass = tone === 'sky' ? 'from-sky-100 to-white text-sky-500' : tone === 'emerald' ? 'from-emerald-100 to-white text-sky-500' : 'from-orange-100 to-white text-orange-500';
+  const toneClass = tone === 'sky' ? 'from-teal-100 to-white text-teal-700' : tone === 'emerald' ? 'from-emerald-100 to-white text-teal-700' : 'from-amber-100 to-white text-amber-600';
   return (
     <div className={`relative min-h-40 overflow-hidden rounded-[28px] bg-gradient-to-br ${toneClass} p-6 shadow-sm`}>
       {image && <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-55" />}

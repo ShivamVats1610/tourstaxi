@@ -20,10 +20,10 @@ export default function ContactPage() {
 
   return (
     <div className="pt-24">
-      <section className="py-20 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 text-white">
+      <section className="bg-gradient-to-br from-[#12233f] via-[#0f3f3b] to-[#071527] py-16 text-white sm:py-20">
         <div className="max-w-5xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-orange-300 text-xs font-semibold uppercase tracking-wider mb-4">Get in Touch</div>
-          <h1 className="text-4xl md:text-6xl font-extrabold">We\u2019d love to plan your next trip</h1>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">Get in Touch</div>
+          <h1 className="text-3xl md:text-5xl font-extrabold">We\u2019d love to plan your next trip</h1>
           <p className="mt-4 text-white/80 text-lg">Drop us a message, call our 24×7 desk, or just walk in \u2014 we\u2019re always happy to talk travel.</p>
         </div>
       </section>
@@ -42,7 +42,7 @@ export default function ContactPage() {
                 <Input required type="email" placeholder="Email Address" />
                 <Input placeholder="Subject (e.g. Ranthambore tour for 4)" />
                 <Textarea required placeholder="Tell us about your trip \u2014 dates, destinations, group size..." rows={5} />
-                <Button type="submit" disabled={sending} className="w-full h-12 bg-gradient-to-r from-sky-500 to-orange-500 hover:opacity-95 font-bold">{sending ? 'Sending...' : <>Send Message <Send className="h-4 w-4 ml-2" /></>}</Button>
+                <Button type="submit" disabled={sending} className="w-full h-12 bg-amber-400 text-slate-950 hover:bg-amber-300 font-bold">{sending ? 'Sending...' : <>Send Message <Send className="h-4 w-4 ml-2" /></>}</Button>
               </form>
             </CardContent></Card>
           </Reveal>
@@ -56,10 +56,10 @@ export default function ContactPage() {
             ].map((c, i) => (
               <Card key={i} className="group hover:-translate-y-0.5 hover:shadow-lg transition-all">
                 <CardContent className="p-5 flex gap-4 items-start">
-                  <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-sky-500 to-orange-500 flex items-center justify-center text-white shrink-0"><c.icon className="h-5 w-5" /></div>
+                  <div className="h-11 w-11 rounded-xl bg-teal-50 flex items-center justify-center text-teal-700 shrink-0"><c.icon className="h-5 w-5" /></div>
                   <div>
                     <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold">{c.title}</div>
-                    {c.href ? <a href={c.href} className="text-slate-900 font-semibold hover:text-sky-600">{c.value}</a> : <div className="text-slate-900 font-semibold">{c.value}</div>}
+                    {c.href ? <a href={c.href} className="text-slate-900 font-semibold hover:text-teal-700">{c.value}</a> : <div className="text-slate-900 font-semibold">{c.value}</div>}
                   </div>
                 </CardContent>
               </Card>

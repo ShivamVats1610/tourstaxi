@@ -2,6 +2,7 @@ import './globals.css';
 import { Inter } from 'next/font/google';
 import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
+import WhatsAppButton from '@/components/site/WhatsAppButton';
 import { Toaster } from 'sonner';
 import BookingProvider from '@/lib/booking-context';
 import { listCabs } from '@/lib/crm';
@@ -9,9 +10,14 @@ import { listCabs } from '@/lib/crm';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata = {
-  title: 'ToursTaxi — Premium Cab Booking & Rajasthan Tours',
-  description: 'Book outstation cabs, airport transfers and curated Rajasthan tour packages with ToursTaxi. Verified drivers, transparent pricing, 24×7 support. 100+ cities.',
-  keywords: 'cab booking, ranthambore taxi, jaipur taxi, golden triangle tour, outstation cab, ToursTaxi'
+  title: 'ToursTaxi - Premium Cab Booking & Rajasthan Tours',
+  description: 'Book outstation cabs, airport transfers and curated Rajasthan tour packages with ToursTaxi. Verified drivers, transparent pricing, 24x7 support. 100+ cities.',
+  keywords: 'cab booking, ranthambore taxi, jaipur taxi, golden triangle tour, outstation cab, ToursTaxi',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg'
+  }
 };
 
 export default async function RootLayout({ children }) {
@@ -19,13 +25,25 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en" className={inter.variable}>
-      <body className="font-sans antialiased bg-slate-50 text-slate-900">
+      <body className="bg-slate-50 font-sans text-slate-900 antialiased">
         <BookingProvider cabs={cabs}>
           <Header />
           <main className="min-h-screen">{children}</main>
+          <WhatsAppButton />
           <Footer />
         </BookingProvider>
-        <Toaster position="top-center" richColors />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            classNames: {
+              toast: 'tourstaxi-toast',
+              title: 'tourstaxi-toast-title',
+              description: 'tourstaxi-toast-description',
+              success: 'tourstaxi-toast-success',
+              error: 'tourstaxi-toast-error'
+            }
+          }}
+        />
       </body>
     </html>
   );
