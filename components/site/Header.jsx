@@ -45,7 +45,7 @@ export default function Header() {
           </span>
         </Link>
 
-        <a href={`tel:${COMPANY.phoneRaw}`} className="flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-2 text-[11px] font-bold text-teal-800 max-[359px]:w-9 max-[359px]:px-0 min-[390px]:px-2.5 min-[390px]:text-xs sm:h-11 md:items-stretch md:overflow-hidden md:rounded-md md:p-0">
+        <a href={`tel:${COMPANY.phoneRaw}`} className="hidden h-9 min-w-0 items-center justify-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-2 text-[11px] font-bold text-teal-800 max-[359px]:w-9 max-[359px]:px-0 min-[390px]:px-2.5 min-[390px]:text-xs sm:h-11 md:flex md:items-stretch md:overflow-hidden md:rounded-md md:p-0">
           <span className="hidden items-center gap-1.5 bg-white px-3 text-slate-950 md:flex">
             <Phone className="h-4 w-4 text-teal-600" /> 24x7
           </span>
@@ -80,7 +80,7 @@ export default function Header() {
           </Button>
         </Link>
 
-        <button onClick={() => setOpen(!open)} className="hidden shrink-0 rounded-md p-2 text-slate-900 sm:block lg:hidden" aria-label="Toggle menu">
+        <button onClick={() => setOpen(!open)} className="flex shrink-0 rounded-md p-2 text-slate-900 lg:hidden" aria-label="Toggle menu" aria-expanded={open}>
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
@@ -93,7 +93,6 @@ export default function Header() {
                 <Link key={item.href} href={item.href} className="rounded-md px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">{item.label}</Link>
               ))}
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <a href={`tel:${COMPANY.phoneRaw}`} className="col-span-2 rounded-md bg-teal-50 px-3 py-2 text-center text-sm font-bold text-teal-800">{COMPANY.phone}</a>
                 <Link href="/blog"><Button variant="outline" className="w-full">Blog</Button></Link>
                 <Link href={session ? dashboardHref : '/login'}><Button className="w-full bg-[#12233f] hover:bg-[#0f1c33]">{session ? 'Dashboard' : 'Login'}</Button></Link>
               </div>

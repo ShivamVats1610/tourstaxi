@@ -114,6 +114,7 @@ function BookingsPanel({ bookings }) {
                 <div className="mt-2 text-xs font-semibold text-slate-600">{booking.passengers || 'Passengers not set'}</div>
               </div>
             </div>
+            <FareBreakdown fare={booking.fare} />
           </article>
         ))}
         {!bookings.length && (
@@ -128,6 +129,29 @@ function BookingsPanel({ bookings }) {
         )}
       </div>
     </section>
+  );
+}
+
+function FareBreakdown({ fare }) {
+  if (!fare) return null;
+  const rows = [
+    ['Actual Distance', formatKm(fare.actualDistance)],
+    ['Minimum Distance Rule', formatKm(fare.minimumDistance)],
+    ['Chargeable Distance', formatKm(fare.chargeableDistance)],
+    ['Vehicle Rate', `Rs ${fare.vehicleRate || 0}/KM`],
+    ['Estimated Fare', money(fare.estimatedFare || fare.total)],
+    ['Trip Days', fare.tripDays || 1]
+  ];
+  return (
+    <div className="mt-4 grid gap-2 rounded-md bg-slate-50 p-3 text-xs font-semibold text-slate-700 sm:grid-cols-2">
+      {rows.map(([label, value]) => (
+        <div key={label} className="flex justify-between gap-3">
+          <span>{label}</span>
+          <b className="text-slate-950">{value}</b>
+        </div>
+      ))}
+      {fare.minimumApplied && <div className="rounded bg-amber-50 px-2 py-1 text-amber-700 sm:col-span-2">Minimum billing of 250 KM per day has been applied.</div>}
+    </div>
   );
 }
 
@@ -174,4 +198,8 @@ function labelTrip(value) {
 
 function money(value) {
   return `Rs ${Number(value || 0).toLocaleString('en-IN')}`;
+}
+
+function formatKm(value) {
+  return `${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 1 })} km`;
 }

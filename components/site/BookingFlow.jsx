@@ -9,7 +9,8 @@ import { ArrowLeftRight, Briefcase, Calendar, Check, ChevronDown, Clock, Copy, H
 import { toast } from 'sonner';
 import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
 import RouteMap from '@/components/site/booking/RouteMap';
-import FareCalculator, { calculateFare, vehicleClassFromName } from '@/components/site/booking/FareCalculator';
+import FareCalculator from '@/components/site/booking/FareCalculator';
+import { calculateMinimumBillingFare, vehicleRate } from '@/lib/fare-policy';
 
 const TRIP_LABELS = {
   'one-way': 'One way',
@@ -88,23 +89,34 @@ function routeDistance(data) {
 }
 
 function cabFare(cab, data, selectedAddons = []) {
+  if (['one-way', 'round-trip', 'airport'].includes(data.tripType)) {
+    const addonObjects = selectedAddons.map((id) => ADDONS.find((item) => item.id === id)).filter(Boolean);
+    return calculateMinimumBillingFare(cab, data, addonObjects);
+  }
+
   const distance = routeDistance(data);
-  const fare = calculateFare(distance, vehicleClassFromName(cab.name));
   const selectedLocalPackage = data.tripType === 'local' ? LOCAL_PACKAGES.find((item) => item.value === data.rental) : null;
   const packagePrice = selectedLocalPackage ? Number(cab[selectedLocalPackage.priceKey]) : 0;
   const tripRate = data.tripType === 'local' ? cab.localPricePerKm : cab.pricePerKm;
-  const cabRatePerKm = Number(tripRate) > 0 ? Number(tripRate) : fare.ratePerKm;
+  const cabRatePerKm = Number(tripRate) > 0 ? Number(tripRate) : vehicleRate(cab);
   const cabDistanceFare = packagePrice > 0 ? packagePrice : Math.round(distance * cabRatePerKm);
   const allowedFuel = fuelOptions(cab);
   const activeFuel = allowedFuel.includes(data.fuelType) ? data.fuelType : allowedFuel[0];
   const fuelSurchargePerKm = activeFuel === 'diesel' ? 1.1 : 0;
   const fuelSurcharge = Math.round(distance * fuelSurchargePerKm);
   const addons = selectedAddons.reduce((sum, id) => sum + (ADDONS.find((item) => item.id === id)?.price || 0), 0);
-  const total = fare.baseFare + cabDistanceFare + fuelSurcharge + addons;
+  const total = cabDistanceFare + fuelSurcharge + addons;
   return {
+    actualDistance: distance,
+    minimumDistance: 0,
+    chargeableDistance: distance,
+    vehicleRate: cabRatePerKm + fuelSurchargePerKm,
+    estimatedFare: cabDistanceFare + fuelSurcharge,
+    tripDays: 1,
+    minimumApplied: false,
     distance,
     durationMinutes: data.durationMinutes || 0,
-    base: fare.baseFare,
+    base: 0,
     ratePerKm: packagePrice > 0 ? Math.round(packagePrice / Math.max(distance, 1)) + fuelSurchargePerKm : cabRatePerKm + fuelSurchargePerKm,
     distanceFare: cabDistanceFare + fuelSurcharge,
     fuelSurcharge,
@@ -114,6 +126,7 @@ function cabFare(cab, data, selectedAddons = []) {
     gst: 0,
     addons,
     total,
+    totalFare: total,
     payLater: Math.max(total - Math.round(total * 0.25), 0),
     partPay: Math.round(total * 0.25),
     oldPrice: total
@@ -592,7 +605,7 @@ function CabCard({ cab, data, set, index, onCheckout }) {
           <div className="mt-4 grid gap-2 text-sm text-slate-800 sm:grid-cols-2">
             <span className="flex items-center gap-2"><User className="h-5 w-5 text-teal-600" /> Driver allowance included</span>
             <span className="flex items-center gap-2"><Briefcase className="h-5 w-5 text-teal-600" /> {cab.luggage}</span>
-            <span className="flex items-center gap-2"><Check className="h-5 w-5 text-emerald-500" /> {formatKm(fare.distance)} included</span>
+            <span className="flex items-center gap-2"><Check className="h-5 w-5 text-emerald-500" /> {formatKm(fare.chargeableDistance || fare.distance)} included</span>
             <span className="flex items-center gap-2"><ArrowLeftRight className="h-5 w-5 text-teal-600" /> Post limit: Rs {cab.pricePerKm || 16}/km</span>
           </div>
           <div className="mt-4 text-sm font-bold text-black">Fuel Type</div>
@@ -639,10 +652,12 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
             <div>Pickup: <b>{prettyDate(data.date)}, {data.time}</b></div>
             {data.tripType === 'round-trip' && <div>Return: <b>{prettyDate(data.returnDate)}, {data.returnTime || '-'}</b></div>}
             {!!data.stops?.length && <div className="sm:col-span-2">Stops: <b>{data.stops.filter(Boolean).join(' | ') || '-'}</b></div>}
-            <div>Kms included: <b>{formatKm(fare.distance)}</b></div>
+            <div>Kms included: <b>{formatKm(fare.chargeableDistance || fare.distance)}</b></div>
             <div>Estimated time: <b>{formatDuration(fare.durationMinutes)}</b></div>
           </div>
         </Section>
+
+        <FareSummary fare={fare} />
 
         <Section title="Contact & Pickup Details">
           <div className="grid gap-4 sm:grid-cols-[1fr_110px_1fr]">
@@ -699,7 +714,7 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
         <Section title="Inclusions/Exclusions">
           <div className="grid gap-5 text-sm sm:grid-cols-2 text-black">
             <List title="Inclusions" items={['Base Fare and Fuel Charges', 'Driver Allowance', 'GST (5%)', 'State Tax & Toll', 'AC cab']} good />
-            <List title="Exclusions" items={[`Beyond package km charged at Rs ${vehicle.pricePerKm || 16}/km after ${fare.distance} km`, 'Multiple pickups/drops', 'Parking at actuals']} />
+            <List title="Exclusions" items={[`Beyond package km charged at Rs ${fare.vehicleRate || vehicle.pricePerKm || 16}/km after ${fare.chargeableDistance || fare.distance} km`, 'Multiple pickups/drops', 'Parking at actuals']} />
           </div>
           <details className="mt-5 border-t border-slate-100 pt-4 font-bold">
             <summary className="flex cursor-pointer items-center justify-between text-black">Read Terms and Conditions <ChevronDown className="h-4 w-4" /></summary>
@@ -724,13 +739,12 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
         <details className="mt-4 text-sm">
           <summary className="cursor-pointer font-bold text-teal-700">View Fare Break up</summary>
           <div className="mt-3 space-y-2 text-slate-700">
-            <FareRow label="Base fare" value={fare.base} />
-            <FareRow label={`${formatKm(fare.distance)} x Rs ${fare.ratePerKm}/km`} value={fare.distanceFare} />
+            <FareRow label="Actual Distance" valueText={formatKm(fare.actualDistance)} />
+            <FareRow label="Minimum Distance Rule" valueText={formatKm(fare.minimumDistance)} />
+            <FareRow label="Chargeable Distance" valueText={formatKm(fare.chargeableDistance || fare.distance)} />
+            <FareRow label="Vehicle Rate" valueText={`Rs ${fare.vehicleRate || fare.ratePerKm}/KM`} />
+            <FareRow label="Estimated Fare" value={fare.estimatedFare || fare.distanceFare} />
             {fare.fuelSurcharge > 0 && <FareRow label="Diesel fuel surcharge" value={fare.fuelSurcharge} />}
-            <FareRow label="Driver allowance" value={fare.driver} />
-            <FareRow label="Toll & state tax estimate" value={fare.toll} />
-            <FareRow label="5% discount" value={-fare.discount} />
-            <FareRow label="Taxes" value={fare.gst} />
             <FareRow label="Add-ons" value={fare.addons} />
             <FareRow label="Total" value={fare.total} bold />
           </div>
@@ -801,8 +815,32 @@ function PaymentOption({ active, onClick, title, subtitle, price }) {
   );
 }
 
-function FareRow({ label, value, bold }) {
-  return <div className={`flex justify-between ${bold ? 'border-t border-slate-100 pt-2 font-black' : ''}`}><span>{label}</span><span>{money(value)}</span></div>;
+function FareSummary({ fare }) {
+  return (
+    <Section title="Fare Summary">
+      <div className="grid gap-3 text-sm text-slate-700 sm:grid-cols-2">
+        <SummaryValue label="Actual Distance" value={formatKm(fare.actualDistance)} />
+        <SummaryValue label="Minimum Distance Rule" value={formatKm(fare.minimumDistance)} />
+        <SummaryValue label="Chargeable Distance" value={formatKm(fare.chargeableDistance || fare.distance)} />
+        <SummaryValue label="Vehicle Rate" value={`Rs ${fare.vehicleRate || fare.ratePerKm}/KM`} />
+        <SummaryValue label="Estimated Fare" value={money(fare.estimatedFare || fare.distanceFare)} />
+        <SummaryValue label="Trip Days" value={String(fare.tripDays || 1)} />
+      </div>
+      {fare.minimumApplied && (
+        <div className="mt-4 rounded-md bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800">
+          Minimum billing of 250 KM per day has been applied.
+        </div>
+      )}
+    </Section>
+  );
+}
+
+function SummaryValue({ label, value }) {
+  return <div><span className="block text-xs font-black uppercase text-slate-500">{label}</span><b className="text-slate-950">{value}</b></div>;
+}
+
+function FareRow({ label, value, valueText, bold }) {
+  return <div className={`flex justify-between gap-3 ${bold ? 'border-t border-slate-100 pt-2 font-black' : ''}`}><span>{label}</span><span>{valueText || money(value)}</span></div>;
 }
 
 function List({ title, items, good }) {

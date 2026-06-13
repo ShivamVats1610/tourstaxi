@@ -4,6 +4,7 @@ import { deleteBookingAction, deleteCabAction, deleteUserAction, saveCabAction, 
 import { requireUser } from '@/lib/auth';
 import { adminStats, listAdminBookings, listCabs, listUsers } from '@/lib/crm';
 import ToastSubmitButton from '@/components/ui/toast-submit-button';
+import AdminBookingNotifier from './AdminBookingNotifier';
 
 export const metadata = { title: 'Admin CRM | ToursTaxi' };
 export const dynamic = 'force-dynamic';
@@ -23,6 +24,7 @@ export default async function AdminDashboard() {
 
   return (
     <DashboardShell user={user}>
+      <AdminBookingNotifier latestBookingId={bookings[0]?.bookingId || ''} latestCreatedAt={bookings[0]?.createdAt ? String(bookings[0].createdAt) : ''} />
       {(user.dbUnavailable || stats.dbUnavailable) && <Notice text="CRM data is temporarily unavailable while the database connection is restored." />}
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
@@ -157,6 +159,7 @@ function Bookings({ bookings }) {
               <div className="mt-2 text-xs font-medium text-slate-700">{booking.pickup} to {booking.tripType === 'local' ? booking.rental : booking.drop}</div>
               <div className="mt-1 text-xs font-semibold text-slate-900">{booking.vehicleName || booking.vehicleSlug || 'Vehicle pending'}</div>
               <div className="mt-2 text-lg font-black text-teal-700">{booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div>
+              <FareBreakdown fare={booking.fare} />
             </div>
             <form action={updateBookingAction} className="mt-3 grid gap-2">
               <input type="hidden" name="id" value={booking.id} />
@@ -210,6 +213,7 @@ function Bookings({ bookings }) {
                 <td className="px-4 py-4">
                   <div className="text-lg font-black text-teal-700">{booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div>
                   <div className="text-xs font-medium text-slate-600">{booking.passengers || 'Passengers not set'}</div>
+                  <FareBreakdown fare={booking.fare} />
                 </td>
                 <td className="px-4 py-4">
                   <form action={updateBookingAction} className="grid min-w-48 gap-2">
@@ -235,6 +239,29 @@ function Bookings({ bookings }) {
         </table>
       </div>
     </Panel>
+  );
+}
+
+function FareBreakdown({ fare }) {
+  if (!fare) return <div className="mt-2 text-xs font-medium text-slate-500">Fare breakdown pending</div>;
+  const rows = [
+    ['Actual Distance', formatKm(fare.actualDistance)],
+    ['Minimum Distance', formatKm(fare.minimumDistance)],
+    ['Chargeable Distance', formatKm(fare.chargeableDistance)],
+    ['Vehicle Rate', `Rs ${fare.vehicleRate || 0}/KM`],
+    ['Estimated Fare', money(fare.estimatedFare || fare.total)],
+    ['Trip Days', fare.tripDays || 1]
+  ];
+  return (
+    <div className="mt-2 grid gap-1 rounded-md bg-slate-50 p-2 text-[11px] font-semibold text-slate-700">
+      {rows.map(([label, value]) => (
+        <div key={label} className="flex justify-between gap-2">
+          <span>{label}</span>
+          <b className="text-slate-950">{value}</b>
+        </div>
+      ))}
+      {fare.minimumApplied && <div className="mt-1 rounded bg-amber-50 px-2 py-1 text-amber-700">Minimum billing of 250 KM per day has been applied.</div>}
+    </div>
   );
 }
 
@@ -376,6 +403,10 @@ function EmptyState({ title, text }) {
 
 function money(value) {
   return `Rs ${Number(value || 0).toLocaleString('en-IN')}`;
+}
+
+function formatKm(value) {
+  return `${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 1 })} km`;
 }
 
 function formatDate(value) {

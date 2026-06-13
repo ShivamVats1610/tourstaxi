@@ -16,7 +16,6 @@ type FareCalculatorProps = {
   compact?: boolean;
 };
 
-const BASE_FARE = 250;
 const RATES: Record<VehicleClass, number> = {
   sedan: 14,
   suv: 18,
@@ -34,12 +33,13 @@ export function vehicleClassFromName(name = ''): VehicleClass {
 
 export function calculateFare(distanceKm: number, vehicleClass: VehicleClass = 'sedan'): FareDetails {
   const ratePerKm = RATES[vehicleClass];
-  const distanceFare = Math.round(distanceKm * ratePerKm);
+  const chargeableDistance = Math.max(Number(distanceKm || 0), 250);
+  const distanceFare = Math.round(chargeableDistance * ratePerKm);
   return {
-    baseFare: BASE_FARE,
+    baseFare: 0,
     ratePerKm,
     distanceFare,
-    totalFare: BASE_FARE + distanceFare
+    totalFare: distanceFare
   };
 }
 
