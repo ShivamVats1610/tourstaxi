@@ -7,6 +7,7 @@ import type { Coordinates, RouteDetails } from './types';
 type RouteMapProps = {
   pickupCoordinates?: Coordinates | null;
   dropCoordinates?: Coordinates | null;
+  stopCoordinates?: Coordinates[];
   route?: RouteDetails | null;
   className?: string;
 };
@@ -20,14 +21,19 @@ const VIEWBOX_WIDTH = 640;
 const VIEWBOX_HEIGHT = 300;
 const PADDING = 42;
 
-export default function RouteMap({ pickupCoordinates, dropCoordinates, route, className = '' }: RouteMapProps) {
-  const coordinates = route?.geometry?.coordinates?.length
+export default function RouteMap({ pickupCoordinates, dropCoordinates, stopCoordinates = [], route, className = '' }: RouteMapProps) {
+  const selectedPoints = [pickupCoordinates, ...stopCoordinates, dropCoordinates].filter(Boolean) as Coordinates[];
+  const coordinates = stopCoordinates.length
+    ? selectedPoints
+    : route?.geometry?.coordinates?.length
     ? route.geometry.coordinates
-    : [pickupCoordinates, dropCoordinates].filter(Boolean) as Coordinates[];
+    : selectedPoints;
   const points = projectCoordinates(coordinates);
+  const markerPoints = stopCoordinates.length ? points : projectCoordinates(selectedPoints);
   const path = buildPath(points);
-  const start = points[0];
-  const end = points[points.length - 1];
+  const start = markerPoints[0] || points[0];
+  const end = markerPoints[markerPoints.length - 1] || points[points.length - 1];
+  const stops = markerPoints.slice(1, -1);
   const hasRoute = points.length >= 2;
 
   return (
@@ -45,6 +51,7 @@ export default function RouteMap({ pickupCoordinates, dropCoordinates, route, cl
           <path d={path} fill="none" stroke="#0ea5e9" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
           <path d={path} fill="none" stroke="#ffffff" strokeWidth="2" strokeDasharray="10 14" strokeLinecap="round" />
           {start && <Marker point={start} color="#0ea5e9" label="Pickup" />}
+          {stops.map((point, index) => <Marker key={`${point.x}-${point.y}-${index}`} point={point} color="#14b8a6" label={`Stop ${index + 1}`} />)}
           {end && <Marker point={end} color="#f97316" label="Drop" />}
         </svg>
       ) : (

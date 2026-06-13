@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeftRight, Briefcase, Calendar, Check, ChevronDown, Clock, Copy, Headphones, MapPin, Phone, Plus, ShieldCheck, Star, Trash2, User, X } from 'lucide-react';
+import { ArrowLeftRight, Briefcase, Calendar, Check, ChevronDown, Clock, Copy, Headphones, Phone, Plus, ShieldCheck, Star, Trash2, User, X } from 'lucide-react';
 import { toast } from 'sonner';
 import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
 import RouteMap from '@/components/site/booking/RouteMap';
@@ -23,6 +23,12 @@ const ADDONS = [
   { id: 'diesel', label: 'Diesel Car Guarantee', priceText: 'Rs 1.1/km' },
   { id: 'new-car', label: 'New Car Promise - Model that is 2023 or newer', price: 249 },
   { id: 'language', label: 'Chauffeurs who know your language', price: 199 }
+];
+
+const LOCAL_PACKAGES = [
+  { id: '4h40', label: '4 HRS | 40 KM', value: '4 hrs / 40 km', km: 40, priceKey: 'local4hrPrice' },
+  { id: '8h80', label: '8 HRS | 80 KM', value: '8 hrs / 80 km', km: 80, priceKey: 'local8hrPrice' },
+  { id: '12h120', label: '12 HRS | 120 KM', value: '12 hrs / 120 km', km: 120, priceKey: 'local12hrPrice' }
 ];
 
 function todayValue() {
@@ -72,7 +78,8 @@ function splitDateTime(value) {
 
 function routeDistance(data) {
   if (data.tripType === 'local') {
-    const km = Number((data.rental || '').match(/\d+\s*hrs\s*\/\s*(\d+)/i)?.[1]);
+    const selectedPackage = LOCAL_PACKAGES.find((item) => item.value === data.rental);
+    const km = selectedPackage?.km || Number((data.rental || '').match(/\d+\s*hrs\s*\/\s*(\d+)/i)?.[1]);
     return km || 80;
   }
   const roadKm = Number(data.distanceKm) || 0;
@@ -83,9 +90,11 @@ function routeDistance(data) {
 function cabFare(cab, data, selectedAddons = []) {
   const distance = routeDistance(data);
   const fare = calculateFare(distance, vehicleClassFromName(cab.name));
+  const selectedLocalPackage = data.tripType === 'local' ? LOCAL_PACKAGES.find((item) => item.value === data.rental) : null;
+  const packagePrice = selectedLocalPackage ? Number(cab[selectedLocalPackage.priceKey]) : 0;
   const tripRate = data.tripType === 'local' ? cab.localPricePerKm : cab.pricePerKm;
   const cabRatePerKm = Number(tripRate) > 0 ? Number(tripRate) : fare.ratePerKm;
-  const cabDistanceFare = Math.round(distance * cabRatePerKm);
+  const cabDistanceFare = packagePrice > 0 ? packagePrice : Math.round(distance * cabRatePerKm);
   const allowedFuel = fuelOptions(cab);
   const activeFuel = allowedFuel.includes(data.fuelType) ? data.fuelType : allowedFuel[0];
   const fuelSurchargePerKm = activeFuel === 'diesel' ? 1.1 : 0;
@@ -96,7 +105,7 @@ function cabFare(cab, data, selectedAddons = []) {
     distance,
     durationMinutes: data.durationMinutes || 0,
     base: fare.baseFare,
-    ratePerKm: cabRatePerKm + fuelSurchargePerKm,
+    ratePerKm: packagePrice > 0 ? Math.round(packagePrice / Math.max(distance, 1)) + fuelSurchargePerKm : cabRatePerKm + fuelSurchargePerKm,
     distanceFare: cabDistanceFare + fuelSurcharge,
     fuelSurcharge,
     driver: 0,
@@ -148,6 +157,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       returnDate: prefill.returnDate || '',
       returnTime: prefill.returnTime || '18:00',
       stops: Array.isArray(prefill.stops) ? prefill.stops : [],
+      stopCoordinates: Array.isArray(prefill.stopCoordinates) ? prefill.stopCoordinates : [],
       rental: prefill.rental || '8 hrs / 80 km',
       passengers: prefill.passengers || '2 Passengers',
       vehicleSlug: prefill.vehicleSlug || '',
@@ -267,8 +277,13 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 onCheckout={(slug) => {
                   const cab = fleet.find((item) => item.slug === slug);
                   const allowed = fuelOptions(cab);
-                  if (!allowed.includes(data.fuelType)) set('fuelType', allowed[0] || 'cng');
-                  set('vehicleSlug', slug);
+                  setData((current) => ({
+                    ...current,
+                    vehicleSlug: slug,
+                    fuelType: allowed.includes(current.fuelType) ? current.fuelType : allowed[0] || 'cng',
+                    address: current.address || current.pickup || '',
+                    dropAddress: current.dropAddress || current.drop || ''
+                  }));
                   setView('checkout');
                 }}
               />
@@ -307,14 +322,16 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
 function TripBar({ data, routeLabel, onModify }) {
   return (
     <div className="bg-slate-950 px-4 py-3 text-white sm:px-8">
-      <div className="mx-auto grid max-w-7xl gap-3 md:grid-cols-[1.5fr_1fr_1fr_1fr_auto] md:items-center">
-        <div>
+      <div className="mx-auto grid max-w-7xl gap-3 md:grid-cols-[1.5fr_2fr_auto] md:items-center">
+        <div className="min-w-0">
           <div className="text-[11px] font-bold uppercase tracking-wide text-teal-200">Select Car</div>
-          <div className="mt-1 text-base font-black leading-tight sm:text-lg">{routeLabel}</div>
+          <div className="mt-1 truncate text-base font-black leading-tight sm:text-lg">{routeLabel}</div>
         </div>
-        <Info label="Trip Type" value={TRIP_LABELS[data.tripType] || 'One way'} invert />
-        <Info label="Pick up" value={prettyDate(data.date)} invert />
-        <Info label="Time" value={`${data.time || '07:00'}${data.returnTime ? ` / ${data.returnTime}` : ''}`} invert />
+        <div className="grid grid-cols-3 gap-2 rounded-md bg-white/5 p-2 md:bg-transparent md:p-0">
+          <Info label="Trip Type" value={TRIP_LABELS[data.tripType] || 'One way'} invert />
+          <Info label="Pick up" value={prettyDate(data.date)} invert />
+          <Info label="Time" value={`${data.time || '07:00'}${data.returnTime ? ` / ${data.returnTime}` : ''}`} invert />
+        </div>
         <Button variant="outline" onClick={onModify} className="h-10 rounded-md border-white/20 bg-white text-slate-950">Modify</Button>
       </div>
     </div>
@@ -323,9 +340,9 @@ function TripBar({ data, routeLabel, onModify }) {
 
 function Info({ label, value, invert = false }) {
   return (
-    <div>
+    <div className="min-w-0">
       <div className={`text-[11px] font-bold uppercase tracking-wide ${invert ? 'text-white/60' : 'text-slate-600'}`}>{label}</div>
-      <div className={`text-sm font-bold ${invert ? 'text-white' : 'text-slate-950'}`}>{value}</div>
+      <div className={`truncate text-xs font-bold sm:text-sm ${invert ? 'text-white' : 'text-slate-950'}`}>{value}</div>
     </div>
   );
 }
@@ -333,8 +350,19 @@ function Info({ label, value, invert = false }) {
 function ModifyPanel({ data, set, onSelectLocation, onContinue }) {
   const minDate = todayValue();
   const minTime = data.date === minDate ? nextPickupTimeValue() : undefined;
-  const canAddStop = ['one-way', 'round-trip'].includes(data.tripType);
-  const updateStop = (index, value) => set('stops', (data.stops || []).map((stop, itemIndex) => itemIndex === index ? value : stop));
+  const canAddStop = ['one-way', 'round-trip', 'airport'].includes(data.tripType);
+  const updateStop = (index, value) => {
+    set('stops', (data.stops || []).map((stop, itemIndex) => itemIndex === index ? value : stop));
+    set('stopCoordinates', (data.stopCoordinates || []).map((coordinates, itemIndex) => itemIndex === index ? null : coordinates));
+  };
+  const selectStop = (index, location) => {
+    set('stops', (data.stops || []).map((stop, itemIndex) => itemIndex === index ? location.label : stop));
+    set('stopCoordinates', (data.stopCoordinates || []).map((coordinates, itemIndex) => itemIndex === index ? location.coordinates : coordinates));
+  };
+  const removeStop = (index) => {
+    set('stops', (data.stops || []).filter((_, itemIndex) => itemIndex !== index));
+    set('stopCoordinates', (data.stopCoordinates || []).filter((_, itemIndex) => itemIndex !== index));
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-3 py-4 sm:px-8 sm:py-6">
@@ -375,22 +403,33 @@ function ModifyPanel({ data, set, onSelectLocation, onContinue }) {
           <div className="mt-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3">
             <div className="flex items-center justify-between gap-3">
               <div className="text-sm font-black text-slate-950">Stops on the way</div>
-              <Button type="button" variant="outline" onClick={() => set('stops', [...(data.stops || []), ''])} className="h-9 rounded-md bg-white text-xs font-black"><Plus className="h-4 w-4" /> Add Stop</Button>
+              <Button type="button" variant="outline" onClick={() => {
+                set('stops', [...(data.stops || []), '']);
+                set('stopCoordinates', [...(data.stopCoordinates || []), null]);
+              }} className="h-9 rounded-md bg-white text-xs font-black"><Plus className="h-4 w-4" /> Add Stop</Button>
             </div>
             {(data.stops || []).map((stop, index) => (
               <div key={index} className="mt-3 flex gap-2">
-                <Input value={stop} onChange={(event) => updateStop(index, event.target.value)} placeholder={`Stop ${index + 1} location`} className="h-10" />
-                <button type="button" onClick={() => set('stops', (data.stops || []).filter((_, itemIndex) => itemIndex !== index))} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-red-200 bg-white text-red-600"><Trash2 className="h-4 w-4" /></button>
+                <LocationAutocomplete
+                  label={`Stop ${index + 1}`}
+                  value={stop}
+                  onValueChange={(value) => updateStop(index, value)}
+                  onSelect={(location) => selectStop(index, location)}
+                  placeholder={`Stop ${index + 1} location`}
+                  className="flex-1"
+                />
+                <button type="button" onClick={() => removeStop(index)} className="mt-6 flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-red-200 bg-white text-red-600"><Trash2 className="h-4 w-4" /></button>
               </div>
             ))}
           </div>
         )}
-        {data.tripType === 'local' && <div className="mt-3"><Field label="Local Package" icon={MapPin}><Input value={data.rental} onChange={(event) => set('rental', event.target.value)} /></Field></div>}
+        {data.tripType === 'local' && <LocalPackageSelector data={data} set={set} />}
         {data.tripType !== 'local' && (
           <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_320px]">
             <RouteMap
               pickupCoordinates={data.pickupCoordinates}
               dropCoordinates={data.dropCoordinates}
+              stopCoordinates={(data.stopCoordinates || []).filter(Boolean)}
               route={data.routeGeometry ? { distanceKm: data.distanceKm, durationMinutes: data.durationMinutes, geometry: data.routeGeometry } : null}
               className="min-h-[280px]"
             />
@@ -407,6 +446,7 @@ function CabSelection({ fleet, data, set, routeLabel, onCheckout }) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8">
+      {data.tripType === 'local' && <LocalPackageSelector data={data} set={set} fleet={fleet} className="mb-4" />}
       {!!fleet.length && (
         <CabOptionRail
           fleet={fleet}
@@ -434,10 +474,38 @@ function CabSelection({ fleet, data, set, routeLabel, onCheckout }) {
           <RouteMap
             pickupCoordinates={data.pickupCoordinates}
             dropCoordinates={data.dropCoordinates}
+            stopCoordinates={(data.stopCoordinates || []).filter(Boolean)}
             route={data.routeGeometry ? { distanceKm: data.distanceKm, durationMinutes: data.durationMinutes, geometry: data.routeGeometry } : null}
             className="min-h-[240px] sm:min-h-[300px]"
           />
           <RouteSummary data={data} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LocalPackageSelector({ data, set, fleet = [], className = '' }) {
+  const selectedPackage = LOCAL_PACKAGES.find((item) => item.value === data.rental) || LOCAL_PACKAGES[1];
+
+  return (
+    <div className={`rounded-md border border-slate-200 bg-white p-2 shadow-sm ${className}`}>
+      <div className="grid grid-cols-3 overflow-hidden rounded border border-slate-300 text-center text-xs font-black sm:text-sm">
+        {LOCAL_PACKAGES.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => set('rental', item.value)}
+            className={`h-11 px-1 transition ${selectedPackage.id === item.id ? 'bg-sky-500 text-white' : 'bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
+            aria-pressed={selectedPackage.id === item.id}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+      {!!fleet.length && (
+        <div className="mt-2 text-center text-xs font-semibold text-slate-500">
+          Prices update from admin cab package rates or local per-km rate.
         </div>
       )}
     </div>
@@ -511,16 +579,16 @@ function CabCard({ cab, data, set, index, onCheckout }) {
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }} className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-      <div className="grid gap-4 p-4 lg:grid-cols-[240px_1fr_220px] lg:items-center sm:p-5">
-        <div className="flex h-36 items-center justify-center rounded bg-slate-50 p-3 sm:h-44">
-          <img src={cab.image} alt={cab.name} className="max-h-full max-w-full object-contain" />
-        </div>
-        <div>
+      <div className="grid grid-cols-[minmax(0,0.95fr)_minmax(150px,1.15fr)] gap-2 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(280px,0.75fr)] sm:gap-5 sm:p-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-6">
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-xl font-black text-slate-800 sm:text-2xl">{cab.name}</h3>
             <span className="rounded bg-slate-950 px-2 py-1 text-xs font-bold text-white">4.8 <Star className="inline h-3 w-3 fill-yellow-400 text-yellow-400" /></span>
           </div>
           <p className="mt-1 text-sm italic text-slate-600">or equivalent | {cab.seats} seater AC Cab</p>
+          <div className="mt-3 text-sm font-bold text-emerald-600">5% OFF <span className="text-slate-400 line-through">{money(fare.oldPrice)}</span></div>
+          <div className="mt-1 text-3xl font-black text-teal-700 sm:text-4xl">{money(fare.total)}</div>
+          <div className="mt-1 text-sm text-black">+ {money(fare.gst)} Charges and Taxes</div>
           <div className="mt-4 grid gap-2 text-sm text-slate-800 sm:grid-cols-2">
             <span className="flex items-center gap-2"><User className="h-5 w-5 text-teal-600" /> Driver allowance included</span>
             <span className="flex items-center gap-2"><Briefcase className="h-5 w-5 text-teal-600" /> {cab.luggage}</span>
@@ -540,12 +608,12 @@ function CabCard({ cab, data, set, index, onCheckout }) {
             <div className="mt-2 text-slate-600">Includes base fare, fuel, driver allowance and GST. Excludes extra pickups, parking and distance beyond package limit.</div>
           </details>
         </div>
-        <div className="text-left lg:text-right">
-          <div className="text-sm font-bold text-emerald-600">5% OFF <span className="text-slate-400 line-through">{money(fare.oldPrice)}</span></div>
-          <div className="mt-2 text-3xl font-black text-teal-700 sm:text-4xl">{money(fare.total)}</div>
-          <div className="mt-1 text-sm text-black">+ {money(fare.gst)} Charges and Taxes</div>
-          <Button onClick={() => onCheckout(cab.slug)} className="mt-4 h-11 w-full rounded bg-amber-500 px-6 text-sm font-black uppercase text-slate-950 hover:bg-amber-400 lg:w-auto">Select Car</Button>
+        <div className="flex min-h-40 min-w-0 items-start justify-center overflow-visible sm:min-h-60 lg:min-h-72">
+          <img src={cab.image} alt={cab.name} className="h-auto max-h-52 w-full max-w-[260px] object-contain sm:max-h-72 sm:max-w-[360px] lg:max-h-80 lg:max-w-[440px]" />
         </div>
+      </div>
+      <div className="px-4 pb-4 sm:px-5">
+        <Button onClick={() => onCheckout(cab.slug)} className="h-12 w-full rounded bg-amber-500 px-6 text-sm font-black uppercase text-slate-950 hover:bg-amber-400">Select Car</Button>
       </div>
       <div className="bg-teal-50 px-5 py-3 text-sm font-bold text-slate-900">New Car Promise - Model that is 2023 or newer @ Rs 249</div>
     </motion.div>
@@ -745,15 +813,6 @@ function List({ title, items, good }) {
         {items.map((item) => <div key={item} className="flex gap-3"><span className={good ? 'text-emerald-500' : 'text-red-500'}>{good ? '✓' : '×'}</span>{item}</div>)}
       </div>
     </div>
-  );
-}
-
-function Field({ icon: Icon, label, children }) {
-  return (
-    <label>
-      <span className="mb-1.5 flex items-center gap-2 text-xs font-black uppercase text-slate-600"><Icon className="h-4 w-4 text-teal-600" /> {label}</span>
-      {children}
-    </label>
   );
 }
 

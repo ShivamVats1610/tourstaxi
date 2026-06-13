@@ -62,7 +62,7 @@ function CabManager({ cabs }) {
                       <StatusBadge status={cab.status || 'active'} />
                     </div>
                     <div className="mt-1 text-sm font-semibold text-slate-700">
-                      {cab.category || 'Category not set'} | {cab.seats || 4} seats | Rs {cab.pricePerKm || 0}/km | Local Rs {cab.localPricePerKm || cab.pricePerKm || 0}/km | {(cab.fuelOptions || []).join(', ') || 'fuel not set'}
+                      {cab.category || 'Category not set'} | {cab.seats || 4} seats | Rs {cab.pricePerKm || 0}/km | Local Rs {cab.localPricePerKm || cab.pricePerKm || 0}/km | 4/40 Rs {cab.local4hrPrice || 'auto'} | 8/80 Rs {cab.local8hrPrice || 'auto'} | 12/120 Rs {cab.local12hrPrice || 'auto'} | {(cab.fuelOptions || []).join(', ') || 'fuel not set'}
                     </div>
                     <div className="mt-1 truncate text-xs font-medium text-slate-500">{cab.features?.join?.(', ') || 'No features added yet'}</div>
                   </div>
@@ -99,6 +99,11 @@ function CabForm({ cab = {} }) {
         <Field name="pricePerKm" label="Price Per Km" type="number" min="0" step="0.1" defaultValue={cab.pricePerKm || 0} />
         <Field name="localPricePerKm" label="Local Price Per Km" type="number" min="0" step="0.1" defaultValue={cab.localPricePerKm || cab.pricePerKm || 0} />
         <Field name="startPrice" label="Start Price" type="number" min="0" defaultValue={cab.startPrice || 0} />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Field name="local4hrPrice" label="4hrs | 40km Price" type="number" min="0" defaultValue={cab.local4hrPrice || ''} placeholder="Auto from local/km" />
+        <Field name="local8hrPrice" label="8hrs | 80km Price" type="number" min="0" defaultValue={cab.local8hrPrice || ''} placeholder="Auto from local/km" />
+        <Field name="local12hrPrice" label="12hrs | 120km Price" type="number" min="0" defaultValue={cab.local12hrPrice || ''} placeholder="Auto from local/km" />
       </div>
       <Field name="image" label="Image URL" defaultValue={cab.image} placeholder="https://res.cloudinary.com/.../cab.jpg" />
       <label className="text-xs font-bold uppercase tracking-wider text-slate-700">

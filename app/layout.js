@@ -33,7 +33,7 @@ export default async function RootLayout({ children }) {
           <Footer />
         </BookingProvider>
         <Toaster
-          position="top-center"
+          position="top-right"
           toastOptions={{
             classNames: {
               toast: 'tourstaxi-toast',

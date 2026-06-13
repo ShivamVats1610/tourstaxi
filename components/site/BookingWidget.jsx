@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { ArrowLeftRight, CalendarDays, ChevronDown, Plane } from 'lucide-react';
+import { ArrowLeftRight, CalendarDays, ChevronDown, Plane, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useBooking } from '@/lib/booking-context';
 import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
@@ -61,6 +61,8 @@ export default function BookingWidget() {
   const [returnDate, setReturnDate] = useState(todayValue());
   const [time, setTime] = useState(nextPickupTimeValue());
   const [returnTime, setReturnTime] = useState('18:00');
+  const [stops, setStops] = useState([]);
+  const [stopCoordinates, setStopCoordinates] = useState([]);
   const { open } = useBooking();
   const minDate = todayValue();
   const minTime = date === minDate ? nextPickupTimeValue() : undefined;
@@ -108,6 +110,8 @@ export default function BookingWidget() {
       time,
       returnTime: tab === 'round-trip' ? returnTime : '',
       returnDate: tab === 'round-trip' ? returnDate : '',
+      stops: ['one-way', 'round-trip', 'airport'].includes(tab) ? stops.filter(Boolean) : [],
+      stopCoordinates: ['one-way', 'round-trip', 'airport'].includes(tab) ? stopCoordinates.filter(Boolean) : [],
       rental: tab === 'local' ? '8 hrs / 80 km' : undefined,
       pickupCoordinates,
       dropCoordinates,
@@ -197,6 +201,44 @@ export default function BookingWidget() {
             </div>
           )}
         </div>
+
+        {['one-way', 'round-trip', 'airport'].includes(tab) && (
+          <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm font-black text-slate-900">Stoppage</div>
+              <Button type="button" variant="outline" onClick={() => {
+                setStops((current) => [...current, '']);
+                setStopCoordinates((current) => [...current, null]);
+              }} className="h-9 rounded-md bg-white text-xs font-black text-slate-950">
+                <Plus className="h-4 w-4" /> Add Stop
+              </Button>
+            </div>
+            {stops.map((stop, index) => (
+              <div key={index} className="mt-3 flex gap-2">
+                <LocationAutocomplete
+                  label={`Stop ${index + 1}`}
+                  value={stop}
+                  onValueChange={(value) => {
+                    setStops((current) => current.map((item, itemIndex) => itemIndex === index ? value : item));
+                    setStopCoordinates((current) => current.map((item, itemIndex) => itemIndex === index ? null : item));
+                  }}
+                  onSelect={(location) => {
+                    setStops((current) => current.map((item, itemIndex) => itemIndex === index ? location.label : item));
+                    setStopCoordinates((current) => current.map((item, itemIndex) => itemIndex === index ? location.coordinates : item));
+                  }}
+                  placeholder={`Stop ${index + 1} location`}
+                  className="flex-1"
+                />
+                <button type="button" onClick={() => {
+                  setStops((current) => current.filter((_, itemIndex) => itemIndex !== index));
+                  setStopCoordinates((current) => current.filter((_, itemIndex) => itemIndex !== index));
+                }} className="mt-6 flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-red-200 bg-white text-red-600">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="pointer-events-none -mb-10 mt-5 flex justify-center lg:-mb-11 lg:mt-6">
           <Button onClick={explore} className="pointer-events-auto h-12 w-full max-w-[300px] rounded-lg !bg-[#f59e0b] text-sm font-black uppercase !text-[#12233f] shadow-lg shadow-amber-500/25 hover:!bg-[#fbbf24] sm:h-14 sm:max-w-[320px] sm:text-lg">
