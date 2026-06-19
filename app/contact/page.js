@@ -23,8 +23,8 @@ export default function ContactPage() {
       <section className="bg-gradient-to-br from-[#12233f] via-[#0f3f3b] to-[#071527] py-16 text-white sm:py-20">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">Get in Touch</div>
-          <h1 className="text-3xl md:text-5xl font-extrabold">We\u2019d love to plan your next trip</h1>
-          <p className="mt-4 text-white/80 text-lg">Drop us a message, call our 24×7 desk, or just walk in \u2014 we\u2019re always happy to talk travel.</p>
+          <h1 className="text-3xl md:text-5xl font-extrabold">We would love to plan your next trip</h1>
+          <p className="mt-4 text-white/80 text-lg">Drop us a message, call our 24x7 desk, or just walk in - we are always happy to talk travel.</p>
         </div>
       </section>
 
@@ -41,7 +41,7 @@ export default function ContactPage() {
                 </div>
                 <Input required type="email" placeholder="Email Address" />
                 <Input placeholder="Subject (e.g. Ranthambore tour for 4)" />
-                <Textarea required placeholder="Tell us about your trip \u2014 dates, destinations, group size..." rows={5} />
+                <Textarea required placeholder="Tell us about your trip - dates, destinations, group size..." rows={5} />
                 <Button type="submit" disabled={sending} className="w-full h-12 bg-amber-400 text-slate-950 hover:bg-amber-300 font-bold">{sending ? 'Sending...' : <>Send Message <Send className="h-4 w-4 ml-2" /></>}</Button>
               </form>
             </CardContent></Card>
@@ -52,7 +52,7 @@ export default function ContactPage() {
               { icon: MapPin, title: 'Office Address', value: COMPANY.address },
               { icon: Phone, title: 'Phone', value: COMPANY.phone, href: `tel:${COMPANY.phoneRaw}` },
               { icon: Mail, title: 'Email', value: COMPANY.email, href: `mailto:${COMPANY.email}` },
-              { icon: Clock, title: 'Working Hours', value: 'Open 24 \u00d7 7 \u2014 even on holidays' }
+              { icon: Clock, title: 'Working Hours', value: 'Open 24 \u00d7 7 - even on holidays' }
             ].map((c, i) => (
               <Card key={i} className="group hover:-translate-y-0.5 hover:shadow-lg transition-all">
                 <CardContent className="p-5 flex gap-4 items-start">

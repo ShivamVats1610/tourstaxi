@@ -5,7 +5,7 @@ import Reveal from '@/components/site/Reveal';
 import { listCabs } from '@/lib/crm';
 import { Users, Briefcase, Check, ArrowRight } from 'lucide-react';
 
-export const metadata = { title: 'Fleet — ToursTaxi' };
+export const metadata = { title: 'Fleet - ToursTaxi' };
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +18,7 @@ export default async function FleetPage() {
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">Our Fleet</div>
           <h1 className="text-3xl md:text-5xl font-extrabold">Six cabs. One promise of comfort.</h1>
-          <p className="mt-4 text-white/80 text-lg">Sanitised, GPS-tracked and serviced fortnightly \u2014 pick the cab that fits your trip.</p>
+          <p className="mt-4 text-white/80 text-lg">Sanitised, GPS-tracked and serviced fortnightly - pick the cab that fits your trip.</p>
         </div>
       </section>
 
@@ -46,8 +46,8 @@ export default async function FleetPage() {
                     <div className="mt-auto pt-5 flex items-end justify-between border-t border-slate-100 mt-4">
                       <div>
                         <div className="text-[11px] text-slate-500">Starting from</div>
-                        <div className="text-3xl font-extrabold text-slate-900">\u20b9{v.startPrice.toLocaleString()}<span className="text-sm text-slate-500 font-medium"> / trip</span></div>
-                        <div className="text-xs text-slate-500">\u20b9{v.pricePerKm}/km \u00b7 incl. driver & fuel</div>
+                        <div className="text-3xl font-extrabold text-slate-900">Rs {v.startPrice.toLocaleString()}<span className="text-sm text-slate-500 font-medium"> / trip</span></div>
+                        <div className="text-xs text-slate-500">Rs {v.pricePerKm}/km / incl. driver & fuel</div>
                       </div>
                       <Link href="/#book"><Button className="bg-amber-400 text-slate-950 hover:bg-amber-300">Book Now <ArrowRight className="h-4 w-4 ml-2" /></Button></Link>
                     </div>

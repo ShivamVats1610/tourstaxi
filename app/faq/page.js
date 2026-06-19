@@ -2,7 +2,7 @@ import Reveal from '@/components/site/Reveal';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { FAQS } from '@/lib/data';
 
-export const metadata = { title: 'FAQ — ToursTaxi' };
+export const metadata = { title: 'FAQ - ToursTaxi' };
 
 export default function FAQPage() {
   return (

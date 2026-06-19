@@ -4,6 +4,7 @@ import { ArrowLeftRight, CalendarDays, ChevronDown, Plane, Plus, Trash2 } from '
 import { Button } from '@/components/ui/button';
 import { useBooking } from '@/lib/booking-context';
 import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
+import { toast } from 'sonner';
 
 const TABS = [
   { id: 'one-way', label: 'One Way' },
@@ -102,10 +103,18 @@ export default function BookingWidget() {
 
   const explore = () => {
     const airportPickup = airportTrip === 'Pickup from Airport';
+    const nextPickup = tab === 'airport' ? (airportPickup ? airport : pickup) : pickup;
+    const nextDrop = tab === 'airport' ? (airportPickup ? drop : airport) : drop;
+
+    if (!nextPickup.trim() || !nextDrop.trim()) {
+      toast.error('Please enter pickup location and drop location.');
+      return;
+    }
+
     open({
       tripType: tab,
-      pickup: tab === 'airport' ? (airportPickup ? airport : pickup) : pickup,
-      drop: tab === 'airport' ? (airportPickup ? drop : airport) : drop,
+      pickup: nextPickup,
+      drop: nextDrop,
       date,
       time,
       returnTime: tab === 'round-trip' ? returnTime : '',
@@ -276,7 +285,7 @@ function LineLocation({ label, value, setValue, setCoordinates, placeholder, sho
         setValue(place.label);
         setCoordinates(place.coordinates);
       }}
-      placeholder={placeholder || (label === 'City' ? 'Enter City' : label === 'To' ? 'Enter Drop Location' : label === 'From' ? 'Enter Pickup Location' : `Enter ${label}`)}
+      placeholder={placeholder || (label === 'City' ? 'City' : label === 'To' ? 'Drop Location' : label === 'From' ? 'Pickup Location' : label)}
       showCurrentLocation={showCurrentLocation}
       variant="line"
       className="min-w-0"
@@ -291,7 +300,7 @@ function LineDateTime({ label, date, time, minDate, minTime, onChange }) {
       <span className="mb-1.5 block text-[13px] font-black uppercase tracking-wide text-slate-700 sm:text-sm">{label}</span>
       <span className="flex h-10 min-w-0 items-center gap-2.5 border-b border-slate-200 text-slate-950 focus-within:border-teal-600">
         <CalendarDays className="h-4 w-4 shrink-0 text-teal-700 lg:hidden" />
-        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-black sm:text-base">{displayDate(date)} · {displayTime(time)}</span>
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-black sm:text-base">{displayDate(date)} / {displayTime(time)}</span>
         <ChevronDown className="h-4 w-4 shrink-0 text-teal-700" />
       </span>
       <input type="datetime-local" value={dateTimeValue(date, time)} min={min} onChange={(event) => onChange(event.target.value)} className="absolute inset-x-0 bottom-0 h-10 cursor-pointer opacity-0" />

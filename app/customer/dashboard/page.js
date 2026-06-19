@@ -45,7 +45,7 @@ export default async function CustomerDashboard() {
           {user.dbUnavailable && <Notice text="Booking data is temporarily unavailable while the database connection is restored." />}
 
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Summary icon={CalendarClock} label="Total Trips" value={bookings.length} />
+            <Summary icon={CalendarClock} label="Total Trips" value={bookings.length} href="#my-bookings" />
             <Summary icon={Car} label="Active Requests" value={activeBookings} />
             <Summary icon={Phone} label="Profile Phone" value={user.phone || 'Not set'} small />
             <Summary icon={Route} label="Fare Value" value={money(totalFare)} />
@@ -85,14 +85,19 @@ function ProfilePanel({ user }) {
 }
 
 function BookingsPanel({ bookings }) {
+  const bookingGroups = groupBookingsByDate(bookings);
+
   return (
-    <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <section id="my-bookings" className="scroll-mt-24 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-4 py-3 sm:px-5 sm:py-4">
         <h2 className="font-black text-slate-950">My Bookings</h2>
         <p className="text-sm font-medium text-slate-600">Bookings connected to your phone, email, or login.</p>
       </div>
       <div className="grid gap-3 p-3 sm:p-4">
-        {bookings.map((booking) => (
+        {bookingGroups.map(([dateLabel, datedBookings]) => (
+          <div key={dateLabel} className="grid gap-3">
+            <div className="rounded-md bg-slate-100 px-3 py-2 text-sm font-black text-slate-800">{dateLabel}</div>
+            {datedBookings.map((booking) => (
           <article key={booking.id} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition hover:border-teal-200 hover:shadow-md sm:p-4">
             <div className="grid gap-4 xl:grid-cols-[1fr_auto]">
               <div>
@@ -116,6 +121,8 @@ function BookingsPanel({ bookings }) {
             </div>
             <FareBreakdown fare={booking.fare} />
           </article>
+            ))}
+          </div>
         ))}
         {!bookings.length && (
           <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-5 py-12 text-center">
@@ -164,16 +171,18 @@ function Labeled({ icon: Icon, label, children }) {
   );
 }
 
-function Summary({ icon: Icon, label, value, small }) {
-  return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
+function Summary({ icon: Icon, label, value, small, href }) {
+  const content = (
+    <>
       <div className="flex items-center justify-between">
         <div className="text-xs font-bold text-slate-600 sm:text-sm">{label}</div>
         <span className="flex h-8 w-8 items-center justify-center rounded-md bg-teal-50 text-teal-700 sm:h-10 sm:w-10"><Icon className="h-4 w-4 sm:h-5 sm:w-5" /></span>
       </div>
       <div className={`mt-2 font-black text-slate-950 sm:mt-3 ${small ? 'text-base sm:text-xl' : 'text-2xl sm:text-3xl'}`}>{value}</div>
-    </div>
+    </>
   );
+  const className = "rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition hover:border-teal-200 hover:shadow-md sm:p-5";
+  return href ? <a href={href} className={className}>{content}</a> : <div className={className}>{content}</div>;
 }
 
 function StatusBadge({ status }) {
@@ -202,4 +211,19 @@ function money(value) {
 
 function formatKm(value) {
   return `${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 1 })} km`;
+}
+
+function groupBookingsByDate(bookings) {
+  const groups = new Map();
+  bookings.forEach((booking) => {
+    const key = booking.pickupDate || 'Date not set';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(booking);
+  });
+  return Array.from(groups.entries()).map(([date, items]) => [formatTripDate(date), items]);
+}
+
+function formatTripDate(value) {
+  if (!value || value === 'Date not set') return value;
+  return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${value}T00:00:00`));
 }

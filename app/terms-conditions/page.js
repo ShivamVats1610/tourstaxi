@@ -1,4 +1,4 @@
-export const metadata = { title: 'Terms & Conditions — ToursTaxi' };
+export const metadata = { title: 'Terms & Conditions - ToursTaxi' };
 
 export default function TermsPage() {
   return (
@@ -18,7 +18,7 @@ export default function TermsPage() {
           <h2>Fares</h2>
           <p>Quoted fares include driver allowance, fuel and applicable taxes. Toll, parking and inter-state permit fees (where applicable) are billed at actuals.</p>
           <h2>Cancellations</h2>
-          <p>Free cancellation up to 4 hours before pickup. Cancellations made later attract a cab-allotment fee of ₹300–₹500 depending on cab category.</p>
+          <p>Free cancellation up to 4 hours before pickup. Cancellations made later attract a cab-allotment fee of Rs 300-Rs 500 depending on cab category.</p>
           <h2>Driver hours</h2>
           <p>Drivers may take mandatory breaks for safety. For multi-day trips, the daily driving limit is 250 km per day; additional km is billed extra.</p>
           <h2>Liability</h2>

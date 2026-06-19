@@ -6,7 +6,7 @@ import Reveal from '@/components/site/Reveal';
 import { BLOG_POSTS, BLOG_CATEGORIES } from '@/lib/data';
 import { Clock, ArrowRight, Search, User } from 'lucide-react';
 
-export const metadata = { title: 'Blog — ToursTaxi' };
+export const metadata = { title: 'Blog - ToursTaxi' };
 
 export default function BlogPage() {
   const featured = BLOG_POSTS[0];
@@ -18,7 +18,7 @@ export default function BlogPage() {
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">Travel Journal</div>
           <h1 className="text-3xl md:text-5xl font-extrabold">Stories, tips & guides from the road</h1>
-          <p className="mt-4 text-white/80 text-lg">Itineraries, wildlife guides and travel hacks \u2014 written by people who actually drive these routes.</p>
+          <p className="mt-4 text-white/80 text-lg">Itineraries, wildlife guides and travel hacks - written by people who actually drive these routes.</p>
         </div>
       </section>
 
@@ -35,7 +35,7 @@ export default function BlogPage() {
                     <div className="absolute bottom-6 left-6 right-6 text-white">
                       <h2 className="text-2xl md:text-3xl font-extrabold leading-tight">{featured.title}</h2>
                       <p className="mt-2 text-white/85 max-w-2xl">{featured.excerpt}</p>
-                      <div className="mt-3 flex items-center gap-4 text-sm text-white/80"><User className="h-4 w-4" />{featured.author} \u00b7 <Clock className="h-4 w-4" />{featured.readMin} min read</div>
+                      <div className="mt-3 flex items-center gap-4 text-sm text-white/80"><User className="h-4 w-4" />{featured.author} / <Clock className="h-4 w-4" />{featured.readMin} min read</div>
                     </div>
                   </div>
                 </Card>
@@ -52,7 +52,7 @@ export default function BlogPage() {
                         <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur text-slate-900 text-[11px] font-bold uppercase">{p.category}</div>
                       </div>
                       <CardContent className="p-5">
-                        <div className="text-xs text-slate-500 flex items-center gap-3"><span>{p.date}</span> \u00b7 <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{p.readMin} min</span></div>
+                        <div className="text-xs text-slate-500 flex items-center gap-3"><span>{p.date}</span> / <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{p.readMin} min</span></div>
                         <h3 className="text-lg font-bold mt-1.5 text-slate-900 group-hover:text-teal-700 transition-colors line-clamp-2">{p.title}</h3>
                         <p className="text-sm text-slate-600 mt-2 line-clamp-2">{p.excerpt}</p>
                         <div className="mt-3 text-teal-700 font-semibold text-sm inline-flex items-center gap-1 group-hover:gap-2 transition-all">Read article <ArrowRight className="h-4 w-4" /></div>

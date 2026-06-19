@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { Loader2, Route } from 'lucide-react';
@@ -158,7 +158,7 @@ export default function FareCalculator({
         <div className="mt-3 grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
           <div><b className="block text-lg text-slate-950">{route.distanceKm} km</b>Distance</div>
           <div><b className="block text-lg text-slate-950">{route.durationMinutes} min</b>Estimated time</div>
-          <div><b className="block text-lg text-sky-600">₹{fare.totalFare.toLocaleString('en-IN')}</b>Total fare</div>
+          <div><b className="block text-lg text-sky-600">Rs {fare.totalFare.toLocaleString('en-IN')}</b>Total fare</div>
         </div>
       ) : (
         <div className="mt-3 text-sm text-slate-500">

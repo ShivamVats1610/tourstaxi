@@ -134,7 +134,7 @@ function Home() {
                 <Link href="/#book" className="group flex items-center justify-between rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-300 hover:shadow-lg">
                   <div>
                     <div className="flex items-center gap-2 text-lg font-black text-slate-950">{route.from} <ArrowRight className="h-4 w-4 text-teal-600" /> {route.to}</div>
-                    <div className="mt-1 text-sm text-slate-500">{route.distance} · {route.duration}</div>
+                    <div className="mt-1 text-sm text-slate-500">{route.distance} / {route.duration}</div>
                   </div>
                   <div className="text-right">
                     <div className="text-xs text-slate-500">From</div>
@@ -244,7 +244,7 @@ function RatingBadge({ icon, title, score }) {
       {icon}
       <div className="text-left">
         <div className="font-black text-slate-950">{title}</div>
-        <div className="flex text-lg leading-none text-amber-400">★★★★★</div>
+        <div className="flex text-lg leading-none text-amber-400">*****</div>
         <div className="text-xs font-bold text-slate-950">({score})</div>
       </div>
     </div>

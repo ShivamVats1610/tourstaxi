@@ -1,4 +1,4 @@
-export const metadata = { title: 'Privacy Policy — ToursTaxi' };
+export const metadata = { title: 'Privacy Policy - ToursTaxi' };
 
 export default function PrivacyPage() {
   return (
@@ -12,7 +12,7 @@ export default function PrivacyPage() {
       </section>
       <section className="py-16">
         <article className="prose prose-slate max-w-3xl mx-auto px-4">
-          <p>ToursTaxi (“we”, “our”, “us”) values your privacy. This policy explains what information we collect, how we use it and the choices you have.</p>
+          <p>ToursTaxi (we, our, us) values your privacy. This policy explains what information we collect, how we use it and the choices you have.</p>
           <h2>Information we collect</h2>
           <p>When you book a cab, we collect your name, contact number, pickup/drop addresses, payment details and basic trip metadata to fulfil your booking.</p>
           <h2>How we use it</h2>

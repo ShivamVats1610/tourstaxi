@@ -7,7 +7,7 @@ import { ArrowRight, Repeat, Timer, Plane, Tent, Briefcase, Phone } from 'lucide
 
 const ICONS = { ArrowRight, Repeat, Timer, Plane, Tent, Briefcase };
 
-export const metadata = { title: 'Services — ToursTaxi' };
+export const metadata = { title: 'Services - ToursTaxi' };
 
 export default function ServicesPage() {
   return (
@@ -16,7 +16,7 @@ export default function ServicesPage() {
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">Services</div>
           <h1 className="text-3xl md:text-5xl font-extrabold">Every kind of ride, all in one place</h1>
-          <p className="mt-4 text-white/80 text-lg">Six services. One promise \u2014 a verified driver, a clean cab and a fair fare.</p>
+          <p className="mt-4 text-white/80 text-lg">Six services. One promise - a verified driver, a clean cab and a fair fare.</p>
         </div>
       </section>
 

@@ -49,9 +49,9 @@ export default function FleetSlugClient({ slug }) {
           <div>
             <div className="text-xs text-sky-600 font-semibold uppercase tracking-wider">{vehicle.category}</div>
             <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 mt-1">{vehicle.name}</h1>
-            <div className="flex items-center gap-1 mt-3">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-4 w-4 fill-orange-400 text-orange-400" />)}<span className="text-sm text-slate-500 ml-1">(4.9 · 1,240 trips)</span></div>
+            <div className="flex items-center gap-1 mt-3">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-4 w-4 fill-orange-400 text-orange-400" />)}<span className="text-sm text-slate-500 ml-1">(4.9 / 1,240 trips)</span></div>
 
-            <p className="mt-4 text-slate-600 leading-relaxed">The {vehicle.name} is one of ToursTaxi&apos;s most-loved cabs — perfect for {vehicle.seats <= 4 ? 'couples and small families' : vehicle.seats <= 6 ? 'families and small groups' : 'large groups and tours'}. Every {vehicle.name} in our fleet is professionally sanitised, GPS-tracked and serviced every fortnight to ensure a flawless ride.</p>
+            <p className="mt-4 text-slate-600 leading-relaxed">The {vehicle.name} is one of ToursTaxi&apos;s most-loved cabs - perfect for {vehicle.seats <= 4 ? 'couples and small families' : vehicle.seats <= 6 ? 'families and small groups' : 'large groups and tours'}. Every {vehicle.name} in our fleet is professionally sanitised, GPS-tracked and serviced every fortnight to ensure a flawless ride.</p>
 
             <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
@@ -65,15 +65,15 @@ export default function FleetSlugClient({ slug }) {
             <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
               <h3 className="font-bold text-slate-900">Features</h3>
               <ul className="mt-3 grid grid-cols-2 gap-y-1.5 text-sm text-slate-700">
-                {[...vehicle.features, 'Sanitised before every trip', 'Live GPS tracking', '24×7 roadside assistance'].map(f => <li key={f} className="flex items-center gap-1.5"><Check className="h-4 w-4 text-sky-500" /> {f}</li>)}
+                {[...vehicle.features, 'Sanitised before every trip', 'Live GPS tracking', '24x7 roadside assistance'].map(f => <li key={f} className="flex items-center gap-1.5"><Check className="h-4 w-4 text-sky-500" /> {f}</li>)}
               </ul>
             </div>
 
             <div className="mt-5 rounded-2xl bg-gradient-to-br from-sky-50 to-orange-50 border border-sky-200 p-5 flex items-end justify-between">
               <div>
                 <div className="text-xs text-slate-500">Starting from</div>
-                <div className="text-4xl font-extrabold text-slate-900">₹{vehicle.startPrice.toLocaleString()}</div>
-                <div className="text-xs text-slate-500">₹{vehicle.pricePerKm}/km · incl. driver & fuel</div>
+                <div className="text-4xl font-extrabold text-slate-900">Rs {vehicle.startPrice.toLocaleString()}</div>
+                <div className="text-xs text-slate-500">Rs {vehicle.pricePerKm}/km / incl. driver & fuel</div>
               </div>
               <Button onClick={() => open({ vehicleSlug: vehicle.slug, startStep: 0 })} className="h-12 px-6 bg-orange-500 hover:bg-orange-600 font-bold shadow-lg shadow-orange-500/30">Book this Cab <ArrowRight className="h-4 w-4 ml-2" /></Button>
             </div>
@@ -105,7 +105,7 @@ export default function FleetSlugClient({ slug }) {
                   <CardContent className="p-4">
                     <div className="text-xs text-sky-600 font-semibold uppercase">{v.category}</div>
                     <div className="font-bold text-slate-900">{v.name}</div>
-                    <div className="mt-1 text-sm text-slate-600 flex items-center gap-3"><span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{v.seats}</span><span>₹{v.startPrice.toLocaleString()}</span></div>
+                    <div className="mt-1 text-sm text-slate-600 flex items-center gap-3"><span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{v.seats}</span><span>Rs {v.startPrice.toLocaleString()}</span></div>
                   </CardContent>
                 </Card>
               </Link>

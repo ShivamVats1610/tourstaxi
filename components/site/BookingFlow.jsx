@@ -46,7 +46,7 @@ function nextPickupTimeValue() {
 
 function money(value) {
   const amount = Number(value || 0);
-  return `${amount < 0 ? '-' : ''}₹${Math.abs(amount).toLocaleString('en-IN')}`;
+  return `${amount < 0 ? '-' : ''}Rs ${Math.abs(amount).toLocaleString('en-IN')}`;
 }
 
 function prettyDate(value) {
@@ -147,6 +147,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
   const [data, setData] = useState({});
   const [selectedAddons, setSelectedAddons] = useState([]);
   const [payment, setPayment] = useState('part');
+  const [paymentStarted, setPaymentStarted] = useState(false);
   const [bookingId, setBookingId] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -189,6 +190,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
     });
     setSelectedAddons([]);
     setPayment('part');
+    setPaymentStarted(false);
     setBookingId('');
     setSubmitting(false);
   }, [open, prefill]);
@@ -238,6 +240,14 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       return;
     }
 
+    const paymentAmount = payment === 'full' ? fare.total : payment === 'part' ? fare.partPay : 0;
+    if (paymentAmount > 0 && !paymentStarted) {
+      openUpiPayment(paymentAmount, `TTX-${Date.now()}`, payment);
+      setPaymentStarted(true);
+      toast.info('Complete UPI payment, then return here and confirm your booking.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const response = await fetch('/api/bookings', {
@@ -246,7 +256,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
         body: JSON.stringify({
           ...data,
           vehicleName: vehicle.name,
-          fare: { ...fare, selectedAddons, paymentOption: payment }
+          fare: { ...fare, selectedAddons, paymentOption: payment, advancePaid: paymentAmount }
         })
       });
       const result = await response.json();
@@ -279,7 +289,13 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
           <div className="max-h-[96vh] overflow-y-auto bg-slate-50">
             <TripBar data={data} routeLabel={routeLabel} onModify={() => setView('details')} />
             {view === 'details' && (
-              <ModifyPanel data={data} set={set} onSelectLocation={selectLocation} onContinue={() => setView('cars')} />
+              <ModifyPanel data={data} set={set} onSelectLocation={selectLocation} onContinue={() => {
+                if (!data.pickup?.trim() || !data.drop?.trim()) {
+                  toast.error('Please enter pickup location and drop location.');
+                  return;
+                }
+                setView('cars');
+              }} />
             )}
             {view === 'cars' && (
               <CabSelection
@@ -311,7 +327,11 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 selectedAddons={selectedAddons}
                 setSelectedAddons={setSelectedAddons}
                 payment={payment}
-                setPayment={setPayment}
+                setPayment={(nextPayment) => {
+                  setPayment(nextPayment);
+                  setPaymentStarted(false);
+                }}
+                paymentStarted={paymentStarted}
                 onBack={() => setView('cars')}
                 onSubmit={submit}
                 submitting={submitting}
@@ -330,6 +350,17 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       </DialogContent>
     </Dialog>
   );
+}
+
+function openUpiPayment(amount, bookingId, paymentOption) {
+  const params = new URLSearchParams({
+    pa: 'merchant1305070.augp@aubank',
+    pn: 'ToursTaxi',
+    am: String(Math.max(Number(amount || 0), 1)),
+    cu: 'INR',
+    tn: `ToursTaxi ${paymentOption === 'full' ? 'full payment' : 'advance'} ${bookingId}`
+  });
+  window.location.href = `upi://pay?${params.toString()}`;
 }
 
 function TripBar({ data, routeLabel, onModify }) {
@@ -534,7 +565,7 @@ function CabOptionRail({ fleet, data, selectedSlug, onSelect }) {
           const active = cab.slug === selectedSlug;
           const allowedFuel = fuelOptions(cab);
           const fuel = allowedFuel.length > 1 ? 'CNG/DSL' : allowedFuel[0] === 'diesel' ? 'DSL' : 'CNG';
-          const category = cab.category?.split(/[·|]/)[0]?.trim() || (cab.seats > 6 ? 'Traveller' : cab.seats > 4 ? 'SUV' : 'Sedan');
+          const category = cab.category?.split(/[/|]/)[0]?.trim() || (cab.seats > 6 ? 'Traveller' : cab.seats > 4 ? 'SUV' : 'Sedan');
 
           return (
             <button
@@ -633,7 +664,7 @@ function CabCard({ cab, data, set, index, onCheckout }) {
   );
 }
 
-function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSelectedAddons, payment, setPayment, onBack, onSubmit, submitting }) {
+function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSelectedAddons, payment, setPayment, paymentStarted, onBack, onSubmit, submitting }) {
   if (!vehicle || !fare) return null;
 
   const toggleAddon = (id) => {
@@ -726,15 +757,20 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
       <aside className="h-fit rounded-lg border border-slate-200 bg-white p-5 shadow-xl lg:sticky lg:top-24">
         <div className="mb-5 rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 font-bold text-yellow-900">Free cancellation till 1 hr of departure</div>
         <h3 className="text-2xl text-black">Payment Options</h3>
-        <PaymentOption active={payment === 'zero'} onClick={() => setPayment('zero')} title="Book at zero" subtitle={`Pay ${money(fare.total)} Later`} price="Rs 0" />
-        <PaymentOption active={payment === 'part'} onClick={() => setPayment('part')} title="Part Pay" subtitle="Pay 25% now and rest to the driver" price={money(fare.partPay)} />
-        <PaymentOption active={payment === 'full'} onClick={() => setPayment('full')} title="Full Pay" subtitle="Full amount" price={money(fare.total)} />
+        <PaymentOption active={payment === 'zero'} onClick={() => setPayment('zero')} title="Pay after ride" subtitle="Book now and pay the driver after trip" price="Rs 0" />
+        <PaymentOption active={payment === 'part'} onClick={() => setPayment('part')} title="Pay 25% amount" subtitle="Open UPI app and pay advance now" price={money(fare.partPay)} />
+        <PaymentOption active={payment === 'full'} onClick={() => setPayment('full')} title="Pay full" subtitle="Open UPI app and pay full fare now" price={money(fare.total)} />
+        {payment !== 'zero' && paymentStarted && (
+          <div className="mt-4 rounded-md border border-teal-200 bg-teal-50 px-3 py-2 text-sm font-bold text-teal-900">
+            After completing UPI payment, tap confirm below.
+          </div>
+        )}
         <div className="mt-5 border-t border-slate-100 pt-5">
           <div className="text-black">Coupon & Offers</div>
           <div className="mt-3 flex gap-2"><Input placeholder="ENTER A COUPON" /><Button className="bg-teal-700 hover:bg-teal-800">APPLY</Button></div>
         </div>
         <Button onClick={onSubmit} disabled={submitting} className="mt-5 h-14 w-full rounded-lg bg-amber-500 text-lg font-black uppercase text-slate-950 hover:bg-amber-400">
-          {submitting ? 'Proceeding...' : 'Proceed'}
+          {submitting ? 'Proceeding...' : payment === 'zero' ? 'Confirm Booking' : paymentStarted ? 'I Have Paid, Confirm Booking' : 'Pay with UPI'}
         </Button>
         <details className="mt-4 text-sm">
           <summary className="cursor-pointer font-bold text-teal-700">View Fare Break up</summary>
@@ -848,7 +884,7 @@ function List({ title, items, good }) {
     <div>
       <div className={`mb-3 font-bold ${good ? 'text-emerald-600' : 'text-red-500'}`}>{title}</div>
       <div className="space-y-3">
-        {items.map((item) => <div key={item} className="flex gap-3"><span className={good ? 'text-emerald-500' : 'text-red-500'}>{good ? '✓' : '×'}</span>{item}</div>)}
+        {items.map((item) => <div key={item} className="flex gap-3"><span className={good ? 'text-emerald-500' : 'text-red-500'}>{good ? '?' : 'x'}</span>{item}</div>)}
       </div>
     </div>
   );
@@ -863,7 +899,7 @@ function DateTimeField({ label, date, time, minDate, minTime, onChange }) {
         <Calendar className="h-4 w-4 text-teal-600" /> {label}
       </span>
       <span className="flex h-8 items-center justify-between gap-3 text-sm font-black text-slate-950">
-        <span className="truncate">{prettyDate(date)} · {time || '07:00'}</span>
+        <span className="truncate">{prettyDate(date)} / {time || '07:00'}</span>
         <Clock className="h-4 w-4 shrink-0 text-teal-600" />
       </span>
       <input

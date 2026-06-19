@@ -28,11 +28,11 @@ export default async function AdminDashboard() {
       {(user.dbUnavailable || stats.dbUnavailable) && <Notice text="CRM data is temporarily unavailable while the database connection is restored." />}
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-        <Stat icon={CalendarClock} label="Bookings" value={stats.bookings} hint={`${stats.newBookings} new`} />
-        <Stat icon={Car} label="Active Cabs" value={activeCabs} hint={`${cabs.length} total`} />
-        <Stat icon={Users} label="Customers" value={stats.users} hint={`${users.length} accounts`} />
-        <Stat icon={Phone} label="Assigned" value={stats.assignedBookings} hint="Driver follow-up" />
-        <Stat icon={IndianRupee} label="Fare Value" value={money(revenue)} hint="Visible bookings" />
+        <Stat icon={CalendarClock} label="Bookings" value={stats.bookings} hint={`${stats.newBookings} new`} href="#booking-details" />
+        <Stat icon={Car} label="Active Cabs" value={activeCabs} hint={`${cabs.length} total`} href="#fleet-details" />
+        <Stat icon={Users} label="Customers" value={stats.users} hint={`${users.length} accounts`} href="#customer-details" />
+        <Stat icon={Phone} label="Assigned" value={stats.assignedBookings} hint="Driver follow-up" href="#booking-details" />
+        <Stat icon={IndianRupee} label="Fare Value" value={money(revenue)} hint="Visible bookings" href="#booking-details" />
       </div>
 
       <CabManager cabs={cabs} />
@@ -44,7 +44,7 @@ export default async function AdminDashboard() {
 
 function CabManager({ cabs }) {
   return (
-    <section className="mt-4 grid gap-4 xl:mt-6 xl:grid-cols-[380px_1fr]">
+    <section id="fleet-details" className="scroll-mt-24 mt-4 grid gap-4 xl:mt-6 xl:grid-cols-[380px_1fr]">
       <Panel title="Add Cab" subtitle="Create a website-ready cab with price, image, and package details." icon={Plus}>
         <CabForm />
       </Panel>
@@ -142,7 +142,7 @@ function CabForm({ cab = {} }) {
 
 function Bookings({ bookings }) {
   return (
-    <Panel title="Booking Pipeline" subtitle="Update fare, assign status, add notes, and remove test enquiries." icon={CalendarClock} className="mt-6">
+    <Panel id="booking-details" title="Booking Pipeline" subtitle="All previous and current bookings. Update fare, assign status, add notes, and remove test enquiries." icon={CalendarClock} className="scroll-mt-24 mt-6">
       <div className="grid gap-3 lg:hidden">
         {bookings.map((booking) => (
           <article key={booking.id} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
@@ -267,7 +267,7 @@ function FareBreakdown({ fare }) {
 
 function Customers({ users }) {
   return (
-    <Panel title="Customers & Admins" subtitle="Edit customer records and manage trusted admin access." icon={Users} className="mt-6">
+    <Panel id="customer-details" title="Customers & Admins" subtitle="Edit customer records and manage trusted admin access." icon={Users} className="scroll-mt-24 mt-6">
       <div className="grid gap-3 lg:grid-cols-2">
         {users.map((item) => (
           <form key={item.id} action={updateUserAction} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -331,22 +331,24 @@ function DashboardShell({ user, children }) {
   );
 }
 
-function Stat({ icon: Icon, label, value, hint }) {
-  return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
+function Stat({ icon: Icon, label, value, hint, href }) {
+  const content = (
+    <>
       <div className="flex items-center justify-between">
         <div className="text-xs font-bold text-slate-600 sm:text-sm">{label}</div>
         <span className="flex h-8 w-8 items-center justify-center rounded-md bg-teal-50 text-teal-700 sm:h-10 sm:w-10"><Icon className="h-4 w-4 sm:h-5 sm:w-5" /></span>
       </div>
       <div className="mt-2 text-2xl font-black text-slate-950 sm:mt-3 sm:text-3xl">{value}</div>
       {hint && <div className="mt-1 text-xs font-semibold text-slate-500">{hint}</div>}
-    </div>
+    </>
   );
+  const className = "block rounded-lg border border-slate-200 bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-teal-500/30 sm:p-5";
+  return href ? <a href={href} className={className}>{content}</a> : <div className={className}>{content}</div>;
 }
 
-function Panel({ title, subtitle, icon: Icon, children, className = '' }) {
+function Panel({ id, title, subtitle, icon: Icon, children, className = '' }) {
   return (
-    <section className={`overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm ${className}`}>
+    <section id={id} className={`overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm ${className}`}>
       <div className="flex items-start gap-3 border-b border-slate-200 bg-white px-5 py-4">
         {Icon && <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-md bg-[#12233f] text-white"><Icon className="h-4 w-4" /></span>}
         <div>

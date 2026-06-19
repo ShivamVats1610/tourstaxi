@@ -4,14 +4,14 @@ import SectionTitle from '@/components/site/SectionTitle';
 import { STATS } from '@/lib/data';
 import { Award, Heart, Globe2, Target } from 'lucide-react';
 
-export const metadata = { title: 'About — ToursTaxi' };
+export const metadata = { title: 'About - ToursTaxi' };
 
 export default function AboutPage() {
   const values = [
-    { icon: Heart, title: 'Hospitality first', desc: 'We treat every guest like family \u2014 from the first call to the final drop.' },
+    { icon: Heart, title: 'Hospitality first', desc: 'We treat every guest like family - from the first call to the final drop.' },
     { icon: Award, title: 'Quality obsession', desc: 'Quarterly-refreshed fleet, certified drivers, zero compromise on comfort.' },
-    { icon: Globe2, title: 'Local expertise', desc: 'Born in Sawai Madhopur, we know India\u2019s heritage and wildlife circuit by heart.' },
-    { icon: Target, title: 'Transparent always', desc: 'Honest pricing, no surge, GST invoices on request \u2014 always.' }
+    { icon: Globe2, title: 'Local expertise', desc: 'Born in Sawai Madhopur, we know India heritage and wildlife circuit by heart.' },
+    { icon: Target, title: 'Transparent always', desc: 'Honest pricing, no surge, GST invoices on request - always.' }
   ];
 
   return (
@@ -20,8 +20,8 @@ export default function AboutPage() {
         <div className="absolute inset-0 bg-grid opacity-30" />
         <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-orange-300 text-xs font-semibold uppercase tracking-wider mb-4">Our Story</div>
-          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">Driving India\u2019s travellers since <span className="text-orange-400">2014</span></h1>
-          <p className="mt-5 text-white/80 text-lg max-w-2xl mx-auto">ToursTaxi began with a single Innova in the lanes of Sawai Madhopur \u2014 today we operate 500+ cabs across 100+ Indian cities, helping travellers explore the country in comfort.</p>
+          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">Driving India travellers since <span className="text-orange-400">2014</span></h1>
+          <p className="mt-5 text-white/80 text-lg max-w-2xl mx-auto">ToursTaxi began with a single Innova in the lanes of Sawai Madhopur - today we operate 500+ cabs across 100+ Indian cities, helping travellers explore the country in comfort.</p>
         </div>
       </section>
 
@@ -60,7 +60,7 @@ export default function AboutPage() {
           <Reveal><img src="https://images.unsplash.com/photo-1477587458883-47145ed94245?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzV8MHwxfHNlYXJjaHwxfHxSYWphc3RoYW58ZW58MHx8fHwxNzgwNzI3Njc3fDA&ixlib=rb-4.1.0&q=85" alt="rajasthan" className="rounded-3xl shadow-xl" /></Reveal>
           <Reveal delay={0.1}>
             <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">Made in Sawai Madhopur. <span className="bg-gradient-to-r from-sky-600 to-orange-500 bg-clip-text text-transparent">Trusted across India.</span></h2>
-            <p className="mt-4 text-slate-600 leading-relaxed">From a tiny cab stand near Ranthambore National Park to a pan-India ground-transport partner for hotels, travel agents and corporates \u2014 ToursTaxi has grown one happy traveller at a time.</p>
+            <p className="mt-4 text-slate-600 leading-relaxed">From a tiny cab stand near Ranthambore National Park to a pan-India ground-transport partner for hotels, travel agents and corporates - ToursTaxi has grown one happy traveller at a time.</p>
             <p className="mt-4 text-slate-600 leading-relaxed">Today we power 10,000+ trips a year, but our promise remains unchanged: honest pricing, warm hospitality and a driver who genuinely loves the road.</p>
           </Reveal>
         </div>

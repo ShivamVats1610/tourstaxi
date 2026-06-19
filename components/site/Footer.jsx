@@ -16,7 +16,7 @@ export default function Footer() {
               <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Premium Cab Rentals</div>
             </div>
           </div>
-          <p className="text-sm text-slate-400 leading-relaxed mb-4">India\u2019s most-trusted cab partner for outstation trips, airport transfers and curated Rajasthan tours \u2014 serving 100+ cities since 2014.</p>
+          <p className="text-sm text-slate-400 leading-relaxed mb-4">India most-trusted cab partner for outstation trips, airport transfers and curated Rajasthan tours - serving 100+ cities since 2014.</p>
           <div className="flex gap-3">
             {SOCIALS.map((label) => (
               <a key={label} href="#" className="h-9 w-9 rounded-full bg-white/10 hover:bg-teal-700 flex items-center justify-center text-xs font-bold uppercase text-white transition-colors">{label}</a>
@@ -34,7 +34,7 @@ export default function Footer() {
         <div>
           <h4 className="text-white font-semibold mb-4">Top Routes</h4>
           <ul className="space-y-2 text-sm">
-            {['Jaipur \u2192 Ranthambore', 'Delhi \u2192 Ranthambore', 'Agra \u2192 Ranthambore', 'Kota \u2192 Ranthambore', 'Jaipur \u2192 Udaipur', 'Sawai Madhopur \u2192 Jaipur'].map(r => (
+            {['Jaipur  to  Ranthambore', 'Delhi  to  Ranthambore', 'Agra  to  Ranthambore', 'Kota  to  Ranthambore', 'Jaipur  to  Udaipur', 'Sawai Madhopur  to  Jaipur'].map(r => (
               <li key={r}><Link href="/popular-routes" className="hover:text-teal-300 transition-colors">{r}</Link></li>
             ))}
           </ul>

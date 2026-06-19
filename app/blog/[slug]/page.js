@@ -8,7 +8,7 @@ import { Clock, User, ArrowLeft, ArrowRight, Calendar } from 'lucide-react';
 export function generateStaticParams() { return BLOG_POSTS.map(p => ({ slug: p.slug })); }
 export function generateMetadata({ params }) {
   const p = BLOG_POSTS.find(b => b.slug === params.slug);
-  return { title: p ? `${p.title} — ToursTaxi Blog` : 'Blog — ToursTaxi' };
+  return { title: p ? `${p.title} - ToursTaxi Blog` : 'Blog - ToursTaxi' };
 }
 
 export default function BlogSinglePage({ params }) {
@@ -40,18 +40,18 @@ export default function BlogSinglePage({ params }) {
         <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-[1fr_320px] gap-10">
           <article className="prose prose-slate max-w-none">
             <p className="text-xl text-slate-700 leading-relaxed font-medium">{post.excerpt}</p>
-            <p className="text-slate-700 leading-relaxed">Welcome to the ToursTaxi travel journal. In this article, our experienced drivers and tour planners share insider knowledge they\u2019ve picked up over hundreds of trips across India.</p>
+            <p className="text-slate-700 leading-relaxed">Welcome to the ToursTaxi travel journal. In this article, our experienced drivers and tour planners share insider knowledge they have picked up over hundreds of trips across India.</p>
             <h2 className="text-2xl font-bold text-slate-900 mt-8">Why this matters</h2>
-            <p className="text-slate-700 leading-relaxed">Whether you\u2019re planning your first Rajasthan trip or returning for the third time, getting the small details right \u2014 timing, hotel choice, the right cab \u2014 turns a good holiday into an unforgettable one.</p>
+            <p className="text-slate-700 leading-relaxed">Whether you are planning your first Rajasthan trip or returning for the third time, getting the small details right - timing, hotel choice, the right cab - turns a good holiday into an unforgettable one.</p>
             <h2 className="text-2xl font-bold text-slate-900 mt-8">Quick tips</h2>
             <ul className="text-slate-700 leading-relaxed list-disc pl-6 space-y-1">
-              <li>Book your cab at least 48 hours in advance during peak season (Oct\u2013Mar).</li>
-              <li>Carry a printout of your booking confirmation \u2014 some monuments need it.</li>
+              <li>Book your cab at least 48 hours in advance during peak season (Oct-Mar).</li>
+              <li>Carry a printout of your booking confirmation - some monuments need it.</li>
               <li>For wildlife, the early-morning safari is always better than the afternoon one.</li>
-              <li>Hydrate constantly \u2014 Rajasthan summers are no joke.</li>
+              <li>Hydrate constantly - Rajasthan summers are no joke.</li>
             </ul>
             <h2 className="text-2xl font-bold text-slate-900 mt-8">Final thoughts</h2>
-            <p className="text-slate-700 leading-relaxed">If you\u2019d like a customised itinerary or a chauffeur who knows every shortcut, call our team \u2014 we\u2019re happy to help plan the perfect trip.</p>
+            <p className="text-slate-700 leading-relaxed">For a customised itinerary or a chauffeur who knows every shortcut, call our team - we are happy to help plan the perfect trip.</p>
           </article>
 
           <aside className="space-y-6 lg:sticky lg:top-24 h-fit">
@@ -74,7 +74,7 @@ export default function BlogSinglePage({ params }) {
             </CardContent></Card>
             <Card className="bg-[#12233f] text-white border-0"><CardContent className="p-5">
               <h4 className="font-bold text-lg">Plan this trip</h4>
-              <p className="text-sm opacity-90 mt-1">Speak to our tour desk \u2014 we\u2019ll handle everything.</p>
+              <p className="text-sm opacity-90 mt-1">Speak to our tour desk - we will handle everything.</p>
               <Link href="/contact"><Button className="mt-4 w-full bg-amber-400 text-slate-950 hover:bg-amber-300 font-bold">Contact Us <ArrowRight className="h-4 w-4 ml-2" /></Button></Link>
             </CardContent></Card>
           </aside>

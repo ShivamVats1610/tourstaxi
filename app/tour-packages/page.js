@@ -5,7 +5,7 @@ import Reveal from '@/components/site/Reveal';
 import { PACKAGES } from '@/lib/data';
 import { Clock, Check, ArrowRight } from 'lucide-react';
 
-export const metadata = { title: 'Tour Packages — ToursTaxi' };
+export const metadata = { title: 'Tour Packages - ToursTaxi' };
 
 export default function ToursPage() {
   return (
@@ -14,7 +14,7 @@ export default function ToursPage() {
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">Tour Packages</div>
           <h1 className="text-3xl md:text-5xl font-extrabold">Curated journeys, end-to-end</h1>
-          <p className="mt-4 text-white/80 text-lg">Cab, stay, sightseeing \u2014 handcrafted by our Sawai Madhopur tour desk.</p>
+          <p className="mt-4 text-white/80 text-lg">Cab, stay, sightseeing - handcrafted by our Sawai Madhopur tour desk.</p>
         </div>
       </section>
 
@@ -38,7 +38,7 @@ export default function ToursPage() {
                     <div className="mt-auto pt-5 flex items-end justify-between border-t border-slate-100 mt-4">
                       <div>
                         <div className="text-[11px] text-slate-500">Starts at</div>
-                        <div className="text-3xl font-extrabold text-slate-900">\u20b9{p.price.toLocaleString()}<span className="text-sm text-slate-500 font-medium"> / person</span></div>
+                        <div className="text-3xl font-extrabold text-slate-900">Rs {p.price.toLocaleString()}<span className="text-sm text-slate-500 font-medium"> / person</span></div>
                       </div>
                       <Link href="/contact"><Button className="bg-amber-400 text-slate-950 hover:bg-amber-300">Book Now <ArrowRight className="h-4 w-4 ml-2" /></Button></Link>
                     </div>

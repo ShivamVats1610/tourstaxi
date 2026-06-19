@@ -21,18 +21,18 @@ const ITINERARIES = {
   ],
   'golden-triangle': [
     { day: 'Day 1', title: 'Delhi Arrival', desc: 'Airport pickup, hotel check-in, Old Delhi tour (Red Fort, Jama Masjid, Chandni Chowk).' },
-    { day: 'Day 2', title: 'Delhi → Agra', desc: 'Drive to Agra, evening view of Taj Mahal from Mehtab Bagh, hotel.' },
-    { day: 'Day 3', title: 'Taj at Sunrise → Jaipur', desc: 'Sunrise Taj Mahal tour, Agra Fort, drive to Jaipur with Fatehpur Sikri stop.' },
+    { day: 'Day 2', title: 'Delhi  to  Agra', desc: 'Drive to Agra, evening view of Taj Mahal from Mehtab Bagh, hotel.' },
+    { day: 'Day 3', title: 'Taj at Sunrise  to  Jaipur', desc: 'Sunrise Taj Mahal tour, Agra Fort, drive to Jaipur with Fatehpur Sikri stop.' },
     { day: 'Day 4', title: 'Jaipur Sightseeing', desc: 'Amber Fort, City Palace, Hawa Mahal, evening Chokhi Dhani cultural dinner.' },
     { day: 'Day 5', title: 'Departure', desc: 'Markets in the morning, drop to Jaipur airport / Delhi.' }
   ],
   'rajasthan-heritage': [
     { day: 'Day 1', title: 'Jaipur', desc: 'Amber Fort, City Palace, Hawa Mahal, Chokhi Dhani.' },
-    { day: 'Day 2', title: 'Jaipur → Pushkar → Jodhpur', desc: 'Holy Brahma Temple & Pushkar Ghats, drive to Jodhpur.' },
+    { day: 'Day 2', title: 'Jaipur  to  Pushkar  to  Jodhpur', desc: 'Holy Brahma Temple & Pushkar Ghats, drive to Jodhpur.' },
     { day: 'Day 3', title: 'Jodhpur Blue City', desc: 'Mehrangarh Fort, Jaswant Thada, blue-city walk, Sardar Market.' },
-    { day: 'Day 4', title: 'Jodhpur → Jaisalmer', desc: 'Drive to the Golden City, evening Gadisar Lake walk.' },
+    { day: 'Day 4', title: 'Jodhpur  to  Jaisalmer', desc: 'Drive to the Golden City, evening Gadisar Lake walk.' },
     { day: 'Day 5', title: 'Desert Camp', desc: 'Jaisalmer Fort, Patwon Ki Haveli, dune sunset, camel ride, cultural night.' },
-    { day: 'Day 6', title: 'Jaisalmer → Udaipur', desc: 'Long scenic drive to the City of Lakes.' },
+    { day: 'Day 6', title: 'Jaisalmer  to  Udaipur', desc: 'Long scenic drive to the City of Lakes.' },
     { day: 'Day 7', title: 'Udaipur', desc: 'City Palace, boat ride on Lake Pichola, Sajjangarh sunset, departure.' }
   ]
 };
@@ -70,7 +70,7 @@ export default function TourSlugClient({ slug }) {
           </div>
 
           <div>
-            <div className="text-xs text-sky-600 font-semibold uppercase tracking-wider">Tour Package · {pkg.tag}</div>
+            <div className="text-xs text-sky-600 font-semibold uppercase tracking-wider">Tour Package / {pkg.tag}</div>
             <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 mt-1">{pkg.title}</h1>
             <div className="flex items-center gap-3 mt-3 text-sm text-slate-600">
               <span className="flex items-center gap-1.5"><Clock className="h-4 w-4 text-sky-500" />{pkg.duration}</span>
@@ -82,12 +82,12 @@ export default function TourSlugClient({ slug }) {
             <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
               <h3 className="font-bold text-slate-900 flex items-center gap-2"><Sparkles className="h-4 w-4 text-orange-500" /> What&apos;s included</h3>
               <ul className="mt-3 grid grid-cols-2 gap-y-1.5 text-sm text-slate-700">
-                {[...pkg.inclusions, 'GST & Toll', '24×7 Tour Manager', 'Pickup & Drop'].map(f => <li key={f} className="flex items-center gap-1.5"><Check className="h-4 w-4 text-sky-500" /> {f}</li>)}
+                {[...pkg.inclusions, 'GST & Toll', '24x7 Tour Manager', 'Pickup & Drop'].map(f => <li key={f} className="flex items-center gap-1.5"><Check className="h-4 w-4 text-sky-500" /> {f}</li>)}
               </ul>
             </div>
 
             <div className="mt-5 rounded-2xl bg-gradient-to-br from-sky-50 to-orange-50 border border-sky-200 p-5 flex items-end justify-between">
-              <div><div className="text-xs text-slate-500">From (per person)</div><div className="text-4xl font-extrabold text-slate-900">₹{pkg.price.toLocaleString()}</div><div className="text-xs text-slate-500">All-inclusive · No hidden charges</div></div>
+              <div><div className="text-xs text-slate-500">From (per person)</div><div className="text-4xl font-extrabold text-slate-900">Rs {pkg.price.toLocaleString()}</div><div className="text-xs text-slate-500">All-inclusive / No hidden charges</div></div>
               <Button onClick={() => open({ packageSlug: pkg.slug, startStep: 0 })} className="h-12 px-6 bg-orange-500 hover:bg-orange-600 font-bold shadow-lg shadow-orange-500/30">Book this Tour <ArrowRight className="h-4 w-4 ml-2" /></Button>
             </div>
           </div>
@@ -143,7 +143,7 @@ export default function TourSlugClient({ slug }) {
                   <CardContent className="p-4">
                     <div className="text-xs flex items-center gap-1.5 text-slate-500"><Clock className="h-3.5 w-3.5" />{p.duration}</div>
                     <div className="font-bold text-slate-900 mt-1">{p.title}</div>
-                    <div className="mt-1 text-sm font-extrabold text-orange-600">₹{p.price.toLocaleString()}</div>
+                    <div className="mt-1 text-sm font-extrabold text-orange-600">Rs {p.price.toLocaleString()}</div>
                   </CardContent>
                 </Card>
               </Link>

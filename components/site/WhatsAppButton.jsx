@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, PhoneCall } from 'lucide-react';
 import { COMPANY } from '@/lib/data';
 
 export default function WhatsAppButton() {
@@ -8,18 +8,31 @@ export default function WhatsAppButton() {
   const href = `https://wa.me/${COMPANY.phoneRaw.replace(/\D/g, '')}?text=${message}`;
 
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Chat on WhatsApp"
-      className="group fixed bottom-5 right-4 z-50 flex items-center gap-2 rounded-full bg-[#128c7e] px-3 py-3 text-white shadow-[0_14px_35px_rgba(15,23,42,0.28)] transition hover:-translate-y-0.5 hover:bg-[#0f766e] sm:right-6 sm:px-4"
-    >
-      <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-[#128c7e]/25" />
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#128c7e]">
-        <MessageCircle className="h-4 w-4" />
-      </span>
-      <span className="hidden text-sm font-black sm:inline">WhatsApp</span>
-    </a>
+    <div className="fixed bottom-5 right-4 z-50 flex flex-col items-end gap-3 sm:right-6">
+      <a
+        href={`tel:${COMPANY.phoneRaw}`}
+        aria-label="Call ToursTaxi"
+        className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-[#f59e0b] text-slate-950 shadow-[0_14px_35px_rgba(15,23,42,0.28)] transition duration-300 hover:-translate-y-1 hover:bg-[#fbbf24]"
+      >
+        <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-amber-400/25" />
+        <span className="absolute -inset-1 -z-20 rounded-full bg-amber-300/20 opacity-0 blur transition group-hover:opacity-100" />
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-amber-300 transition group-hover:rotate-12">
+          <PhoneCall className="h-5 w-5" />
+        </span>
+      </a>
+
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat on WhatsApp"
+        className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-[#128c7e] text-white shadow-[0_14px_35px_rgba(15,23,42,0.28)] transition duration-300 hover:-translate-y-1 hover:bg-[#0f766e]"
+      >
+        <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-[#128c7e]/25" />
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#128c7e] transition group-hover:scale-110">
+          <MessageCircle className="h-5 w-5" />
+        </span>
+      </a>
+    </div>
   );
 }
