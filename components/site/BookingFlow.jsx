@@ -242,9 +242,9 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
 
     const paymentAmount = payment === 'full' ? fare.total : payment === 'part' ? fare.partPay : 0;
     if (paymentAmount > 0 && !paymentStarted) {
-      openUpiPayment(paymentAmount, `TTX-${Date.now()}`, payment);
+      openUpiPayment(paymentAmount, `TTX-${Date.now()}`, payment, 'gpay');
       setPaymentStarted(true);
-      toast.info('Complete UPI payment, then return here and confirm your booking.');
+      toast.info('Complete payment in Google Pay, then return here.');
       return;
     }
 
@@ -332,6 +332,11 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                   setPaymentStarted(false);
                 }}
                 paymentStarted={paymentStarted}
+                onStartPayment={(app) => {
+                  const amount = payment === 'full' ? fare.total : fare.partPay;
+                  openUpiPayment(amount, `TTX-${Date.now()}`, payment, app);
+                  setPaymentStarted(true);
+                }}
                 onBack={() => setView('cars')}
                 onSubmit={submit}
                 submitting={submitting}
@@ -352,7 +357,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
   );
 }
 
-function openUpiPayment(amount, bookingId, paymentOption) {
+function openUpiPayment(amount, bookingId, paymentOption, app = 'gpay') {
   const params = new URLSearchParams({
     pa: 'merchant1305070.augp@aubank',
     pn: 'ToursTaxi',
@@ -360,7 +365,13 @@ function openUpiPayment(amount, bookingId, paymentOption) {
     cu: 'INR',
     tn: `ToursTaxi ${paymentOption === 'full' ? 'full payment' : 'advance'} ${bookingId}`
   });
-  window.location.href = `upi://pay?${params.toString()}`;
+  const query = params.toString();
+  const links = {
+    gpay: `gpay://upi/pay?${query}`,
+    paytm: `paytmmp://upi/pay?${query}`,
+    phonepe: `phonepe://upi/pay?${query}`
+  };
+  window.location.href = links[app] || links.gpay;
 }
 
 function TripBar({ data, routeLabel, onModify }) {
@@ -407,14 +418,32 @@ function ModifyPanel({ data, set, onSelectLocation, onContinue }) {
     set('stops', (data.stops || []).filter((_, itemIndex) => itemIndex !== index));
     set('stopCoordinates', (data.stopCoordinates || []).filter((_, itemIndex) => itemIndex !== index));
   };
+  const swapPlaces = () => {
+    const pickup = data.pickup || '';
+    const drop = data.drop || '';
+    const pickupCoordinates = data.pickupCoordinates || null;
+    const dropCoordinates = data.dropCoordinates || null;
+    set('pickup', drop);
+    set('drop', pickup);
+    set('pickupCoordinates', dropCoordinates);
+    set('dropCoordinates', pickupCoordinates);
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-3 py-4 sm:px-8 sm:py-6">
       <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="grid gap-3 lg:grid-cols-5">
+        <div className="grid gap-3 lg:grid-cols-[1fr_auto_1fr_2fr_auto]">
           <LocationAutocomplete label={data.tripType === 'local' ? 'Pickup Location' : 'From'} value={data.pickup || ''} placeholder="Pickup location" onValueChange={(value) => set('pickup', value)} onSelect={(location) => onSelectLocation('pickup', location)} showCurrentLocation />
+          <button
+            type="button"
+            onClick={swapPlaces}
+            className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-teal-50 text-teal-700 shadow-sm ring-1 ring-teal-100 transition hover:bg-teal-100 hover:text-teal-800 lg:self-end"
+            aria-label="Swap pickup and drop"
+          >
+            <ArrowLeftRight className="h-5 w-5" />
+          </button>
           <LocationAutocomplete label={data.tripType === 'local' ? 'Drop Location' : 'To'} value={data.drop || ''} placeholder="Drop location" onValueChange={(value) => set('drop', value)} onSelect={(location) => onSelectLocation('drop', location)} />
-          <div className="grid gap-3 rounded-lg bg-slate-50 p-3 lg:col-span-2">
+          <div className="grid gap-3 rounded-lg bg-slate-50 p-3">
             <DateTimeField
               label="Pickup Date & Time"
               date={data.date}
@@ -664,7 +693,7 @@ function CabCard({ cab, data, set, index, onCheckout }) {
   );
 }
 
-function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSelectedAddons, payment, setPayment, paymentStarted, onBack, onSubmit, submitting }) {
+function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSelectedAddons, payment, setPayment, paymentStarted, onStartPayment, onBack, onSubmit, submitting }) {
   if (!vehicle || !fare) return null;
 
   const toggleAddon = (id) => {
@@ -758,19 +787,26 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
         <div className="mb-5 rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 font-bold text-yellow-900">Free cancellation till 1 hr of departure</div>
         <h3 className="text-2xl text-black">Payment Options</h3>
         <PaymentOption active={payment === 'zero'} onClick={() => setPayment('zero')} title="Pay after ride" subtitle="Book now and pay the driver after trip" price="Rs 0" />
-        <PaymentOption active={payment === 'part'} onClick={() => setPayment('part')} title="Pay 25% amount" subtitle="Open UPI app and pay advance now" price={money(fare.partPay)} />
-        <PaymentOption active={payment === 'full'} onClick={() => setPayment('full')} title="Pay full" subtitle="Open UPI app and pay full fare now" price={money(fare.total)} />
-        {payment !== 'zero' && paymentStarted && (
-          <div className="mt-4 rounded-md border border-teal-200 bg-teal-50 px-3 py-2 text-sm font-bold text-teal-900">
-            After completing UPI payment, tap confirm below.
+        <PaymentOption active={payment === 'part'} onClick={() => setPayment('part')} title="Pay 25% amount" subtitle="Pay advance to merchant1305070.augp@aubank" price={money(fare.partPay)} />
+        <PaymentOption active={payment === 'full'} onClick={() => setPayment('full')} title="Pay full" subtitle="Pay full fare to merchant1305070.augp@aubank" price={money(fare.total)} />
+        {payment !== 'zero' && (
+          <div className="mt-4 rounded-md border border-teal-200 bg-teal-50 p-3 text-sm font-bold text-teal-900">
+            <div>{paymentStarted ? 'After payment is completed, confirm your booking below.' : 'Choose a payment app. Booking confirmation is hidden until you open payment.'}</div>
+            {!paymentStarted && (
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                <button type="button" onClick={() => onStartPayment('gpay')} className="h-10 rounded-md bg-white px-2 text-xs font-black text-slate-950 shadow-sm ring-1 ring-teal-100">Google Pay</button>
+                <button type="button" onClick={() => onStartPayment('paytm')} className="h-10 rounded-md bg-white px-2 text-xs font-black text-slate-950 shadow-sm ring-1 ring-teal-100">Paytm</button>
+                <button type="button" onClick={() => onStartPayment('phonepe')} className="h-10 rounded-md bg-white px-2 text-xs font-black text-slate-950 shadow-sm ring-1 ring-teal-100">PhonePe</button>
+              </div>
+            )}
           </div>
         )}
         <div className="mt-5 border-t border-slate-100 pt-5">
           <div className="text-black">Coupon & Offers</div>
           <div className="mt-3 flex gap-2"><Input placeholder="ENTER A COUPON" /><Button className="bg-teal-700 hover:bg-teal-800">APPLY</Button></div>
         </div>
-        <Button onClick={onSubmit} disabled={submitting} className="mt-5 h-14 w-full rounded-lg bg-amber-500 text-lg font-black uppercase text-slate-950 hover:bg-amber-400">
-          {submitting ? 'Proceeding...' : payment === 'zero' ? 'Confirm Booking' : paymentStarted ? 'I Have Paid, Confirm Booking' : 'Pay with UPI'}
+        <Button onClick={onSubmit} disabled={submitting} className={`mt-5 h-14 w-full rounded-lg text-lg font-black uppercase ${payment !== 'zero' && !paymentStarted ? 'bg-teal-700 text-white hover:bg-teal-800' : 'bg-amber-500 text-slate-950 hover:bg-amber-400'}`}>
+          {submitting ? 'Proceeding...' : payment === 'zero' ? 'Confirm Booking' : paymentStarted ? 'I Have Paid, Confirm Booking' : 'Pay with Google Pay'}
         </Button>
         <details className="mt-4 text-sm">
           <summary className="cursor-pointer font-bold text-teal-700">View Fare Break up</summary>

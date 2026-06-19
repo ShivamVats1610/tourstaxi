@@ -264,7 +264,7 @@ function SwapButton({ onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="mx-auto hidden h-10 w-10 items-center justify-center rounded-full bg-teal-50 text-teal-700 transition hover:bg-teal-100 lg:flex"
+      className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-teal-50 text-teal-700 shadow-sm ring-1 ring-teal-100 transition hover:bg-teal-100 hover:text-teal-800 lg:h-10 lg:w-10"
       aria-label="Swap pickup and drop"
     >
       <ArrowLeftRight className="h-5 w-5" />
