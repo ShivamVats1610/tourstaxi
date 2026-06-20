@@ -2,10 +2,14 @@
 
 import { MessageCircle, PhoneCall } from 'lucide-react';
 import { COMPANY } from '@/lib/data';
+import { usePathname } from 'next/navigation';
 
 export default function WhatsAppButton() {
+  const pathname = usePathname();
   const message = encodeURIComponent('Hi ToursTaxi, I want to book a cab.');
   const href = `https://wa.me/${COMPANY.phoneRaw.replace(/\D/g, '')}?text=${message}`;
+
+  if (pathname?.startsWith('/admin')) return null;
 
   return (
     <div className="fixed bottom-5 right-4 z-50 flex flex-col items-end gap-3 sm:right-6">

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { requireUser } from '@/lib/auth';
 import { deleteBooking, deleteCab, deleteUser, updateBooking, updateUser, upsertCab } from '@/lib/crm';
+import { updatePricingSettings } from '@/lib/pricing-settings';
 
 async function requireAdmin() {
   await requireUser('admin');
@@ -40,6 +41,7 @@ export async function saveCabAction(formData) {
   });
 
   revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/cars');
   revalidatePath('/fleet');
   revalidatePath('/');
 }
@@ -48,6 +50,7 @@ export async function deleteCabAction(formData) {
   await requireAdmin();
   await deleteCab(String(formData.get('id') || ''));
   revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/cars');
   revalidatePath('/fleet');
   revalidatePath('/');
 }
@@ -61,6 +64,8 @@ export async function updateBookingAction(formData) {
     notes: formData.get('notes'),
   });
   revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/bookings/new');
+  revalidatePath('/admin/bookings/old');
   revalidatePath('/customer/dashboard');
 }
 
@@ -68,6 +73,8 @@ export async function deleteBookingAction(formData) {
   await requireAdmin();
   await deleteBooking(String(formData.get('id') || ''));
   revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/bookings/new');
+  revalidatePath('/admin/bookings/old');
 }
 
 export async function updateUserAction(formData) {
@@ -80,12 +87,27 @@ export async function updateUserAction(formData) {
     role: formData.get('role'),
   });
   revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/customers');
 }
 
 export async function deleteUserAction(formData) {
   await requireAdmin();
   await deleteUser(String(formData.get('id') || ''));
   revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/customers');
+}
+
+export async function updatePricingSettingsAction(formData) {
+  await requireAdmin();
+  await updatePricingSettings({
+    minimumBillingKmPerDay: formData.get('minimumBillingKmPerDay'),
+    oneWayMinimumKm: formData.get('oneWayMinimumKm'),
+    airportMinimumKm: formData.get('airportMinimumKm'),
+    roundTripMinimumKmPerDay: formData.get('roundTripMinimumKmPerDay'),
+    advancePercent: formData.get('advancePercent'),
+  });
+  revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/pricing');
 }
 
 export async function updateProfileAction(formData) {

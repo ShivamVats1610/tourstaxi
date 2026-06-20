@@ -101,6 +101,14 @@ export default function BookingWidget() {
     setDropCoordinates(pickupCoordinates);
   };
 
+  const swapAirportPlaces = () => {
+    setAirportTrip((current) => current === 'Pickup from Airport' ? 'Drop to Airport' : 'Pickup from Airport');
+    setPickup(airport);
+    setAirport(pickup);
+    setPickupCoordinates(dropCoordinates);
+    setDropCoordinates(pickupCoordinates);
+  };
+
   const explore = () => {
     const airportPickup = airportTrip === 'Pickup from Airport';
     const nextPickup = tab === 'airport' ? (airportPickup ? airport : pickup) : pickup;
@@ -176,36 +184,65 @@ export default function BookingWidget() {
 
         <div className="mt-5 lg:mt-6">
           {tab === 'one-way' && (
-            <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto_1fr_290px] xl:gap-7">
-              <LineLocation label="From" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
-              <SwapButton onClick={swapPlaces} />
-              <LineLocation label="To" value={drop} setValue={setDrop} setCoordinates={setDropCoordinates} />
+            <div className="grid items-end gap-4 lg:grid-cols-[minmax(0,1fr)_290px] xl:gap-7">
+              <RouteLocationFields
+                pickup={pickup}
+                drop={drop}
+                setPickup={setPickup}
+                setDrop={setDrop}
+                setPickupCoordinates={setPickupCoordinates}
+                setDropCoordinates={setDropCoordinates}
+                onSwap={swapPlaces}
+              />
               {commonDateFields}
             </div>
           )}
 
           {tab === 'round-trip' && (
-            <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto_1fr_230px_230px] xl:gap-6">
-              <LineLocation label="From" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
-              <SwapButton onClick={swapPlaces} />
-              <LineLocation label="To" value={drop} setValue={setDrop} setCoordinates={setDropCoordinates} />
+            <div className="grid items-end gap-4 lg:grid-cols-[minmax(0,1fr)_230px_230px] xl:gap-6">
+              <RouteLocationFields
+                pickup={pickup}
+                drop={drop}
+                setPickup={setPickup}
+                setDrop={setDrop}
+                setPickupCoordinates={setPickupCoordinates}
+                setDropCoordinates={setDropCoordinates}
+                onSwap={swapPlaces}
+              />
               {commonDateFields}
             </div>
           )}
 
           {tab === 'local' && (
-            <div className="grid items-end gap-4 md:grid-cols-3 xl:gap-7">
-              <LineLocation label="Pickup Location" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
-              <LineLocation label="Drop Location" value={drop} setValue={setDrop} setCoordinates={setDropCoordinates} />
+            <div className="grid items-end gap-4 md:grid-cols-[minmax(0,1fr)_290px] xl:gap-7">
+              <RouteLocationFields
+                pickup={pickup}
+                drop={drop}
+                fromLabel="Pickup Location"
+                toLabel="Drop Location"
+                setPickup={setPickup}
+                setDrop={setDrop}
+                setPickupCoordinates={setPickupCoordinates}
+                setDropCoordinates={setDropCoordinates}
+                onSwap={swapPlaces}
+              />
               {commonDateFields}
             </div>
           )}
 
           {tab === 'airport' && (
-            <div className="grid items-end gap-4 lg:grid-cols-[220px_1fr_1fr_270px] xl:gap-7">
+            <div className="grid items-end gap-4 lg:grid-cols-[220px_minmax(0,1fr)_270px] xl:gap-7">
               <LineSelect label="Trip" value={airportTrip} onChange={setAirportTrip} options={AIRPORT_TRIPS} />
-              <LineLocation label="Pickup Address" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
-              <LineLocation label={airportTrip === 'Pickup from Airport' ? 'Pickup Airport' : 'Drop Airport'} value={airport} setValue={setAirport} setCoordinates={setDropCoordinates} placeholder="Enter Airport" />
+              <AirportLocationFields
+                pickup={pickup}
+                airport={airport}
+                setPickup={setPickup}
+                setAirport={setAirport}
+                setPickupCoordinates={setPickupCoordinates}
+                setDropCoordinates={setDropCoordinates}
+                airportTrip={airportTrip}
+                onSwap={swapAirportPlaces}
+              />
               {commonDateFields}
             </div>
           )}
@@ -259,12 +296,32 @@ export default function BookingWidget() {
   );
 }
 
+function RouteLocationFields({ pickup, drop, fromLabel = 'From', toLabel = 'To', setPickup, setDrop, setPickupCoordinates, setDropCoordinates, onSwap }) {
+  return (
+    <div className="relative grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-end lg:gap-4 xl:gap-6">
+      <LineLocation label={fromLabel} value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
+      <SwapButton onClick={onSwap} />
+      <LineLocation label={toLabel} value={drop} setValue={setDrop} setCoordinates={setDropCoordinates} />
+    </div>
+  );
+}
+
+function AirportLocationFields({ pickup, airport, setPickup, setAirport, setPickupCoordinates, setDropCoordinates, airportTrip, onSwap }) {
+  return (
+    <div className="relative grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-end lg:gap-4 xl:gap-6">
+      <LineLocation label="Pickup Address" value={pickup} setValue={setPickup} setCoordinates={setPickupCoordinates} showCurrentLocation />
+      <SwapButton onClick={onSwap} />
+      <LineLocation label={airportTrip === 'Pickup from Airport' ? 'Pickup Airport' : 'Drop Airport'} value={airport} setValue={setAirport} setCoordinates={setDropCoordinates} placeholder="Enter Airport" />
+    </div>
+  );
+}
+
 function SwapButton({ onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-teal-50 text-teal-700 shadow-sm ring-1 ring-teal-100 transition hover:bg-teal-100 hover:text-teal-800 lg:h-10 lg:w-10"
+      className="absolute right-1 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-teal-700 shadow-md ring-1 ring-teal-100 transition hover:bg-teal-50 hover:text-teal-800 lg:static lg:mx-auto lg:h-10 lg:w-10 lg:translate-y-0"
       aria-label="Swap pickup and drop"
     >
       <ArrowLeftRight className="h-5 w-5" />

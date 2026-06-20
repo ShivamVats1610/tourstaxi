@@ -35,6 +35,8 @@ export default function Header() {
   const dashboardHref = session?.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard';
   const visibleNav = NAV.filter((item) => ['Home', 'Services', 'Fleet', 'Routes', 'Tour Packages', 'Contact'].includes(item.label));
 
+  if (pathname?.startsWith('/admin')) return null;
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/80 bg-white/95 text-slate-950 shadow-[0_2px_18px_rgba(15,23,42,0.08)] backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:h-[74px] sm:gap-3 sm:px-6 lg:px-8 xl:max-w-[1280px]">

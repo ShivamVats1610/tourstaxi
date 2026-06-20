@@ -1,10 +1,17 @@
+'use client';
+
 import Link from 'next/link';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { COMPANY, NAV } from '@/lib/data';
+import { usePathname } from 'next/navigation';
 
 const SOCIALS = ['f', 'ig', 'x', 'yt'];
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith('/admin')) return null;
+
   return (
     <footer className="bg-[#071527] text-slate-300 pt-16 pb-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-10 lg:grid-cols-4">
