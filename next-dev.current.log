@@ -1,0 +1,36 @@
+
+> tourstaxi@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.7 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.175:3000
+- Environments: .env.local
+✓ Ready in 1364ms
+[mapbox:build] {
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: true }
+- Experiments (use with caution):
+  · serverActions
+
+○ Compiling /login ...
+ GET /login 200 in 11.5s (next.js: 9.2s, proxy.ts: 286ms, application-code: 1993ms)
+ GET /api/auth/me 200 in 1407ms (next.js: 1344ms, application-code: 63ms)
+ GET /api/pricing-settings 200 in 1133ms (next.js: 1082ms, application-code: 51ms)
+ GET / 200 in 2.3s (next.js: 1923ms, application-code: 335ms)
+ POST /login 200 in 1623ms (next.js: 12ms, proxy.ts: 12ms, application-code: 1598ms)
+  └─ ƒ createFirebaseSession({"adminCode":"","email":"tourstaxi.com@gmail.com","firebaseUid":"kET2ExKYjYUYhtfYa8tdrec44y13","...":"2 items not stringified"}) in 1401ms app/actions/auth.js
+ GET /admin/dashboard 200 in 3.6s (next.js: 1992ms, proxy.ts: 51ms, application-code: 1517ms)
+ GET /admin/dashboard 200 in 1341ms (next.js: 128ms, proxy.ts: 46ms, application-code: 1167ms)
+ GET /api/auth/me 200 in 87ms (next.js: 24ms, application-code: 63ms)
+ GET /api/bookings 200 in 419ms (next.js: 347ms, application-code: 72ms)
+ GET /api/bookings 200 in 489ms (next.js: 435ms, application-code: 54ms)
+ GET /admin/cars 200 in 1187ms (next.js: 1004ms, proxy.ts: 11ms, application-code: 173ms)
+ GET /api/auth/me 200 in 56ms (next.js: 14ms, application-code: 42ms)
+ POST /admin/cars 200 in 3.3s (next.js: 17ms, proxy.ts: 25ms, application-code: 3.2s)
+  └─ ƒ saveCabAction({}) in 2963ms app/actions/crm.js

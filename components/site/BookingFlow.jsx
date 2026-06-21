@@ -161,7 +161,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
-    fetch('/api/pricing-settings')
+    fetch('/api/pricing-settings', { cache: 'no-store' })
       .then((response) => response.json())
       .then((result) => {
         if (!cancelled && result?.settings) setPricingSettings(result.settings);
@@ -772,6 +772,7 @@ function CabCard({ cab, data, set, pricingSettings, index, onCheckout }) {
 function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSelectedAddons, payment, setPayment, onBack, onSubmit, submitting }) {
   if (!vehicle || !fare) return null;
   const detailsComplete = Boolean(data.name?.trim() && data.phone?.trim() && data.address?.trim() && data.dropAddress?.trim());
+  const advancePercent = Math.min(Math.max(Number(fare.pricingPolicy?.advancePercent ?? DEFAULT_PRICING_SETTINGS.advancePercent), 0), 100);
 
   const toggleAddon = (id) => {
     setSelectedAddons((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
@@ -844,7 +845,7 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
         <aside className="h-fit rounded-lg border border-slate-200 bg-white p-3 shadow-lg lg:sticky lg:top-4">
           <div className="mb-3 rounded-md border border-yellow-300 bg-yellow-50 px-3 py-2 text-xs font-bold text-yellow-900">Free cancellation till 1 hr of departure</div>
           <h3 className="text-lg font-black text-black">Payment Options</h3>
-          <PaymentOption active={payment === 'part'} onClick={() => setPayment('part')} title="Pay 25% advance" subtitle="Razorpay secure payment" price={money(fare.partPay)} />
+          <PaymentOption active={payment === 'part'} onClick={() => setPayment('part')} title={`Pay ${advancePercent}% advance`} subtitle="Razorpay secure payment" price={money(fare.partPay)} />
           <PaymentOption active={payment === 'full'} onClick={() => setPayment('full')} title="Pay full fare" subtitle="Confirm with full payment" price={money(fare.total)} />
           <div className="mt-3 rounded-md border border-teal-200 bg-teal-50 p-2 text-xs font-bold text-teal-900">Confirmation appears only after Razorpay payment is verified.</div>
           <Button onClick={onSubmit} disabled={submitting} className="mt-3 h-11 w-full rounded-md bg-teal-700 text-sm font-black uppercase text-white hover:bg-teal-800">

@@ -15,7 +15,14 @@ export async function saveCabAction(formData) {
   let image = String(formData.get('image') || '');
 
   if (imageFile && imageFile.size) {
-    image = await uploadToCloudinary(imageFile);
+    try {
+      image = await uploadToCloudinary(imageFile);
+    } catch (error) {
+      console.error('Cab image upload failed:', error);
+      if (!image) {
+        throw error;
+      }
+    }
   }
 
   await upsertCab({
@@ -43,6 +50,7 @@ export async function saveCabAction(formData) {
   revalidatePath('/admin/dashboard');
   revalidatePath('/admin/cars');
   revalidatePath('/fleet');
+  revalidatePath('/fleet/[slug]', 'page');
   revalidatePath('/');
 }
 
@@ -52,6 +60,7 @@ export async function deleteCabAction(formData) {
   revalidatePath('/admin/dashboard');
   revalidatePath('/admin/cars');
   revalidatePath('/fleet');
+  revalidatePath('/fleet/[slug]', 'page');
   revalidatePath('/');
 }
 
@@ -108,6 +117,7 @@ export async function updatePricingSettingsAction(formData) {
   });
   revalidatePath('/admin/dashboard');
   revalidatePath('/admin/pricing');
+  revalidatePath('/');
 }
 
 export async function updateProfileAction(formData) {
