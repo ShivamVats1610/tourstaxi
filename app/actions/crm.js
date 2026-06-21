@@ -52,6 +52,7 @@ export async function saveCabAction(formData) {
   revalidatePath('/fleet');
   revalidatePath('/fleet/[slug]', 'page');
   revalidatePath('/');
+  revalidatePath('/', 'layout');
 }
 
 export async function deleteCabAction(formData) {
@@ -62,6 +63,7 @@ export async function deleteCabAction(formData) {
   revalidatePath('/fleet');
   revalidatePath('/fleet/[slug]', 'page');
   revalidatePath('/');
+  revalidatePath('/', 'layout');
 }
 
 export async function updateBookingAction(formData) {

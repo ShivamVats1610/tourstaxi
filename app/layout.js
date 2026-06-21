@@ -9,6 +9,8 @@ import { listCabs } from '@/lib/crm';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'ToursTaxi - Premium Cab Booking & Rajasthan Tours',
   description: 'Book outstation cabs, airport transfers and curated Rajasthan tour packages with ToursTaxi. Verified drivers, transparent pricing, 24x7 support. 100+ cities.',
