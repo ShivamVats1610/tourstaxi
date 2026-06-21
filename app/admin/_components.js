@@ -204,12 +204,13 @@ function CabForm({ cab = {} }) {
 
 export function Customers({ users }) {
   return (
-    <Panel title="Customers & Admins" subtitle="Edit customer records and manage trusted admin access." icon={Users}>
+    <Panel title="Customers & Admins" subtitle="Edit customer records, booking totals, and trusted admin access." icon={Users}>
       <div className="grid gap-3 lg:grid-cols-2">
         {users.map((item) => (
           <form key={item.id} action={updateUserAction} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
             <input type="hidden" name="id" value={item.id} />
-            <div className="mb-3 flex items-center justify-between gap-3"><div><div className="font-black">{item.name || 'Unnamed user'}</div><div className="text-xs font-semibold text-slate-500">{item.email || 'No email'}</div></div><StatusBadge status={item.role || 'customer'} /></div>
+            <div className="mb-3 flex items-start justify-between gap-3"><div className="min-w-0"><div className="font-black">{item.name || 'Unnamed user'}</div><div className="break-words text-xs font-semibold text-slate-500">{item.email || 'No email'}</div></div><div className="flex shrink-0 flex-col items-end gap-2"><StatusBadge status={item.role || 'customer'} /><span className="inline-flex rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-teal-700 ring-1 ring-teal-200">{item.bookingCount || 0} bookings</span></div></div>
+            <div className="mb-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2"><div className="text-[11px] font-black uppercase tracking-wider text-slate-500">Total Bookings</div><div className="mt-1 text-2xl font-black text-slate-950">{Number(item.bookingCount || 0).toLocaleString('en-IN')}</div></div>
             <div className="grid gap-3 sm:grid-cols-2"><Field name="name" label="Name" defaultValue={item.name} /><Field name="phone" label="Phone" defaultValue={item.phone} /><Field name="email" label="Email" type="email" defaultValue={item.email} /><label className="text-xs font-bold uppercase tracking-wider text-slate-700">Role<select name="role" defaultValue={item.role} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold normal-case"><option value="customer">Customer</option><option value="admin">Admin</option></select></label></div>
             <div className="mt-3 flex flex-wrap gap-2"><ToastSubmitButton message="Saving user" description="Customer details are being updated." className="h-9 rounded-md bg-[#12233f] px-3 text-xs font-black text-white hover:bg-[#0f1c33]">Save User</ToastSubmitButton><button formAction={deleteUserAction} className="inline-flex h-9 items-center rounded-md border border-red-200 bg-red-50 px-3 text-xs font-bold text-red-700 hover:bg-red-100"><Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete</button></div>
           </form>
@@ -229,9 +230,19 @@ export function PricingSettingsForm({ settings }) {
           <Field name="oneWayMinimumKm" label="One Way Minimum KM" type="number" min="0" defaultValue={settings.oneWayMinimumKm} />
           <Field name="airportMinimumKm" label="Airport Minimum KM" type="number" min="0" defaultValue={settings.airportMinimumKm} />
           <Field name="roundTripMinimumKmPerDay" label="Round Trip KM Per Day" type="number" min="0" defaultValue={settings.roundTripMinimumKmPerDay} />
+          <Field name="localMinimumKm" label="Local Minimum KM" type="number" min="0" defaultValue={settings.localMinimumKm} />
           <Field name="advancePercent" label="Advance Payment %" type="number" min="0" max="100" step="1" defaultValue={settings.advancePercent} />
         </div>
-        <div className="break-words rounded-lg border border-teal-100 bg-teal-50 p-4 text-sm font-semibold text-teal-950">Example: set one way minimum to 300 and any one-way trip below 300 km will bill 300 km. Round trip uses the per-day value multiplied by trip days.</div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <Field name="oneWayBaseFare" label="One Way Base Fare" type="number" min="0" defaultValue={settings.oneWayBaseFare} />
+          <Field name="roundTripBaseFare" label="Round Trip Base Fare" type="number" min="0" defaultValue={settings.roundTripBaseFare} />
+          <Field name="airportBaseFare" label="Airport Base Fare" type="number" min="0" defaultValue={settings.airportBaseFare} />
+          <Field name="localBaseFare" label="Local Base Fare" type="number" min="0" defaultValue={settings.localBaseFare} />
+          <Field name="driverAllowancePerDay" label="Driver Allowance Per Day" type="number" min="0" defaultValue={settings.driverAllowancePerDay} />
+          <Field name="gstPercent" label="GST %" type="number" min="0" max="100" step="0.1" defaultValue={settings.gstPercent} />
+          <Field name="dieselSurchargePerKm" label="Diesel Surcharge Per KM" type="number" min="0" step="0.1" defaultValue={settings.dieselSurchargePerKm} />
+        </div>
+        <div className="break-words rounded-lg border border-teal-100 bg-teal-50 p-4 text-sm font-semibold text-teal-950">Car rates come from Add Cab. These rules add minimum KM, base fare, driver allowance, GST, diesel surcharge, and advance payment across one way, round trip, local, and airport bookings.</div>
         <ToastSubmitButton message="Saving fare settings" description="Fare calculation policy is being updated." className="h-11 w-full rounded-md bg-teal-700 px-4 text-sm font-black text-white hover:bg-teal-800 sm:w-fit">Save Fare Settings</ToastSubmitButton>
       </form>
     </Panel>
@@ -240,7 +251,7 @@ export function PricingSettingsForm({ settings }) {
 
 function FareBreakdown({ fare }) {
   if (!fare) return <div className="mt-2 text-xs font-medium text-slate-500">Fare breakdown pending</div>;
-  return <div className="mt-2 grid gap-1 rounded-md bg-slate-50 p-2 text-[11px] font-semibold text-slate-700"><Row label="Actual" value={formatKm(fare.actualDistance)} /><Row label="Minimum" value={formatKm(fare.minimumDistance)} /><Row label="Chargeable" value={formatKm(fare.chargeableDistance)} /><Row label="Rate" value={`Rs ${fare.vehicleRate || 0}/KM`} />{fare.minimumApplied && <div className="mt-1 rounded bg-amber-50 px-2 py-1 text-amber-700">Minimum billing rule applied.</div>}</div>;
+  return <div className="mt-2 grid gap-1 rounded-md bg-slate-50 p-2 text-[11px] font-semibold text-slate-700"><Row label="Actual" value={formatKm(fare.actualDistance)} /><Row label="Minimum" value={formatKm(fare.minimumDistance)} /><Row label="Chargeable" value={formatKm(fare.chargeableDistance)} /><Row label="Rate" value={`Rs ${fare.vehicleRate || 0}/KM`} />{!!fare.base && <Row label="Base" value={money(fare.base)} />}{!!fare.driver && <Row label="Driver" value={money(fare.driver)} />}{!!fare.fuelSurcharge && <Row label="Fuel" value={money(fare.fuelSurcharge)} />}{!!fare.gst && <Row label="GST" value={money(fare.gst)} />}{fare.minimumApplied && <div className="mt-1 rounded bg-amber-50 px-2 py-1 text-amber-700">Minimum billing rule applied.</div>}</div>;
 }
 
 function Row({ label, value }) {

@@ -23,7 +23,7 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const cabs = await listCabs({ fallbackToFleet: true });
+  const cabs = await listCabs({ fallbackToFleet: false });
 
   return (
     <html lang="en" className={inter.variable}>

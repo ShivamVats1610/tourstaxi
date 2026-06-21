@@ -8,7 +8,7 @@ export default async function NewBookingsPage() {
   const bookings = await listAdminBookings();
   const today = dateKey(new Date());
   const activeBookings = bookings.filter((booking) => (
-    dateKey(booking.createdAt) === today &&
+    dateKey(booking.pickupDate) >= today &&
     !['completed', 'cancelled'].includes(booking.status)
   ));
   return <BookingTable bookings={activeBookings} title="Customer New Bookings" />;

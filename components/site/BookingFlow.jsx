@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
 import RouteMap from '@/components/site/booking/RouteMap';
 import FareCalculator from '@/components/site/booking/FareCalculator';
-import { calculateMinimumBillingFare, vehicleRate } from '@/lib/fare-policy';
+import { calculateTripFare } from '@/lib/fare-policy';
 import { DEFAULT_PRICING_SETTINGS } from '@/lib/pricing-defaults';
 
 const TRIP_LABELS = {
@@ -82,62 +82,9 @@ function splitDateTime(value) {
   return { nextDate, nextTime: nextTime.slice(0, 5) };
 }
 
-function routeDistance(data) {
-  if (data.tripType === 'local') {
-    const selectedPackage = LOCAL_PACKAGES.find((item) => item.value === data.rental);
-    const km = selectedPackage?.km || Number((data.rental || '').match(/\d+\s*hrs\s*\/\s*(\d+)/i)?.[1]);
-    return km || 80;
-  }
-  const roadKm = Number(data.distanceKm) || 0;
-  if (data.tripType === 'airport') return roadKm || 35;
-  return data.tripType === 'round-trip' ? roadKm * 2 : roadKm;
-}
-
 function cabFare(cab, data, selectedAddons = [], pricingSettings = DEFAULT_PRICING_SETTINGS) {
-  if (['one-way', 'round-trip', 'airport'].includes(data.tripType)) {
-    const addonObjects = selectedAddons.map((id) => ADDONS.find((item) => item.id === id)).filter(Boolean);
-    return calculateMinimumBillingFare(cab, data, addonObjects, pricingSettings);
-  }
-
-  const distance = routeDistance(data);
-  const selectedLocalPackage = data.tripType === 'local' ? LOCAL_PACKAGES.find((item) => item.value === data.rental) : null;
-  const packagePrice = selectedLocalPackage ? Number(cab[selectedLocalPackage.priceKey]) : 0;
-  const tripRate = data.tripType === 'local' ? cab.localPricePerKm : cab.pricePerKm;
-  const cabRatePerKm = Number(tripRate) > 0 ? Number(tripRate) : vehicleRate(cab);
-  const cabDistanceFare = packagePrice > 0 ? packagePrice : Math.round(distance * cabRatePerKm);
-  const allowedFuel = fuelOptions(cab);
-  const activeFuel = allowedFuel.includes(data.fuelType) ? data.fuelType : allowedFuel[0];
-  const fuelSurchargePerKm = activeFuel === 'diesel' ? 1.1 : 0;
-  const fuelSurcharge = Math.round(distance * fuelSurchargePerKm);
-  const addons = selectedAddons.reduce((sum, id) => sum + (ADDONS.find((item) => item.id === id)?.price || 0), 0);
-  const total = cabDistanceFare + fuelSurcharge + addons;
-  const advanceRatio = Math.min(Math.max(Number(pricingSettings.advancePercent || 25), 0), 100) / 100;
-  const partPay = Math.round(total * advanceRatio);
-  return {
-    actualDistance: distance,
-    minimumDistance: 0,
-    chargeableDistance: distance,
-    vehicleRate: cabRatePerKm + fuelSurchargePerKm,
-    estimatedFare: cabDistanceFare + fuelSurcharge,
-    tripDays: 1,
-    minimumApplied: false,
-    distance,
-    durationMinutes: data.durationMinutes || 0,
-    base: 0,
-    ratePerKm: packagePrice > 0 ? Math.round(packagePrice / Math.max(distance, 1)) + fuelSurchargePerKm : cabRatePerKm + fuelSurchargePerKm,
-    distanceFare: cabDistanceFare + fuelSurcharge,
-    fuelSurcharge,
-    driver: 0,
-    toll: 0,
-    discount: 0,
-    gst: 0,
-    addons,
-    total,
-    totalFare: total,
-    payLater: Math.max(total - partPay, 0),
-    partPay,
-    oldPrice: total
-  };
+  const addonObjects = selectedAddons.map((id) => ADDONS.find((item) => item.id === id)).filter(Boolean);
+  return calculateTripFare(cab, data, addonObjects, pricingSettings);
 }
 
 function fuelOptions(cab) {
@@ -261,20 +208,14 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       return;
     }
 
-    const paymentAmount = payment === 'full' ? fare.total : fare.partPay;
-    if (paymentAmount <= 0) {
+    const paymentAmount = payment === 'after' ? 0 : payment === 'full' ? fare.total : fare.partPay;
+    if (payment !== 'after' && paymentAmount <= 0) {
       toast.error('Payment amount is not valid.');
       return;
     }
 
     setSubmitting(true);
     try {
-      const checkoutLoaded = await loadRazorpayCheckout();
-      if (!checkoutLoaded || !window.Razorpay) {
-        toast.error('Unable to load Razorpay checkout.');
-        return;
-      }
-
       const fullPhone = `${data.phoneCountry || '+91'}${String(data.phone || '').replace(/\D/g, '')}`;
       const bookingPayload = {
         ...data,
@@ -282,6 +223,32 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
         vehicleName: vehicle.name,
         fare: { ...fare, selectedAddons, paymentOption: payment, advancePaid: paymentAmount }
       };
+
+      if (payment === 'after') {
+        const bookingResponse = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bookingPayload)
+        });
+        const bookingResult = await bookingResponse.json();
+        if (!bookingResponse.ok) {
+          toast.error(bookingResult.error || bookingResult.errors?.[0] || 'Unable to save booking');
+          return;
+        }
+
+        setBookingId(bookingResult.booking.bookingId);
+        toast.success('Booking received.', {
+          description: `Reference ${bookingResult.booking.bookingId}. Pay after your ride.`
+        });
+        setView('confirmed');
+        return;
+      }
+
+      const checkoutLoaded = await loadRazorpayCheckout();
+      if (!checkoutLoaded || !window.Razorpay) {
+        toast.error('Unable to load Razorpay checkout.');
+        return;
+      }
 
       const orderResponse = await fetch('/api/payments/razorpay/order', {
         method: 'POST',
@@ -847,9 +814,10 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
           <h3 className="text-lg font-black text-black">Payment Options</h3>
           <PaymentOption active={payment === 'part'} onClick={() => setPayment('part')} title={`Pay ${advancePercent}% advance`} subtitle="Razorpay secure payment" price={money(fare.partPay)} />
           <PaymentOption active={payment === 'full'} onClick={() => setPayment('full')} title="Pay full fare" subtitle="Confirm with full payment" price={money(fare.total)} />
-          <div className="mt-3 rounded-md border border-teal-200 bg-teal-50 p-2 text-xs font-bold text-teal-900">Confirmation appears only after Razorpay payment is verified.</div>
+          <PaymentOption active={payment === 'after'} onClick={() => setPayment('after')} title="Pay after ride" subtitle="No online payment now" price={money(0)} />
+          <div className="mt-3 rounded-md border border-teal-200 bg-teal-50 p-2 text-xs font-bold text-teal-900">{payment === 'after' ? 'Booking will be sent to admin without online payment.' : 'Confirmation appears only after Razorpay payment is verified.'}</div>
           <Button onClick={onSubmit} disabled={submitting} className="mt-3 h-11 w-full rounded-md bg-teal-700 text-sm font-black uppercase text-white hover:bg-teal-800">
-            {submitting ? 'Opening Razorpay...' : `Pay ${payment === 'full' ? money(fare.total) : money(fare.partPay)}`}
+            {submitting ? (payment === 'after' ? 'Saving booking...' : 'Opening Razorpay...') : payment === 'after' ? 'Book Now' : `Pay ${payment === 'full' ? money(fare.total) : money(fare.partPay)}`}
           </Button>
           <details className="mt-3 text-xs">
             <summary className="cursor-pointer font-bold text-teal-700">Fare break up</summary>
@@ -858,9 +826,12 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
               <FareRow label="Minimum Distance Rule" valueText={formatKm(fare.minimumDistance)} />
               <FareRow label="Chargeable Distance" valueText={formatKm(fare.chargeableDistance || fare.distance)} />
               <FareRow label="Vehicle Rate" valueText={`Rs ${fare.vehicleRate || fare.ratePerKm}/KM`} />
+              {!!fare.base && <FareRow label="Base Fare" value={fare.base} />}
               <FareRow label="Estimated Fare" value={fare.estimatedFare || fare.distanceFare} />
+              {!!fare.driver && <FareRow label="Driver allowance" value={fare.driver} />}
               {fare.fuelSurcharge > 0 && <FareRow label="Diesel fuel surcharge" value={fare.fuelSurcharge} />}
               <FareRow label="Add-ons" value={fare.addons} />
+              {!!fare.gst && <FareRow label="GST" value={fare.gst} />}
               <FareRow label="Total" value={fare.total} bold />
             </div>
           </details>
@@ -939,6 +910,7 @@ function FareSummary({ fare }) {
         <SummaryValue label="Minimum Distance Rule" value={formatKm(fare.minimumDistance)} />
         <SummaryValue label="Chargeable Distance" value={formatKm(fare.chargeableDistance || fare.distance)} />
         <SummaryValue label="Vehicle Rate" value={`Rs ${fare.vehicleRate || fare.ratePerKm}/KM`} />
+        <SummaryValue label="Base Fare" value={money(fare.base)} />
         <SummaryValue label="Estimated Fare" value={money(fare.estimatedFare || fare.distanceFare)} />
         <SummaryValue label="Trip Days" value={String(fare.tripDays || 1)} />
       </div>

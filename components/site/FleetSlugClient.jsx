@@ -1,24 +1,19 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { FLEET, FAQS } from '@/lib/data';
+import { FAQS } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useBooking } from '@/lib/booking-context';
 import { Users, Briefcase, Check, ArrowLeft, ArrowRight, Snowflake, Star, Fuel } from 'lucide-react';
 
-export default function FleetSlugClient({ slug }) {
-  const vehicle = FLEET.find(v => v.slug === slug);
+export default function FleetSlugClient({ vehicle, related = [] }) {
   const { open } = useBooking();
 
-  const gallery = vehicle ? [vehicle.image, ...FLEET.filter(v => v.slug !== slug).slice(0, 3).map(v => v.image)] : [];
+  const gallery = [vehicle.image, ...related.map(v => v.image)].filter(Boolean);
   const [active, setActive] = useState(0);
-
-  const related = FLEET.filter(v => v.slug !== slug).slice(0, 3);
-  if (!vehicle) return notFound();
 
   return (
     <div className="pt-24">

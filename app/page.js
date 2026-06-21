@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Apple, ArrowRight, BadgeIndianRupee, CalendarCheck, Check, Clock, Download, Headphones, Play, Route as RouteIcon, ShieldCheck, Smartphone, Star, Users, Briefcase, XCircle } from 'lucide-react';
@@ -8,12 +9,30 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import BookingWidget from '@/components/site/BookingWidget';
 import Reveal from '@/components/site/Reveal';
 import SectionTitle from '@/components/site/SectionTitle';
-import { COMPANY, FAQS, FLEET, PACKAGES, ROUTES, TESTIMONIALS, WHY_CHOOSE } from '@/lib/data';
+import { COMPANY, FAQS, PACKAGES, ROUTES, TESTIMONIALS, WHY_CHOOSE } from '@/lib/data';
 
 const HERO_BG = 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=2200&q=85';
 const ICONS = { ShieldCheck, BadgeIndianRupee, Headphones, Clock, Route: RouteIcon };
 
 function Home() {
+  const [fleet, setFleet] = useState([]);
+
+  useEffect(() => {
+    let ignore = false;
+    fetch('/api/cabs', { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() : null)
+      .then((result) => {
+        if (!ignore && Array.isArray(result?.cabs)) setFleet(result.cabs);
+      })
+      .catch((error) => {
+        console.error('Fleet lookup failed:', error);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
   return (
     <>
       <section className="relative overflow-hidden pt-16 sm:pt-[74px]">
@@ -48,7 +67,7 @@ function Home() {
       <section className="-mt-1 bg-white pb-12 pt-24">
         <div className="mx-auto grid max-w-7xl gap-4 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
           <PromoCard title="Book Now" subtitle="at zero cost" note="Pay after cab confirmation" tone="sky" />
-          <PromoCard title="Premium Cabs" subtitle="for every route" note="Sedan, SUV and traveller options" image={FLEET[3]?.image} />
+          <PromoCard title="Premium Cabs" subtitle="for every route" note="Sedan, SUV and traveller options" image={fleet[3]?.image || fleet[0]?.image} />
           <PromoCard title="Free Cancellations" subtitle="before your trip" note="Flexible travel plans" tone="emerald" />
         </div>
       </section>
@@ -102,7 +121,7 @@ function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionTitle eyebrow="Our Fleet" title="Cars for solo rides, families and groups" subtitle="Every cab is kept clean, AC-ready and suitable for outstation travel." />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {FLEET.map((vehicle, index) => (
+            {fleet.map((vehicle, index) => (
               <Reveal key={vehicle.slug} delay={index * 0.04}>
                 <Card className="h-full overflow-hidden rounded-lg border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl">
                   <img src={vehicle.image} alt={vehicle.name} className="h-48 w-full object-cover" />
@@ -121,6 +140,11 @@ function Home() {
                 </Card>
               </Reveal>
             ))}
+            {!fleet.length && (
+              <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm font-semibold text-slate-600 sm:col-span-2 lg:col-span-3">
+                Fleet details are being updated.
+              </div>
+            )}
           </div>
         </div>
       </section>

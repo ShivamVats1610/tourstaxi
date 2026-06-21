@@ -115,6 +115,14 @@ export async function updatePricingSettingsAction(formData) {
     oneWayMinimumKm: formData.get('oneWayMinimumKm'),
     airportMinimumKm: formData.get('airportMinimumKm'),
     roundTripMinimumKmPerDay: formData.get('roundTripMinimumKmPerDay'),
+    localMinimumKm: formData.get('localMinimumKm'),
+    oneWayBaseFare: formData.get('oneWayBaseFare'),
+    roundTripBaseFare: formData.get('roundTripBaseFare'),
+    airportBaseFare: formData.get('airportBaseFare'),
+    localBaseFare: formData.get('localBaseFare'),
+    driverAllowancePerDay: formData.get('driverAllowancePerDay'),
+    gstPercent: formData.get('gstPercent'),
+    dieselSurchargePerKm: formData.get('dieselSurchargePerKm'),
     advancePercent: formData.get('advancePercent'),
   });
   revalidatePath('/admin/dashboard');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2, Route } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Coordinates, FareDetails, RouteDetails, VehicleClass } from './types';
@@ -120,7 +120,7 @@ export default function FareCalculator({
         if (!active) return;
         setRoute(nextRoute);
         onRouteChange?.(nextRoute);
-        onFareChange?.(calculateFare(nextRoute.distanceKm, vehicleClass));
+        onFareChange?.(null);
       } catch (error) {
         console.error('[mapbox:browser:route:error]', error);
         setServiceMessage(error instanceof Error ? error.message : 'Route calculation is temporarily unavailable.');
@@ -140,8 +140,6 @@ export default function FareCalculator({
     };
   }, [pickupCoordinates, dropCoordinates, pickupLabel, dropLabel, vehicleClass, onRouteChange, onFareChange]);
 
-  const fare = useMemo(() => route ? calculateFare(route.distanceKm, vehicleClass) : null, [route, vehicleClass]);
-
   if (compact) return null;
 
   return (
@@ -154,11 +152,11 @@ export default function FareCalculator({
         {loading && <Loader2 className="h-4 w-4 animate-spin text-slate-400" />}
       </div>
 
-      {route && fare ? (
+      {route ? (
         <div className="mt-3 grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
           <div><b className="block text-lg text-slate-950">{route.distanceKm} km</b>Distance</div>
           <div><b className="block text-lg text-slate-950">{route.durationMinutes} min</b>Estimated time</div>
-          <div><b className="block text-lg text-sky-600">Rs {fare.totalFare.toLocaleString('en-IN')}</b>Total fare</div>
+          <div><b className="block text-lg text-sky-600">Select cab</b>Fare updates by vehicle</div>
         </div>
       ) : (
         <div className="mt-3 text-sm text-slate-500">

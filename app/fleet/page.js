@@ -10,7 +10,7 @@ export const metadata = { title: 'Fleet - ToursTaxi' };
 export const dynamic = 'force-dynamic';
 
 export default async function FleetPage() {
-  const fleet = await listCabs();
+  const fleet = await listCabs({ fallbackToFleet: false });
 
   return (
     <div className="pt-24">

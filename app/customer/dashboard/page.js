@@ -146,6 +146,10 @@ function FareBreakdown({ fare }) {
     ['Minimum Distance Rule', formatKm(fare.minimumDistance)],
     ['Chargeable Distance', formatKm(fare.chargeableDistance)],
     ['Vehicle Rate', `Rs ${fare.vehicleRate || 0}/KM`],
+    ['Base Fare', money(fare.base)],
+    ['Driver Allowance', money(fare.driver)],
+    ['Fuel Surcharge', money(fare.fuelSurcharge)],
+    ['GST', money(fare.gst)],
     ['Estimated Fare', money(fare.estimatedFare || fare.total)],
     ['Trip Days', fare.tripDays || 1]
   ];
@@ -157,7 +161,7 @@ function FareBreakdown({ fare }) {
           <b className="text-slate-950">{value}</b>
         </div>
       ))}
-      {fare.minimumApplied && <div className="rounded bg-amber-50 px-2 py-1 text-amber-700 sm:col-span-2">Minimum billing of 250 KM per day has been applied.</div>}
+      {fare.minimumApplied && <div className="rounded bg-amber-50 px-2 py-1 text-amber-700 sm:col-span-2">Minimum billing of {formatKm(fare.minimumDistance)} has been applied.</div>}
     </div>
   );
 }
