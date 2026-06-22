@@ -2,12 +2,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Reveal from '@/components/site/Reveal';
-import { ROUTES } from '@/lib/data';
+import { listPopularRoutes } from '@/lib/crm';
 import { ArrowRight, MapPin, Clock } from 'lucide-react';
 
 export const metadata = { title: 'Popular Routes - ToursTaxi' };
+export const dynamic = 'force-dynamic';
 
-export default function RoutesPage() {
+export default async function RoutesPage() {
+  const routes = await listPopularRoutes();
+
   return (
     <div className="pt-24">
       <section className="bg-gradient-to-br from-[#12233f] via-[#0f3f3b] to-[#071527] py-16 text-white sm:py-20">
@@ -20,8 +23,8 @@ export default function RoutesPage() {
 
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {ROUTES.map((r, i) => (
-            <Reveal key={`${r.from}-${r.to}`} delay={i * 0.05}>
+          {routes.map((r, i) => (
+            <Reveal key={r.id || `${r.from}-${r.to}`} delay={i * 0.05}>
               <Card className="overflow-hidden group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
                 <div className="relative h-52 overflow-hidden">
                   <img src={r.image} alt={`${r.from} to ${r.to}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />

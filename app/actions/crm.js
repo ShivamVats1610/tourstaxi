@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { requireUser } from '@/lib/auth';
-import { deleteBlogPost, deleteBooking, deleteCab, deleteTourPackage, deleteUser, updateBooking, updateUser, upsertBlogPost, upsertCab, upsertTourPackage } from '@/lib/crm';
+import { deleteBlogPost, deleteBooking, deleteCab, deletePopularRoute, deleteTourPackage, deleteUser, updateBooking, updateUser, upsertBlogPost, upsertCab, upsertPopularRoute, upsertTourPackage } from '@/lib/crm';
 import { updatePricingSettings } from '@/lib/pricing-settings';
 
 async function requireAdmin() {
@@ -148,6 +148,45 @@ export async function deleteBlogPostAction(formData) {
   revalidatePath('/admin/blog');
   revalidatePath('/blog');
   revalidatePath('/blog/[slug]', 'page');
+  revalidatePath('/');
+}
+
+export async function savePopularRouteAction(formData) {
+  await requireAdmin();
+  const imageFile = formData.get('imageFile');
+  let image = String(formData.get('image') || '');
+
+  if (imageFile && imageFile.size) {
+    try {
+      image = await uploadToCloudinary(imageFile, 'tourstaxi/routes');
+    } catch (error) {
+      console.error('Popular route image upload failed:', error);
+      if (!image) throw error;
+    }
+  }
+
+  await upsertPopularRoute({
+    id: formData.get('id'),
+    slug: formData.get('slug'),
+    from: formData.get('from'),
+    to: formData.get('to'),
+    distance: formData.get('distance'),
+    duration: formData.get('duration'),
+    price: formData.get('price'),
+    image,
+    status: formData.get('status'),
+  });
+
+  revalidatePath('/admin/routes');
+  revalidatePath('/popular-routes');
+  revalidatePath('/');
+}
+
+export async function deletePopularRouteAction(formData) {
+  await requireAdmin();
+  await deletePopularRoute(String(formData.get('id') || ''));
+  revalidatePath('/admin/routes');
+  revalidatePath('/popular-routes');
   revalidatePath('/');
 }
 

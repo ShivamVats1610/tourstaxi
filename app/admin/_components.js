@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { BookOpen, CalendarClock, Car, CheckCircle2, IndianRupee, LayoutDashboard, LogOut, Map, Plus, Settings, Trash2, Upload, Users } from 'lucide-react';
 import { logoutAction } from '@/app/actions/auth';
-import { deleteBlogPostAction, deleteBookingAction, deleteCabAction, deleteTourPackageAction, deleteUserAction, saveBlogPostAction, saveCabAction, saveTourPackageAction, updateBookingAction, updatePricingSettingsAction, updateUserAction } from '@/app/actions/crm';
+import { deleteBlogPostAction, deleteBookingAction, deleteCabAction, deletePopularRouteAction, deleteTourPackageAction, deleteUserAction, saveBlogPostAction, saveCabAction, savePopularRouteAction, saveTourPackageAction, updateBookingAction, updatePricingSettingsAction, updateUserAction } from '@/app/actions/crm';
 import ToastSubmitButton from '@/components/ui/toast-submit-button';
 
 export const STATUSES = ['new', 'assigned', 'confirmed', 'completed', 'cancelled'];
@@ -12,6 +12,7 @@ export const ADMIN_NAV = [
   { label: 'Old Bookings', href: '/admin/bookings/old', icon: CheckCircle2 },
   { label: 'Customers', href: '/admin/customers', icon: Users },
   { label: 'Cars', href: '/admin/cars', icon: Car },
+  { label: 'Routes', href: '/admin/routes', icon: Map },
   { label: 'Tour Packages', href: '/admin/tour-packages', icon: Map },
   { label: 'Blog', href: '/admin/blog', icon: BookOpen },
   { label: 'Fare Settings', href: '/admin/pricing', icon: Settings },
@@ -250,6 +251,45 @@ export function BlogManager({ posts }) {
         </div>
       </Panel>
     </div>
+  );
+}
+
+export function RouteManager({ routes }) {
+  return (
+    <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+      <Panel title="Add Popular Route" subtitle="Create route cards for the popular routes page." icon={Plus}><RouteForm /></Panel>
+      <Panel title="Popular Routes" subtitle="Edit route images, distance, duration, fares, and publish status." icon={Map}>
+        <div className="grid gap-3">
+          {routes.map((route) => (
+            <details key={route.id} className="rounded-lg border border-slate-200 bg-white">
+              <summary className="cursor-pointer list-none p-4 hover:bg-slate-50">
+                <div className="grid gap-3 sm:grid-cols-[112px_1fr_auto] sm:items-center">
+                  <div className="h-20 overflow-hidden rounded-md bg-slate-100">{route.image ? <img src={route.image} alt={`${route.from} to ${route.to}`} className="h-full w-full object-cover" /> : <Map className="m-auto mt-6 h-8 w-8 text-slate-400" />}</div>
+                  <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h3 className="font-black">{route.from || 'From'} to {route.to || 'To'}</h3><StatusBadge status={route.status || 'active'} /></div><div className="mt-1 text-sm font-semibold text-slate-700">{route.distance || '-'} | {route.duration || '-'} | Rs {Number(route.price || 0).toLocaleString('en-IN')}</div><div className="mt-1 text-xs font-medium text-slate-500">{route.slug || 'No slug'}</div></div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-teal-700">Open editor</div>
+                </div>
+              </summary>
+              <div className="border-t border-slate-200 bg-slate-50 p-4"><RouteForm route={route} /><DeleteForm id={route.id} action={deletePopularRouteAction} label="Delete route" className="mt-3" /></div>
+            </details>
+          ))}
+          {!routes.length && <EmptyState title="No routes yet" text="Add your first route to show it on the popular routes page." />}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function RouteForm({ route = {} }) {
+  return (
+    <form action={savePopularRouteAction} className="grid gap-3">
+      <input type="hidden" name="id" defaultValue={route.id || ''} />
+      <div className="grid gap-3 sm:grid-cols-2"><Field name="from" label="From City" defaultValue={route.from} placeholder="Jaipur" required /><Field name="to" label="To City" defaultValue={route.to} placeholder="Ranthambore" required /></div>
+      <Field name="slug" label="Slug" defaultValue={route.slug} placeholder="jaipur-ranthambore" />
+      <div className="grid gap-3 sm:grid-cols-2"><Field name="distance" label="Distance" defaultValue={route.distance} placeholder="180 km" /><Field name="duration" label="Duration" defaultValue={route.duration} placeholder="4h" /><Field name="price" label="Cab From Price" type="number" min="0" defaultValue={route.price || 0} /><label className="text-xs font-bold uppercase tracking-wider text-slate-700">Status<select name="status" defaultValue={route.status || 'active'} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold normal-case"><option value="active">Active</option><option value="inactive">Inactive</option></select></label></div>
+      <Field name="image" label="Image URL" defaultValue={route.image} />
+      <label className="text-xs font-bold uppercase tracking-wider text-slate-700"><span className="mb-1 flex items-center gap-1.5"><Upload className="h-3.5 w-3.5 text-teal-600" /> Upload Route Image</span><input name="imageFile" type="file" accept="image/*" className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-950 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white" /></label>
+      <ToastSubmitButton message="Saving popular route" description="Route details are being updated." className="inline-flex h-11 items-center justify-center rounded-md bg-[#12233f] px-4 text-sm font-black text-white hover:bg-[#0f1c33]"><CheckCircle2 className="mr-2 h-4 w-4" /> Save Route</ToastSubmitButton>
+    </form>
   );
 }
 
