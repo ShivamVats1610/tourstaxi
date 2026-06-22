@@ -112,10 +112,10 @@ export default function BookingWidget() {
   const explore = () => {
     const airportPickup = airportTrip === 'Pickup from Airport';
     const nextPickup = tab === 'airport' ? (airportPickup ? airport : pickup) : pickup;
-    const nextDrop = tab === 'airport' ? (airportPickup ? drop : airport) : drop;
+    const nextDrop = tab === 'local' ? '' : tab === 'airport' ? (airportPickup ? drop : airport) : drop;
 
-    if (!nextPickup.trim() || !nextDrop.trim()) {
-      toast.error('Please enter pickup location and drop location.');
+    if (!nextPickup.trim() || (tab !== 'local' && !nextDrop.trim())) {
+      toast.error(tab === 'local' ? 'Please enter pickup location.' : 'Please enter pickup location and drop location.');
       return;
     }
 
@@ -215,16 +215,16 @@ export default function BookingWidget() {
 
           {tab === 'local' && (
             <div className="grid items-end gap-4 md:grid-cols-[minmax(0,1fr)_290px] xl:gap-7">
-              <RouteLocationFields
-                pickup={pickup}
-                drop={drop}
-                fromLabel="Pickup Location"
-                toLabel="Drop Location"
-                setPickup={setPickup}
-                setDrop={setDrop}
-                setPickupCoordinates={setPickupCoordinates}
-                setDropCoordinates={setDropCoordinates}
-                onSwap={swapPlaces}
+              <LineLocation
+                label="Pickup Location"
+                value={pickup}
+                onChange={setPickup}
+                onSelect={(location) => {
+                  setPickup(location.label);
+                  setPickupCoordinates(location.coordinates);
+                }}
+                placeholder="Pickup Location"
+                useCurrentLocation
               />
               {commonDateFields}
             </div>

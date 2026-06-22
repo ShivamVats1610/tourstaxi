@@ -118,6 +118,7 @@ export async function updatePricingSettingsAction(formData) {
     localMinimumKm: formData.get('localMinimumKm'),
     oneWayBaseFare: formData.get('oneWayBaseFare'),
     roundTripBaseFare: formData.get('roundTripBaseFare'),
+    roundTripDiscountPercent: formData.get('roundTripDiscountPercent'),
     airportBaseFare: formData.get('airportBaseFare'),
     localBaseFare: formData.get('localBaseFare'),
     driverAllowancePerDay: formData.get('driverAllowancePerDay'),

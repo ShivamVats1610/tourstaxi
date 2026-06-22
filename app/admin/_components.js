@@ -209,8 +209,39 @@ export function Customers({ users }) {
         {users.map((item) => (
           <form key={item.id} action={updateUserAction} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
             <input type="hidden" name="id" value={item.id} />
-            <div className="mb-3 flex items-start justify-between gap-3"><div className="min-w-0"><div className="font-black">{item.name || 'Unnamed user'}</div><div className="break-words text-xs font-semibold text-slate-500">{item.email || 'No email'}</div></div><div className="flex shrink-0 flex-col items-end gap-2"><StatusBadge status={item.role || 'customer'} /><span className="inline-flex rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-teal-700 ring-1 ring-teal-200">{item.bookingCount || 0} bookings</span></div></div>
-            <div className="mb-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2"><div className="text-[11px] font-black uppercase tracking-wider text-slate-500">Total Bookings</div><div className="mt-1 text-2xl font-black text-slate-950">{Number(item.bookingCount || 0).toLocaleString('en-IN')}</div></div>
+            <div className="mb-3 flex items-start justify-between gap-3"><div className="min-w-0"><div className="font-black">{item.name || 'Unnamed user'}</div><div className="break-words text-xs font-semibold text-slate-500">{item.email || 'No email'}</div></div><div className="flex shrink-0 flex-col items-end gap-2"><StatusBadge status={item.role || 'customer'} /></div></div>
+            <details className="mb-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+              <summary className="cursor-pointer list-none">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[11px] font-black uppercase tracking-wider text-slate-500">Total Bookings</div>
+                    <div className="mt-1 text-2xl font-black text-slate-950">{Number(item.bookingCount || 0).toLocaleString('en-IN')}</div>
+                  </div>
+                  <span className="rounded-md border border-teal-200 bg-white px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-teal-700">View</span>
+                </div>
+              </summary>
+              <div className="mt-3 grid gap-2 border-t border-slate-200 pt-3">
+                {(item.bookings || []).map((booking) => (
+                  <div key={booking.id || booking.bookingId} className="rounded-md border border-slate-200 bg-white p-3 text-xs">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="font-black text-slate-950">{booking.bookingId || 'Booking'}</div>
+                        <div className="mt-1 break-words font-semibold text-slate-700">{booking.pickup || '-'} to {booking.tripType === 'local' ? booking.rental : booking.drop || '-'}</div>
+                      </div>
+                      <StatusBadge status={booking.status || 'new'} />
+                    </div>
+                    <div className="mt-2 grid gap-1 text-slate-600 sm:grid-cols-2">
+                      <div><b>Trip:</b> {booking.tripType?.replace('-', ' ') || '-'}</div>
+                      <div><b>Pickup:</b> {booking.pickupDate || '-'} {booking.pickupTime || ''}</div>
+                      {booking.returnDate && <div><b>Return:</b> {booking.returnDate} {booking.returnTime || ''}</div>}
+                      <div><b>Cab:</b> {booking.vehicleName || booking.vehicleSlug || '-'}</div>
+                      <div><b>Fare:</b> {booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div>
+                    </div>
+                  </div>
+                ))}
+                {!item.bookings?.length && <div className="rounded-md border border-dashed border-slate-300 bg-white px-3 py-4 text-center text-xs font-bold text-slate-500">No bookings found for this customer.</div>}
+              </div>
+            </details>
             <div className="grid gap-3 sm:grid-cols-2"><Field name="name" label="Name" defaultValue={item.name} /><Field name="phone" label="Phone" defaultValue={item.phone} /><Field name="email" label="Email" type="email" defaultValue={item.email} /><label className="text-xs font-bold uppercase tracking-wider text-slate-700">Role<select name="role" defaultValue={item.role} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold normal-case"><option value="customer">Customer</option><option value="admin">Admin</option></select></label></div>
             <div className="mt-3 flex flex-wrap gap-2"><ToastSubmitButton message="Saving user" description="Customer details are being updated." className="h-9 rounded-md bg-[#12233f] px-3 text-xs font-black text-white hover:bg-[#0f1c33]">Save User</ToastSubmitButton><button formAction={deleteUserAction} className="inline-flex h-9 items-center rounded-md border border-red-200 bg-red-50 px-3 text-xs font-bold text-red-700 hover:bg-red-100"><Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete</button></div>
           </form>
@@ -232,6 +263,7 @@ export function PricingSettingsForm({ settings }) {
           <Field name="roundTripMinimumKmPerDay" label="Round Trip KM Per Day" type="number" min="0" defaultValue={settings.roundTripMinimumKmPerDay} />
           <Field name="localMinimumKm" label="Local Minimum KM" type="number" min="0" defaultValue={settings.localMinimumKm} />
           <Field name="advancePercent" label="Advance Payment %" type="number" min="0" max="100" step="1" defaultValue={settings.advancePercent} />
+          <Field name="roundTripDiscountPercent" label="Round Trip Discount %" type="number" min="0" max="100" step="1" defaultValue={settings.roundTripDiscountPercent} />
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           <Field name="oneWayBaseFare" label="One Way Base Fare" type="number" min="0" defaultValue={settings.oneWayBaseFare} />

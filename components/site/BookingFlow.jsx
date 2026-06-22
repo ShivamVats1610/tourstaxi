@@ -82,6 +82,10 @@ function splitDateTime(value) {
   return { nextDate, nextTime: nextTime.slice(0, 5) };
 }
 
+function isBeforeDate(value, minimum) {
+  return Boolean(value && minimum && value < minimum);
+}
+
 function cabFare(cab, data, selectedAddons = [], pricingSettings = DEFAULT_PRICING_SETTINGS) {
   const addonObjects = selectedAddons.map((id) => ADDONS.find((item) => item.id === id)).filter(Boolean);
   return calculateTripFare(cab, data, addonObjects, pricingSettings);
@@ -94,6 +98,28 @@ function fuelOptions(cab) {
 
 function fuelLabel(value) {
   return value === 'diesel' ? 'Diesel' : 'CNG';
+}
+
+function validCustomerName(value) {
+  const parts = String(value || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return false;
+  return parts.every((part) => /^[A-Za-z][A-Za-z.'-]{1,}$/.test(part) && !/(.)\1{2,}/i.test(part));
+}
+
+function validCustomerPhone(phone, country = '+91') {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (/^(\d)\1+$/.test(digits)) return false;
+  if (/^(\d{2,5})\1+$/.test(digits)) return false;
+  if (country === '+91') return /^[6-9]\d{9}$/.test(digits);
+  return digits.length >= 7 && digits.length <= 15;
+}
+
+function validCustomerEmail(value) {
+  const email = String(value || '').trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return false;
+  const [local, domain = ''] = email.split('@');
+  if (local.length < 5 || /^x+$/i.test(local) || /(.)\1{3,}/i.test(local)) return false;
+  return domain.includes('.') && !domain.startsWith('.') && !domain.endsWith('.');
 }
 
 export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) {
@@ -205,6 +231,18 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
   const submit = async () => {
     if (!data.name || !data.phone || !data.address || !vehicle || !fare) {
       toast.error('Please add name, phone and pickup location.');
+      return;
+    }
+    if (!validCustomerName(data.name)) {
+      toast.error('Please enter your real first and last name.');
+      return;
+    }
+    if (!validCustomerPhone(data.phone, data.phoneCountry)) {
+      toast.error(data.phoneCountry === '+91' ? 'Please enter a valid 10 digit Indian mobile number.' : 'Please enter a valid mobile number.');
+      return;
+    }
+    if (!validCustomerEmail(data.email)) {
+      toast.error('Please enter a valid email address.');
       return;
     }
 
@@ -339,11 +377,10 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
           <Confirmed bookingId={bookingId} data={data} vehicle={vehicle} fare={fare} onClose={onClose} />
         ) : (
           <div className="max-h-[96vh] overflow-y-auto bg-slate-50">
-            <TripBar data={data} routeLabel={routeLabel} onModify={() => setView('details')} />
             {view === 'details' && (
-              <ModifyPanel data={data} set={set} onSelectLocation={selectLocation} onContinue={() => {
-                if (!data.pickup?.trim() || !data.drop?.trim()) {
-                  toast.error('Please enter pickup location and drop location.');
+              <DetailsPanel data={data} set={set} onSelectLocation={selectLocation} onContinue={() => {
+                if (!data.pickup?.trim() || (data.tripType !== 'local' && !data.drop?.trim())) {
+                  toast.error(data.tripType === 'local' ? 'Please enter pickup location.' : 'Please enter pickup location and drop location.');
                   return;
                 }
                 setView('cars');
@@ -416,25 +453,6 @@ function loadRazorpayCheckout() {
   });
 }
 
-function TripBar({ data, routeLabel, onModify }) {
-  return (
-    <div className="bg-slate-950 px-4 py-3 text-white sm:px-8">
-      <div className="mx-auto grid max-w-7xl gap-3 md:grid-cols-[1.5fr_2fr_auto] md:items-center">
-        <div className="min-w-0">
-          <div className="text-[11px] font-bold uppercase tracking-wide text-teal-200">Select Car</div>
-          <div className="mt-1 truncate text-base font-black leading-tight sm:text-lg">{routeLabel}</div>
-        </div>
-        <div className="grid grid-cols-3 gap-2 rounded-md bg-white/5 p-2 md:bg-transparent md:p-0">
-          <Info label="Trip Type" value={TRIP_LABELS[data.tripType] || 'One way'} invert />
-          <Info label="Pick up" value={prettyDate(data.date)} invert />
-          <Info label="Time" value={`${data.time || '07:00'}${data.returnTime ? ` / ${data.returnTime}` : ''}`} invert />
-        </div>
-        <Button variant="outline" onClick={onModify} className="h-10 rounded-md border-white/20 bg-white text-slate-950">Modify</Button>
-      </div>
-    </div>
-  );
-}
-
 function Info({ label, value, invert = false }) {
   return (
     <div className="min-w-0">
@@ -444,7 +462,7 @@ function Info({ label, value, invert = false }) {
   );
 }
 
-function ModifyPanel({ data, set, onSelectLocation, onContinue }) {
+function DetailsPanel({ data, set, onSelectLocation, onContinue }) {
   const minDate = todayValue();
   const minTime = data.date === minDate ? nextPickupTimeValue() : undefined;
   const canAddStop = ['one-way', 'round-trip', 'airport'].includes(data.tripType);
@@ -476,15 +494,19 @@ function ModifyPanel({ data, set, onSelectLocation, onContinue }) {
       <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="grid gap-3 lg:grid-cols-[1fr_auto_1fr_2fr_auto]">
           <LocationAutocomplete label={data.tripType === 'local' ? 'Pickup Location' : 'From'} value={data.pickup || ''} placeholder="Pickup location" onValueChange={(value) => set('pickup', value)} onSelect={(location) => onSelectLocation('pickup', location)} showCurrentLocation />
-          <button
-            type="button"
-            onClick={swapPlaces}
-            className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-teal-50 text-teal-700 shadow-sm ring-1 ring-teal-100 transition hover:bg-teal-100 hover:text-teal-800 lg:self-end"
-            aria-label="Swap pickup and drop"
-          >
-            <ArrowLeftRight className="h-5 w-5" />
-          </button>
-          <LocationAutocomplete label={data.tripType === 'local' ? 'Drop Location' : 'To'} value={data.drop || ''} placeholder="Drop location" onValueChange={(value) => set('drop', value)} onSelect={(location) => onSelectLocation('drop', location)} />
+          {data.tripType !== 'local' && (
+            <>
+              <button
+                type="button"
+                onClick={swapPlaces}
+                className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-teal-50 text-teal-700 shadow-sm ring-1 ring-teal-100 transition hover:bg-teal-100 hover:text-teal-800 lg:self-end"
+                aria-label="Swap pickup and drop"
+              >
+                <ArrowLeftRight className="h-5 w-5" />
+              </button>
+              <LocationAutocomplete label="To" value={data.drop || ''} placeholder="Drop location" onValueChange={(value) => set('drop', value)} onSelect={(location) => onSelectLocation('drop', location)} />
+            </>
+          )}
           <div className="grid gap-3 rounded-lg bg-slate-50 p-3">
             <DateTimeField
               label="Pickup Date & Time"
@@ -496,6 +518,9 @@ function ModifyPanel({ data, set, onSelectLocation, onContinue }) {
                 const { nextDate, nextTime } = splitDateTime(value);
                 set('date', nextDate);
                 set('time', nextTime);
+                if (data.tripType === 'round-trip' && isBeforeDate(data.returnDate, nextDate)) {
+                  set('returnDate', nextDate);
+                }
               }}
             />
             {data.tripType === 'round-trip' && (
@@ -506,7 +531,7 @@ function ModifyPanel({ data, set, onSelectLocation, onContinue }) {
                 minDate={data.date || minDate}
                 onChange={(value) => {
                   const { nextDate, nextTime } = splitDateTime(value);
-                  set('returnDate', nextDate);
+                  set('returnDate', isBeforeDate(nextDate, data.date) ? data.date : nextDate);
                   set('returnTime', nextTime);
                 }}
               />
@@ -560,7 +585,7 @@ function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onCheckou
   const selectedCab = fleet.find((cab) => cab.slug === data.vehicleSlug) || fleet[0] || null;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8">
+    <div className="mx-auto max-w-7xl px-3 pb-3 pt-1 sm:px-8 sm:pb-6 sm:pt-3">
       {data.tripType === 'local' && <LocalPackageSelector data={data} set={set} fleet={fleet} className="mb-4" />}
       {!!fleet.length && (
         <CabOptionRail
@@ -576,7 +601,7 @@ function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onCheckou
           }}
         />
       )}
-      <div className="mt-5 space-y-4">
+      <div className="mt-3 space-y-3 sm:mt-5 sm:space-y-4">
         {!fleet.length && <div className="rounded-lg border border-slate-200 p-6 text-slate-600">No active cabs are available right now.</div>}
         {selectedCab && (
           <CabCard key={selectedCab.slug} cab={selectedCab} data={data} set={set} pricingSettings={pricingSettings} routeLabel={routeLabel} index={0} onCheckout={onCheckout} />
@@ -630,8 +655,8 @@ function LocalPackageSelector({ data, set, fleet = [], className = '' }) {
 
 function CabOptionRail({ fleet, data, pricingSettings, selectedSlug, onSelect }) {
   return (
-    <div className="mt-5 overflow-hidden border-b border-slate-100 bg-white">
-      <div className="flex gap-4 overflow-x-auto px-1 pb-4 pt-1 [scrollbar-width:none] sm:gap-6">
+    <div className="overflow-hidden border-b border-slate-100 bg-white">
+      <div className="flex gap-4 overflow-x-auto px-1 pb-2 pt-1 [scrollbar-width:none] sm:gap-6 sm:pb-4">
         {fleet.map((cab) => {
           const fare = cabFare(cab, data, [], pricingSettings);
           const active = cab.slug === selectedSlug;
@@ -695,41 +720,41 @@ function CabCard({ cab, data, set, pricingSettings, index, onCheckout }) {
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }} className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-      <div className="grid grid-cols-[minmax(0,0.95fr)_minmax(150px,1.15fr)] gap-2 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(280px,0.75fr)] sm:gap-5 sm:p-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-6">
+      <div className="grid grid-cols-[minmax(0,1fr)_132px] gap-2 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(280px,0.75fr)] sm:gap-5 sm:p-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-6">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-xl font-black text-slate-800 sm:text-2xl">{cab.name}</h3>
-            <span className="rounded bg-slate-950 px-2 py-1 text-xs font-bold text-white">4.8 <Star className="inline h-3 w-3 fill-yellow-400 text-yellow-400" /></span>
+            <h3 className="text-lg font-black leading-tight text-slate-800 sm:text-2xl">{cab.name}</h3>
+            <span className="rounded bg-slate-950 px-1.5 py-0.5 text-[11px] font-bold text-white sm:px-2 sm:py-1 sm:text-xs">4.8 <Star className="inline h-3 w-3 fill-yellow-400 text-yellow-400" /></span>
           </div>
-          <p className="mt-1 text-sm italic text-slate-600">or equivalent | {cab.seats} seater AC Cab</p>
-          <div className="mt-3 text-sm font-bold text-emerald-600">5% OFF <span className="text-slate-400 line-through">{money(fare.oldPrice)}</span></div>
-          <div className="mt-1 text-3xl font-black text-teal-700 sm:text-4xl">{money(fare.total)}</div>
-          <div className="mt-1 text-sm text-black">+ {money(fare.gst)} Charges and Taxes</div>
-          <div className="mt-4 grid gap-2 text-sm text-slate-800 sm:grid-cols-2">
-            <span className="flex items-center gap-2"><User className="h-5 w-5 text-teal-600" /> Driver allowance included</span>
-            <span className="flex items-center gap-2"><Briefcase className="h-5 w-5 text-teal-600" /> {cab.luggage}</span>
-            <span className="flex items-center gap-2"><Check className="h-5 w-5 text-emerald-500" /> {formatKm(fare.chargeableDistance || fare.distance)} included</span>
-            <span className="flex items-center gap-2"><ArrowLeftRight className="h-5 w-5 text-teal-600" /> Post limit: Rs {cab.pricePerKm || 16}/km</span>
+          <p className="mt-0.5 text-xs italic leading-snug text-slate-600 sm:text-sm">or equivalent | {cab.seats} seater AC Cab</p>
+          <div className="mt-2 text-xs font-bold text-emerald-600 sm:mt-3 sm:text-sm">5% OFF <span className="text-slate-400 line-through">{money(fare.oldPrice)}</span></div>
+          <div className="mt-0.5 whitespace-nowrap text-3xl font-black leading-none text-teal-700 sm:mt-1 sm:text-4xl">{money(fare.total)}</div>
+          <div className="mt-1 whitespace-nowrap text-xs text-black sm:text-sm">+ {money(fare.gst)} Charges and Taxes</div>
+          <div className="mt-3 grid gap-1.5 text-xs text-slate-800 sm:mt-4 sm:grid-cols-2 sm:gap-2 sm:text-sm">
+            <span className="flex min-w-0 items-center gap-1.5"><User className="h-4 w-4 shrink-0 text-teal-600 sm:h-5 sm:w-5" /> <span className="truncate">Driver allowance included</span></span>
+            <span className="flex min-w-0 items-center gap-1.5"><Briefcase className="h-4 w-4 shrink-0 text-teal-600 sm:h-5 sm:w-5" /> <span className="truncate">{cab.luggage}</span></span>
+            <span className="flex min-w-0 items-center gap-1.5"><Check className="h-4 w-4 shrink-0 text-emerald-500 sm:h-5 sm:w-5" /> <span className="truncate">{formatKm(fare.chargeableDistance || fare.distance)} included</span></span>
+            <span className="flex min-w-0 items-center gap-1.5"><ArrowLeftRight className="h-4 w-4 shrink-0 text-teal-600 sm:h-5 sm:w-5" /> <span className="truncate">Post limit: Rs {cab.pricePerKm || 16}/km</span></span>
           </div>
-          <div className="mt-4 text-sm font-bold text-black">Fuel Type</div>
-          <div className="mt-2 flex gap-2 text-sm font-semibold text-black">
+          <div className="mt-3 text-xs font-bold text-black sm:mt-4 sm:text-sm">Fuel Type</div>
+          <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-black sm:text-sm">
             {fuels.map((fuel) => (
-              <label key={fuel} className={`flex h-9 items-center gap-2 rounded-md border px-3 ${activeFuel === fuel ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-slate-200 text-black'}`}>
+              <label key={fuel} className={`flex h-8 items-center gap-1.5 rounded-md border px-2.5 sm:h-9 sm:gap-2 sm:px-3 ${activeFuel === fuel ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-slate-200 text-black'}`}>
                 <input type="radio" checked={activeFuel === fuel} onChange={() => set('fuelType', fuel)} name={`fuel-${cab.slug}`} className="accent-amber-500" /> {fuelLabel(fuel)}
               </label>
             ))}
           </div>
-          <details className="mt-4 text-sm text-teal-700">
+          <details className="mt-2 text-xs text-teal-700 sm:mt-4 sm:text-sm">
             <summary className="cursor-pointer font-semibold">Inclusions and Exclusions</summary>
             <div className="mt-2 text-slate-600">Includes base fare, fuel, driver allowance and GST. Excludes extra pickups, parking and distance beyond package limit.</div>
           </details>
         </div>
-        <div className="flex min-h-40 min-w-0 items-start justify-center overflow-visible sm:min-h-60 lg:min-h-72">
-          <img src={cab.image} alt={cab.name} className="h-auto max-h-52 w-full max-w-[260px] object-contain sm:max-h-72 sm:max-w-[360px] lg:max-h-80 lg:max-w-[440px]" />
+        <div className="flex min-h-24 min-w-0 items-start justify-center overflow-visible sm:min-h-60 lg:min-h-72">
+          <img src={cab.image} alt={cab.name} className="h-auto max-h-28 w-full max-w-[132px] object-contain sm:max-h-72 sm:max-w-[360px] lg:max-h-80 lg:max-w-[440px]" />
         </div>
       </div>
-      <div className="px-4 pb-4 sm:px-5">
-        <Button onClick={() => onCheckout(cab.slug)} className="h-12 w-full rounded bg-amber-500 px-6 text-sm font-black uppercase text-slate-950 hover:bg-amber-400">Select Car</Button>
+      <div className="px-3 pb-3 sm:px-5 sm:pb-4">
+        <Button onClick={() => onCheckout(cab.slug)} className="h-10 w-full rounded bg-amber-500 px-6 text-xs font-black uppercase text-slate-950 hover:bg-amber-400 sm:h-12 sm:text-sm">Select Car</Button>
       </div>
       <div className="bg-teal-50 px-5 py-3 text-sm font-bold text-slate-900">New Car Promise - Model that is 2023 or newer @ Rs 249</div>
     </motion.div>
@@ -737,8 +762,17 @@ function CabCard({ cab, data, set, pricingSettings, index, onCheckout }) {
 }
 
 function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSelectedAddons, payment, setPayment, onBack, onSubmit, submitting }) {
+  const [paymentStep, setPaymentStep] = useState(false);
+  const detailsComplete = Boolean(
+    validCustomerName(data.name) &&
+    validCustomerPhone(data.phone, data.phoneCountry) &&
+    validCustomerEmail(data.email) &&
+    data.address?.trim() &&
+    data.dropAddress?.trim()
+  );
+  const activePaymentStep = paymentStep && detailsComplete;
+
   if (!vehicle || !fare) return null;
-  const detailsComplete = Boolean(data.name?.trim() && data.phone?.trim() && data.address?.trim() && data.dropAddress?.trim());
   const advancePercent = Math.min(Math.max(Number(fare.pricingPolicy?.advancePercent ?? DEFAULT_PRICING_SETTINGS.advancePercent), 0), 100);
 
   const toggleAddon = (id) => {
@@ -746,46 +780,52 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
   };
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-3 px-3 py-3 text-sm sm:px-5 sm:py-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="mx-auto max-w-3xl px-3 py-3 text-sm sm:px-5 sm:py-4">
       <div className="space-y-3">
-        <button onClick={onBack} className="text-xs font-black text-teal-700">Back to cabs</button>
-        <Section title="Trip Details" tone="blue" compact>
-          <div className="text-base font-black text-black sm:text-lg">{routeLabel} <span className="text-xs font-normal text-black">({TRIP_LABELS[data.tripType]})</span></div>
-          <div className="mt-2 grid gap-1.5 text-xs text-slate-700 sm:grid-cols-2">
-            <div>Car Type: <b>{vehicle.name} or Equivalent</b></div>
-            <div>Fuel Type: <b>{fuelLabel(data.fuelType)}</b></div>
-            <div>Pickup: <b>{prettyDate(data.date)}, {data.time}</b></div>
-            {data.tripType === 'round-trip' && <div>Return: <b>{prettyDate(data.returnDate)}, {data.returnTime || '-'}</b></div>}
-            {!!data.stops?.length && <div className="sm:col-span-2">Stops: <b>{data.stops.filter(Boolean).join(' | ') || '-'}</b></div>}
-            <div>Kms included: <b>{formatKm(fare.chargeableDistance || fare.distance)}</b></div>
-            <div>Estimated time: <b>{formatDuration(fare.durationMinutes)}</b></div>
-          </div>
-        </Section>
-
-        <Section title="Contact & Pickup Details" compact>
-          <div className="grid gap-2 sm:grid-cols-[1fr_76px_1fr]">
-            <Input value={data.name} onChange={(event) => set('name', event.target.value)} placeholder="Full Name" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500" />
-            <select value={data.phoneCountry || '+91'} onChange={(event) => set('phoneCountry', event.target.value)} className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm font-semibold text-slate-950">
-              {COUNTRY_CODES.map(([country, code]) => (
-                <option key={`${country}-${code}`} value={code}>{country} {code}</option>
-              ))}
-            </select>
-            <Input value={data.phone} onChange={(event) => set('phone', event.target.value)} placeholder="Mobile No." className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500" />
-            <Input value={data.email} onChange={(event) => set('email', event.target.value)} placeholder="Email ID" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />
-            <Input value={data.address} onChange={(event) => set('address', event.target.value)} placeholder="Pickup Location" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />
-            <Input value={data.dropAddress} onChange={(event) => set('dropAddress', event.target.value)} placeholder="Drop Location" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />
-            <Textarea value={data.notes} onChange={(event) => set('notes', event.target.value)} placeholder="Any notes for driver" className="min-h-16 bg-slate-100 text-sm sm:col-span-3" />
-          </div>
-        </Section>
-
-        {!detailsComplete && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900">
-            Fill name, mobile number, pickup and drop details to continue to payment.
-          </div>
-        )}
-
-        {detailsComplete && (
+        {!activePaymentStep ? (
           <>
+            <button onClick={onBack} className="text-xs font-black text-teal-700">Back to cabs</button>
+            <Section title="Trip Details" tone="blue" compact>
+              <div className="text-base font-black text-black sm:text-lg">{routeLabel} <span className="text-xs font-normal text-black">({TRIP_LABELS[data.tripType]})</span></div>
+              <div className="mt-2 grid gap-1.5 text-xs text-slate-700 sm:grid-cols-2">
+                <div>Car Type: <b>{vehicle.name} or Equivalent</b></div>
+                <div>Fuel Type: <b>{fuelLabel(data.fuelType)}</b></div>
+                <div>Pickup: <b>{prettyDate(data.date)}, {data.time}</b></div>
+                {data.tripType === 'round-trip' && <div>Return: <b>{prettyDate(data.returnDate)}, {data.returnTime || '-'}</b></div>}
+                {!!data.stops?.length && <div className="sm:col-span-2">Stops: <b>{data.stops.filter(Boolean).join(' | ') || '-'}</b></div>}
+                <div>Kms included: <b>{formatKm(fare.chargeableDistance || fare.distance)}</b></div>
+                <div>Estimated time: <b>{formatDuration(fare.durationMinutes)}</b></div>
+              </div>
+            </Section>
+
+            <Section title="Contact & Pickup Details" compact>
+              <div className="grid gap-2 sm:grid-cols-[1fr_76px_1fr]">
+                <Input value={data.name} onChange={(event) => set('name', event.target.value)} placeholder="First and Last Name" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500" />
+                <select value={data.phoneCountry || '+91'} onChange={(event) => set('phoneCountry', event.target.value)} className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm font-semibold text-slate-950">
+                  {COUNTRY_CODES.map(([country, code]) => (
+                    <option key={`${country}-${code}`} value={code}>{country} {code}</option>
+                  ))}
+                </select>
+                <Input value={data.phone} onChange={(event) => set('phone', event.target.value)} placeholder="Mobile No." className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500" />
+                <Input value={data.email} onChange={(event) => set('email', event.target.value)} placeholder="Email ID" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />
+                <Input value={data.address} onChange={(event) => set('address', event.target.value)} placeholder="Pickup Location" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />
+                <Input value={data.dropAddress} onChange={(event) => set('dropAddress', event.target.value)} placeholder="Drop Location" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />
+                <Textarea value={data.notes} onChange={(event) => set('notes', event.target.value)} placeholder="Any notes for driver" className="min-h-16 bg-slate-100 text-sm sm:col-span-3" />
+              </div>
+            </Section>
+
+            {!detailsComplete && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900">
+                Fill real first and last name, valid mobile number, valid email, pickup and drop details to continue to payment.
+              </div>
+            )}
+            <Button onClick={() => setPaymentStep(true)} disabled={!detailsComplete} className="h-11 w-full rounded-md bg-teal-700 text-sm font-black uppercase text-white hover:bg-teal-800 disabled:opacity-50">
+              Continue to Payment
+            </Button>
+          </>
+        ) : (
+          <>
+            <button onClick={() => setPaymentStep(false)} className="text-xs font-black text-teal-700">Back to details</button>
             <FareSummary fare={fare} />
 
             <Section title="Add-ons" subtitle="Optional upgrades" compact>
@@ -804,39 +844,38 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
                 ))}
               </div>
             </Section>
+
+            <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+              <div className="mb-3 rounded-md border border-yellow-300 bg-yellow-50 px-3 py-2 text-xs font-bold text-yellow-900">Free cancellation till 1 hr of departure</div>
+              <h3 className="text-lg font-black text-black">Payment Options</h3>
+              <PaymentOption active={payment === 'part'} onClick={() => setPayment('part')} title={`Pay ${advancePercent}% advance`} subtitle="Razorpay secure payment" price={money(fare.partPay)} />
+              <PaymentOption active={payment === 'full'} onClick={() => setPayment('full')} title="Pay full fare" subtitle="Confirm with full payment" price={money(fare.total)} />
+              <PaymentOption active={payment === 'after'} onClick={() => setPayment('after')} title="Pay after ride" subtitle="No online payment now" price={money(0)} />
+              <div className="mt-3 rounded-md border border-teal-200 bg-teal-50 p-2 text-xs font-bold text-teal-900">{payment === 'after' ? 'Booking will be sent to admin without online payment.' : 'Confirmation appears only after Razorpay payment is verified.'}</div>
+              <Button onClick={onSubmit} disabled={submitting} className="mt-3 h-11 w-full rounded-md bg-teal-700 text-sm font-black uppercase text-white hover:bg-teal-800">
+                {submitting ? (payment === 'after' ? 'Saving booking...' : 'Opening Razorpay...') : payment === 'after' ? 'Book Now' : `Pay ${payment === 'full' ? money(fare.total) : money(fare.partPay)}`}
+              </Button>
+              <details className="mt-3 text-xs">
+                <summary className="cursor-pointer font-bold text-teal-700">Fare break up</summary>
+                <div className="mt-2 space-y-1.5 text-slate-700">
+                  <FareRow label="Actual Distance" valueText={formatKm(fare.actualDistance)} />
+                  <FareRow label="Minimum Distance Rule" valueText={formatKm(fare.minimumDistance)} />
+                  <FareRow label="Chargeable Distance" valueText={formatKm(fare.chargeableDistance || fare.distance)} />
+                  <FareRow label="Vehicle Rate" valueText={`Rs ${fare.vehicleRate || fare.ratePerKm}/KM`} />
+                  {!!fare.base && <FareRow label="Base Fare" value={fare.base} />}
+                  <FareRow label="Estimated Fare" value={fare.estimatedFare || fare.distanceFare} />
+                  {!!fare.driver && <FareRow label="Driver allowance" value={fare.driver} />}
+                  {fare.fuelSurcharge > 0 && <FareRow label="Diesel fuel surcharge" value={fare.fuelSurcharge} />}
+                  {fare.discount > 0 && <FareRow label="Round trip discount" value={-fare.discount} />}
+                  <FareRow label="Add-ons" value={fare.addons} />
+                  {!!fare.gst && <FareRow label="GST" value={fare.gst} />}
+                  <FareRow label="Total" value={fare.total} bold />
+                </div>
+              </details>
+            </section>
           </>
         )}
       </div>
-
-      {detailsComplete && (
-        <aside className="h-fit rounded-lg border border-slate-200 bg-white p-3 shadow-lg lg:sticky lg:top-4">
-          <div className="mb-3 rounded-md border border-yellow-300 bg-yellow-50 px-3 py-2 text-xs font-bold text-yellow-900">Free cancellation till 1 hr of departure</div>
-          <h3 className="text-lg font-black text-black">Payment Options</h3>
-          <PaymentOption active={payment === 'part'} onClick={() => setPayment('part')} title={`Pay ${advancePercent}% advance`} subtitle="Razorpay secure payment" price={money(fare.partPay)} />
-          <PaymentOption active={payment === 'full'} onClick={() => setPayment('full')} title="Pay full fare" subtitle="Confirm with full payment" price={money(fare.total)} />
-          <PaymentOption active={payment === 'after'} onClick={() => setPayment('after')} title="Pay after ride" subtitle="No online payment now" price={money(0)} />
-          <div className="mt-3 rounded-md border border-teal-200 bg-teal-50 p-2 text-xs font-bold text-teal-900">{payment === 'after' ? 'Booking will be sent to admin without online payment.' : 'Confirmation appears only after Razorpay payment is verified.'}</div>
-          <Button onClick={onSubmit} disabled={submitting} className="mt-3 h-11 w-full rounded-md bg-teal-700 text-sm font-black uppercase text-white hover:bg-teal-800">
-            {submitting ? (payment === 'after' ? 'Saving booking...' : 'Opening Razorpay...') : payment === 'after' ? 'Book Now' : `Pay ${payment === 'full' ? money(fare.total) : money(fare.partPay)}`}
-          </Button>
-          <details className="mt-3 text-xs">
-            <summary className="cursor-pointer font-bold text-teal-700">Fare break up</summary>
-            <div className="mt-2 space-y-1.5 text-slate-700">
-              <FareRow label="Actual Distance" valueText={formatKm(fare.actualDistance)} />
-              <FareRow label="Minimum Distance Rule" valueText={formatKm(fare.minimumDistance)} />
-              <FareRow label="Chargeable Distance" valueText={formatKm(fare.chargeableDistance || fare.distance)} />
-              <FareRow label="Vehicle Rate" valueText={`Rs ${fare.vehicleRate || fare.ratePerKm}/KM`} />
-              {!!fare.base && <FareRow label="Base Fare" value={fare.base} />}
-              <FareRow label="Estimated Fare" value={fare.estimatedFare || fare.distanceFare} />
-              {!!fare.driver && <FareRow label="Driver allowance" value={fare.driver} />}
-              {fare.fuelSurcharge > 0 && <FareRow label="Diesel fuel surcharge" value={fare.fuelSurcharge} />}
-              <FareRow label="Add-ons" value={fare.addons} />
-              {!!fare.gst && <FareRow label="GST" value={fare.gst} />}
-              <FareRow label="Total" value={fare.total} bold />
-            </div>
-          </details>
-        </aside>
-      )}
     </div>
   );
 }
@@ -912,6 +951,7 @@ function FareSummary({ fare }) {
         <SummaryValue label="Vehicle Rate" value={`Rs ${fare.vehicleRate || fare.ratePerKm}/KM`} />
         <SummaryValue label="Base Fare" value={money(fare.base)} />
         <SummaryValue label="Estimated Fare" value={money(fare.estimatedFare || fare.distanceFare)} />
+        {fare.discount > 0 && <SummaryValue label="Round Trip Discount" value={money(-fare.discount)} />}
         <SummaryValue label="Trip Days" value={String(fare.tripDays || 1)} />
       </div>
       {fare.minimumApplied && (
