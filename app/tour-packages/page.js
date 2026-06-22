@@ -2,12 +2,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Reveal from '@/components/site/Reveal';
-import { PACKAGES } from '@/lib/data';
+import { listTourPackages } from '@/lib/crm';
 import { Clock, Check, ArrowRight } from 'lucide-react';
 
 export const metadata = { title: 'Tour Packages - ToursTaxi' };
+export const dynamic = 'force-dynamic';
 
-export default function ToursPage() {
+export default async function ToursPage() {
+  const packages = await listTourPackages();
+
   return (
     <div className="pt-24">
       <section className="bg-gradient-to-br from-[#12233f] via-[#0f3f3b] to-[#071527] py-16 text-white sm:py-20">
@@ -20,7 +23,7 @@ export default function ToursPage() {
 
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 grid gap-8 lg:grid-cols-2">
-          {PACKAGES.map((p, i) => (
+          {packages.map((p, i) => (
             <Reveal key={p.slug} delay={i * 0.06}>
               <Card className="overflow-hidden group hover:shadow-2xl transition-all h-full">
                 <div className="grid sm:grid-cols-5">

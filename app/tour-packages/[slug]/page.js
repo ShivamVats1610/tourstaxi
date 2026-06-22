@@ -1,12 +1,17 @@
 import TourSlugClient from '@/components/site/TourSlugClient';
-import { PACKAGES } from '@/lib/data';
+import { listTourPackages } from '@/lib/crm';
 
-export function generateStaticParams() { return PACKAGES.map(p => ({ slug: p.slug })); }
-export function generateMetadata({ params }) {
-  const p = PACKAGES.find(x => x.slug === params.slug);
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const packages = await listTourPackages();
+  const p = packages.find(x => x.slug === slug);
   return { title: p ? `${p.title} - Tour Package | ToursTaxi` : 'Tour Packages - ToursTaxi' };
 }
 
-export default function Page({ params }) {
-  return <TourSlugClient slug={params.slug} />;
+export default async function Page({ params }) {
+  const { slug } = await params;
+  const packages = await listTourPackages();
+  return <TourSlugClient slug={slug} packages={packages} />;
 }

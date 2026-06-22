@@ -3,14 +3,34 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Reveal from '@/components/site/Reveal';
-import { BLOG_POSTS, BLOG_CATEGORIES } from '@/lib/data';
+import { BLOG_CATEGORIES } from '@/lib/data';
+import { listBlogPosts } from '@/lib/crm';
 import { Clock, ArrowRight, Search, User } from 'lucide-react';
 
 export const metadata = { title: 'Blog - ToursTaxi' };
+export const dynamic = 'force-dynamic';
 
-export default function BlogPage() {
-  const featured = BLOG_POSTS[0];
-  const rest = BLOG_POSTS.slice(1);
+export default async function BlogPage() {
+  const posts = await listBlogPosts();
+  const featured = posts[0];
+  const rest = posts.slice(1);
+  const categories = [...new Set(posts.map((post) => post.category).filter(Boolean))].map((name) => ({
+    name,
+    count: posts.filter((post) => post.category === name).length
+  }));
+
+  if (!featured) {
+    return (
+      <div className="pt-24">
+        <section className="py-20">
+          <div className="mx-auto max-w-4xl px-4 text-center">
+            <h1 className="text-3xl font-extrabold text-slate-950">No blog posts yet</h1>
+            <p className="mt-3 text-slate-600">Posts added from the admin panel will appear here.</p>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-24">
@@ -75,7 +95,7 @@ export default function BlogPage() {
             <Card><CardContent className="p-5">
               <h4 className="font-bold text-slate-900 mb-3">Categories</h4>
               <ul className="space-y-2">
-                {BLOG_CATEGORIES.map(c => (
+                {(categories.length ? categories : BLOG_CATEGORIES).map(c => (
                   <li key={c.name}><Link href="/blog" className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-teal-50 text-sm text-slate-700 hover:text-teal-700"><span>{c.name}</span><span className="text-xs text-slate-400 bg-slate-100 rounded-full px-2 py-0.5">{c.count}</span></Link></li>
                 ))}
               </ul>
@@ -83,7 +103,7 @@ export default function BlogPage() {
             <Card><CardContent className="p-5">
               <h4 className="font-bold text-slate-900 mb-3">Recent Posts</h4>
               <ul className="space-y-3">
-                {BLOG_POSTS.slice(0, 4).map(p => (
+                {posts.slice(0, 4).map(p => (
                   <li key={p.slug}><Link href={`/blog/${p.slug}`} className="flex gap-3 group">
                     <img src={p.image} alt={p.title} className="h-16 w-16 rounded-lg object-cover shrink-0" />
                     <div><div className="text-sm font-semibold text-slate-800 group-hover:text-teal-700 line-clamp-2">{p.title}</div><div className="text-xs text-slate-500 mt-1">{p.date}</div></div>

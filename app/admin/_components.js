@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { CalendarClock, Car, CheckCircle2, IndianRupee, LayoutDashboard, LogOut, Plus, Settings, Trash2, Upload, Users } from 'lucide-react';
+import { BookOpen, CalendarClock, Car, CheckCircle2, IndianRupee, LayoutDashboard, LogOut, Map, Plus, Settings, Trash2, Upload, Users } from 'lucide-react';
 import { logoutAction } from '@/app/actions/auth';
-import { deleteBookingAction, deleteCabAction, deleteUserAction, saveCabAction, updateBookingAction, updatePricingSettingsAction, updateUserAction } from '@/app/actions/crm';
+import { deleteBlogPostAction, deleteBookingAction, deleteCabAction, deleteTourPackageAction, deleteUserAction, saveBlogPostAction, saveCabAction, saveTourPackageAction, updateBookingAction, updatePricingSettingsAction, updateUserAction } from '@/app/actions/crm';
 import ToastSubmitButton from '@/components/ui/toast-submit-button';
 
 export const STATUSES = ['new', 'assigned', 'confirmed', 'completed', 'cancelled'];
@@ -12,6 +12,8 @@ export const ADMIN_NAV = [
   { label: 'Old Bookings', href: '/admin/bookings/old', icon: CheckCircle2 },
   { label: 'Customers', href: '/admin/customers', icon: Users },
   { label: 'Cars', href: '/admin/cars', icon: Car },
+  { label: 'Tour Packages', href: '/admin/tour-packages', icon: Map },
+  { label: 'Blog', href: '/admin/blog', icon: BookOpen },
   { label: 'Fare Settings', href: '/admin/pricing', icon: Settings },
 ];
 
@@ -182,6 +184,89 @@ export function CabManager({ cabs }) {
         </div>
       </Panel>
     </div>
+  );
+}
+
+export function TourPackageManager({ packages }) {
+  return (
+    <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+      <Panel title="Add Tour Package" subtitle="Create cards for the tour packages page." icon={Plus}><TourPackageForm /></Panel>
+      <Panel title="Tour Packages" subtitle="Edit images, pricing, inclusions, and publish status." icon={Map}>
+        <div className="grid gap-3">
+          {packages.map((item) => (
+            <details key={item.id} className="rounded-lg border border-slate-200 bg-white">
+              <summary className="cursor-pointer list-none p-4 hover:bg-slate-50">
+                <div className="grid gap-3 sm:grid-cols-[112px_1fr_auto] sm:items-center">
+                  <div className="h-20 overflow-hidden rounded-md bg-slate-100">{item.image ? <img src={item.image} alt={item.title} className="h-full w-full object-cover" /> : <Map className="m-auto mt-6 h-8 w-8 text-slate-400" />}</div>
+                  <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h3 className="font-black">{item.title || 'Untitled package'}</h3><StatusBadge status={item.status || 'active'} /></div><div className="mt-1 text-sm font-semibold text-slate-700">{item.duration || '-'} | Rs {Number(item.price || 0).toLocaleString('en-IN')} | {item.tag || 'No tag'}</div><div className="mt-1 line-clamp-2 text-xs font-medium text-slate-500">{item.description || 'No description added yet'}</div></div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-teal-700">Open editor</div>
+                </div>
+              </summary>
+              <div className="border-t border-slate-200 bg-slate-50 p-4"><TourPackageForm item={item} /><DeleteForm id={item.id} action={deleteTourPackageAction} label="Delete package" className="mt-3" /></div>
+            </details>
+          ))}
+          {!packages.length && <EmptyState title="No packages yet" text="Add your first tour package to show it on the website." />}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function TourPackageForm({ item = {} }) {
+  return (
+    <form action={saveTourPackageAction} className="grid gap-3">
+      <input type="hidden" name="id" defaultValue={item.id || ''} />
+      <Field name="title" label="Package Title" defaultValue={item.title} placeholder="Ranthambore Tiger Safari" required />
+      <Field name="slug" label="Slug" defaultValue={item.slug} placeholder="ranthambore-safari" />
+      <div className="grid gap-3 sm:grid-cols-2"><Field name="duration" label="Duration" defaultValue={item.duration} placeholder="2 Days / 1 Night" /><Field name="price" label="Starts At Price" type="number" min="0" defaultValue={item.price || 0} /><Field name="tag" label="Tag" defaultValue={item.tag} placeholder="Wildlife" /><label className="text-xs font-bold uppercase tracking-wider text-slate-700">Status<select name="status" defaultValue={item.status || 'active'} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold normal-case"><option value="active">Active</option><option value="inactive">Inactive</option></select></label></div>
+      <Field name="image" label="Image URL" defaultValue={item.image} />
+      <label className="text-xs font-bold uppercase tracking-wider text-slate-700"><span className="mb-1 flex items-center gap-1.5"><Upload className="h-3.5 w-3.5 text-teal-600" /> Upload Package Image</span><input name="imageFile" type="file" accept="image/*" className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-950 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white" /></label>
+      <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Description<textarea name="description" defaultValue={item.description || ''} className="mt-1 min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal" /></label>
+      <Field name="inclusions" label="Inclusions" defaultValue={item.inclusions?.join?.(', ') || ''} placeholder="2 Jungle Safaris, AC Resort Stay, Breakfast" />
+      <ToastSubmitButton message="Saving tour package" description="Package details are being updated." className="inline-flex h-11 items-center justify-center rounded-md bg-[#12233f] px-4 text-sm font-black text-white hover:bg-[#0f1c33]"><CheckCircle2 className="mr-2 h-4 w-4" /> Save Package</ToastSubmitButton>
+    </form>
+  );
+}
+
+export function BlogManager({ posts }) {
+  return (
+    <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+      <Panel title="Add Blog Post" subtitle="Create cards and articles for the blog page." icon={Plus}><BlogPostForm /></Panel>
+      <Panel title="Blog Posts" subtitle="Edit article cards, hero images, categories, and content." icon={BookOpen}>
+        <div className="grid gap-3">
+          {posts.map((post) => (
+            <details key={post.id} className="rounded-lg border border-slate-200 bg-white">
+              <summary className="cursor-pointer list-none p-4 hover:bg-slate-50">
+                <div className="grid gap-3 sm:grid-cols-[112px_1fr_auto] sm:items-center">
+                  <div className="h-20 overflow-hidden rounded-md bg-slate-100">{post.image ? <img src={post.image} alt={post.title} className="h-full w-full object-cover" /> : <BookOpen className="m-auto mt-6 h-8 w-8 text-slate-400" />}</div>
+                  <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h3 className="font-black">{post.title || 'Untitled post'}</h3><StatusBadge status={post.status || 'active'} /></div><div className="mt-1 text-sm font-semibold text-slate-700">{post.category || 'No category'} | {post.date || '-'} | {post.readMin || 0} min</div><div className="mt-1 line-clamp-2 text-xs font-medium text-slate-500">{post.excerpt || 'No excerpt added yet'}</div></div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-teal-700">Open editor</div>
+                </div>
+              </summary>
+              <div className="border-t border-slate-200 bg-slate-50 p-4"><BlogPostForm post={post} /><DeleteForm id={post.id} action={deleteBlogPostAction} label="Delete post" className="mt-3" /></div>
+            </details>
+          ))}
+          {!posts.length && <EmptyState title="No blog posts yet" text="Add your first article to show it on the blog." />}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function BlogPostForm({ post = {} }) {
+  return (
+    <form action={saveBlogPostAction} className="grid gap-3">
+      <input type="hidden" name="id" defaultValue={post.id || ''} />
+      <Field name="title" label="Post Title" defaultValue={post.title} placeholder="Best Time to Visit Ranthambore" required />
+      <Field name="slug" label="Slug" defaultValue={post.slug} placeholder="best-time-to-visit-ranthambore" />
+      <div className="grid gap-3 sm:grid-cols-2"><Field name="category" label="Category" defaultValue={post.category} placeholder="Wildlife" /><Field name="author" label="Author" defaultValue={post.author} placeholder="ToursTaxi Team" /><Field name="date" label="Display Date" defaultValue={post.date} placeholder="12 May 2025" /><Field name="readMin" label="Read Minutes" type="number" min="1" defaultValue={post.readMin || 5} /></div>
+      <Field name="image" label="Image URL" defaultValue={post.image} />
+      <label className="text-xs font-bold uppercase tracking-wider text-slate-700"><span className="mb-1 flex items-center gap-1.5"><Upload className="h-3.5 w-3.5 text-teal-600" /> Upload Blog Image</span><input name="imageFile" type="file" accept="image/*" className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-950 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white" /></label>
+      <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Excerpt<textarea name="excerpt" defaultValue={post.excerpt || ''} className="mt-1 min-h-20 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal" /></label>
+      <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Article Content<textarea name="content" defaultValue={post.content || ''} className="mt-1 min-h-40 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal" placeholder="Write article paragraphs. Use blank lines between paragraphs." /></label>
+      <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Status<select name="status" defaultValue={post.status || 'active'} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold normal-case"><option value="active">Active</option><option value="inactive">Inactive</option></select></label>
+      <ToastSubmitButton message="Saving blog post" description="Blog content is being updated." className="inline-flex h-11 items-center justify-center rounded-md bg-[#12233f] px-4 text-sm font-black text-white hover:bg-[#0f1c33]"><CheckCircle2 className="mr-2 h-4 w-4" /> Save Post</ToastSubmitButton>
+    </form>
   );
 }
 

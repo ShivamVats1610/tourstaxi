@@ -22,9 +22,8 @@ const TRIP_LABELS = {
 
 const ADDONS = [
   { id: 'carrier', label: 'Cab with Luggage Carrier', price: 149, tag: 'Most Popular' },
-  { id: 'diesel', label: 'Diesel Car Guarantee', priceText: 'Rs 1.1/km' },
   { id: 'new-car', label: 'New Car Promise - Model that is 2023 or newer', price: 249 },
-  { id: 'language', label: 'Chauffeurs who know your language', price: 199 }
+  { id: 'language', label: 'Chauffeurs who know your language', price: 0 }
 ];
 
 const COUNTRY_CODES = [
@@ -194,6 +193,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       email: '',
       address: '',
       dropAddress: '',
+      languagePreference: '',
       notes: ''
     });
     setSelectedAddons([]);
@@ -406,6 +406,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 set={set}
                 routeLabel={routeLabel}
                 pricingSettings={pricingSettings}
+                onModify={() => setView('details')}
                 onCheckout={(slug) => {
                   const cab = fleet.find((item) => item.slug === slug);
                   const allowed = fuelOptions(cab);
@@ -601,7 +602,7 @@ function DetailsPanel({ data, set, onSelectLocation, onContinue }) {
   );
 }
 
-function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onCheckout }) {
+function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onModify, onCheckout }) {
   const selectedCab = fleet.find((cab) => cab.slug === data.vehicleSlug) || fleet[0] || null;
 
   return (
@@ -625,7 +626,7 @@ function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onCheckou
       <div className="mt-3 space-y-3 sm:mt-5 sm:space-y-4">
         {!fleet.length && <div className="rounded-lg border border-slate-200 p-6 text-slate-600">No active cabs are available right now.</div>}
         {selectedCab && (
-          <CabCard key={selectedCab.slug} cab={selectedCab} data={data} set={set} pricingSettings={pricingSettings} routeLabel={routeLabel} index={0} onCheckout={onCheckout} />
+          <CabCard key={selectedCab.slug} cab={selectedCab} data={data} set={set} pricingSettings={pricingSettings} routeLabel={routeLabel} index={0} onModify={onModify} onCheckout={onCheckout} />
         )}
       </div>
       <div className="mt-5">
@@ -734,10 +735,11 @@ function StripItem({ icon, title, text }) {
   );
 }
 
-function CabCard({ cab, data, set, pricingSettings, index, onCheckout }) {
+function CabCard({ cab, data, set, pricingSettings, index, onModify, onCheckout }) {
   const fare = cabFare(cab, data, [], pricingSettings);
   const fuels = fuelOptions(cab);
   const activeFuel = fuels.includes(data.fuelType) ? data.fuelType : fuels[0];
+  const visibleStops = (data.stops || []).filter(Boolean);
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }} className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -757,21 +759,39 @@ function CabCard({ cab, data, set, pricingSettings, index, onCheckout }) {
             <span className="flex min-w-0 items-center gap-1.5"><Check className="h-4 w-4 shrink-0 text-emerald-500 sm:h-5 sm:w-5" /> <span className="truncate">{formatKm(fare.chargeableDistance || fare.distance)} included</span></span>
             <span className="flex min-w-0 items-center gap-1.5"><ArrowLeftRight className="h-4 w-4 shrink-0 text-teal-600 sm:h-5 sm:w-5" /> <span className="truncate">Post limit: Rs {cab.pricePerKm || 16}/km</span></span>
           </div>
-          <div className="mt-3 text-xs font-bold text-black sm:mt-4 sm:text-sm">Fuel Type</div>
-          <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-black sm:text-sm">
-            {fuels.map((fuel) => (
-              <label key={fuel} className={`flex h-8 items-center gap-1.5 rounded-md border px-2.5 sm:h-9 sm:gap-2 sm:px-3 ${activeFuel === fuel ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-slate-200 text-black'}`}>
-                <input type="radio" checked={activeFuel === fuel} onChange={() => set('fuelType', fuel)} name={`fuel-${cab.slug}`} className="accent-amber-500" /> {fuelLabel(fuel)}
-              </label>
-            ))}
+          <div className="mt-3 rounded-md border border-dashed border-teal-200 bg-teal-50/70 p-3 text-xs text-slate-800 sm:mt-4 sm:text-sm">
+            <div className="flex items-center justify-between gap-3">
+              <div className="font-black text-slate-950">Modify Trip</div>
+              <Button type="button" variant="outline" onClick={onModify} className="h-8 shrink-0 rounded-md bg-white px-3 text-xs font-black text-teal-700">
+                Edit
+              </Button>
+            </div>
+            <div className="mt-2 grid gap-1.5 font-semibold">
+              <div className="truncate">Pickup: {data.pickup || '-'}</div>
+              {data.tripType !== 'local' && <div className="truncate">Drop: {data.drop || '-'}</div>}
+              {!!visibleStops.length && <div className="truncate">Stops: {visibleStops.join(' | ')}</div>}
+              <div>{prettyDate(data.date)} at {formatClock(data.time)}</div>
+            </div>
           </div>
-          <details className="mt-2 text-xs text-teal-700 sm:mt-4 sm:text-sm">
-            <summary className="cursor-pointer font-semibold">Inclusions and Exclusions</summary>
-            <div className="mt-2 text-slate-600">Includes base fare, fuel, driver allowance and GST. Excludes extra pickups, parking and distance beyond package limit.</div>
-          </details>
         </div>
-        <div className="flex min-h-24 min-w-0 items-start justify-center overflow-visible sm:min-h-60 lg:min-h-72">
-          <img src={cab.image} alt={cab.name} className="h-auto max-h-28 w-full max-w-[132px] object-contain sm:max-h-72 sm:max-w-[360px] lg:max-h-80 lg:max-w-[440px]" />
+        <div className="min-w-0">
+          <div className="flex min-h-24 items-start justify-center overflow-visible sm:min-h-60 lg:min-h-72">
+            <img src={cab.image} alt={cab.name} className="h-auto max-h-28 w-full max-w-[132px] object-contain sm:max-h-72 sm:max-w-[360px] lg:max-h-80 lg:max-w-[440px]" />
+          </div>
+          <div className="mt-2 rounded-md border border-slate-100 bg-white/80 p-2.5 sm:mt-3 sm:p-3">
+            <div className="text-xs font-bold text-black sm:text-sm">Fuel Type</div>
+            <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-black sm:text-sm">
+              {fuels.map((fuel) => (
+                <label key={fuel} className={`flex h-8 items-center gap-1.5 rounded-md border px-2.5 sm:h-9 sm:gap-2 sm:px-3 ${activeFuel === fuel ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-slate-200 text-black'}`}>
+                  <input type="radio" checked={activeFuel === fuel} onChange={() => set('fuelType', fuel)} name={`fuel-${cab.slug}`} className="accent-amber-500" /> {fuelLabel(fuel)}
+                </label>
+              ))}
+            </div>
+            <details className="mt-2 text-xs text-teal-700 sm:mt-3 sm:text-sm">
+              <summary className="cursor-pointer font-semibold">Inclusions and Exclusions</summary>
+              <div className="mt-2 text-slate-600">Includes base fare, fuel, driver allowance and GST. Excludes extra pickups, parking and distance beyond package limit.</div>
+            </details>
+          </div>
         </div>
       </div>
       <div className="px-3 pb-3 sm:px-5 sm:pb-4">
@@ -848,22 +868,54 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
         ) : (
           <>
             <button onClick={() => setPaymentStep(false)} className="text-xs font-black text-teal-700">Back to details</button>
-            <FareSummary fare={fare} />
 
             <Section title="Add-ons" subtitle="Optional upgrades" compact>
               <div className="grid gap-2">
-                {ADDONS.map((addon) => (
-                  <button key={addon.id} onClick={() => toggleAddon(addon.id)} className="flex w-full items-center justify-between gap-3 rounded-md border border-slate-200 bg-white p-2.5 text-left text-xs shadow-sm">
-                    <span className="flex min-w-0 items-center gap-2">
-                      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 ${selectedAddons.includes(addon.id) ? 'border-teal-600 bg-teal-600 text-white' : 'border-teal-300'}`}>
-                        {selectedAddons.includes(addon.id) && <Check className="h-3.5 w-3.5" />}
+                {ADDONS.map((addon) => {
+                  const selected = selectedAddons.includes(addon.id);
+                  if (addon.id === 'language') {
+                    return (
+                      <div key={addon.id} className="rounded-md border border-slate-200 bg-white p-2.5 text-xs shadow-sm">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <button type="button" onClick={() => toggleAddon(addon.id)} className="flex min-w-0 items-center gap-2 text-left">
+                            <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 ${selected ? 'border-teal-600 bg-teal-600 text-white' : 'border-teal-300'}`}>
+                              {selected && <Check className="h-3.5 w-3.5" />}
+                            </span>
+                            <b className="min-w-0 text-black">{addon.label}</b>
+                          </button>
+                          <div className="flex gap-2">
+                            {['Hindi', 'English'].map((language) => (
+                              <button
+                                key={language}
+                                type="button"
+                                onClick={() => {
+                                  if (!selected) toggleAddon(addon.id);
+                                  set('languagePreference', language);
+                                }}
+                                className={`h-8 rounded-md border px-3 font-black ${data.languagePreference === language ? 'border-teal-600 bg-teal-50 text-teal-700' : 'border-slate-200 bg-white text-slate-700'}`}
+                              >
+                                {language}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <button key={addon.id} onClick={() => toggleAddon(addon.id)} className="flex w-full items-center justify-between gap-3 rounded-md border border-slate-200 bg-white p-2.5 text-left text-xs shadow-sm">
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 ${selected ? 'border-teal-600 bg-teal-600 text-white' : 'border-teal-300'}`}>
+                          {selected && <Check className="h-3.5 w-3.5" />}
+                        </span>
+                        <b className="min-w-0 text-black">{addon.label}</b>
+                        {addon.tag && <span className="hidden rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 sm:inline">{addon.tag}</span>}
                       </span>
-                      <b className="min-w-0 text-black">{addon.label}</b>
-                      {addon.tag && <span className="hidden rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 sm:inline">{addon.tag}</span>}
-                    </span>
-                    <b className="shrink-0 text-black">{addon.priceText || money(addon.price)}</b>
-                  </button>
-                ))}
+                      <b className="shrink-0 text-black">{money(addon.price)}</b>
+                    </button>
+                  );
+                })}
               </div>
             </Section>
 
@@ -961,32 +1013,6 @@ function PaymentOption({ active, onClick, title, subtitle, price }) {
       <b className="shrink-0 text-base text-black">{price}</b>
     </button>
   );
-}
-
-function FareSummary({ fare }) {
-  return (
-    <Section title="Fare Summary" compact>
-      <div className="grid gap-2 text-xs text-slate-700 sm:grid-cols-2">
-        <SummaryValue label="Actual Distance" value={formatKm(fare.actualDistance)} />
-        <SummaryValue label="Minimum Distance Rule" value={formatKm(fare.minimumDistance)} />
-        <SummaryValue label="Chargeable Distance" value={formatKm(fare.chargeableDistance || fare.distance)} />
-        <SummaryValue label="Vehicle Rate" value={`Rs ${fare.vehicleRate || fare.ratePerKm}/KM`} />
-        <SummaryValue label="Base Fare" value={money(fare.base)} />
-        <SummaryValue label="Estimated Fare" value={money(fare.estimatedFare || fare.distanceFare)} />
-        {fare.discount > 0 && <SummaryValue label="Round Trip Discount" value={money(-fare.discount)} />}
-        <SummaryValue label="Trip Days" value={String(fare.tripDays || 1)} />
-      </div>
-      {fare.minimumApplied && (
-        <div className="mt-4 rounded-md bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800">
-          Minimum billing of {formatKm(fare.minimumDistance)} has been applied.
-        </div>
-      )}
-    </Section>
-  );
-}
-
-function SummaryValue({ label, value }) {
-  return <div><span className="block text-xs font-black uppercase text-slate-500">{label}</span><b className="text-slate-950">{value}</b></div>;
 }
 
 function FareRow({ label, value, valueText, bold }) {

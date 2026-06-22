@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { requireUser } from '@/lib/auth';
-import { deleteBooking, deleteCab, deleteUser, updateBooking, updateUser, upsertCab } from '@/lib/crm';
+import { deleteBlogPost, deleteBooking, deleteCab, deleteTourPackage, deleteUser, updateBooking, updateUser, upsertBlogPost, upsertCab, upsertTourPackage } from '@/lib/crm';
 import { updatePricingSettings } from '@/lib/pricing-settings';
 
 async function requireAdmin() {
@@ -64,6 +64,91 @@ export async function deleteCabAction(formData) {
   revalidatePath('/fleet/[slug]', 'page');
   revalidatePath('/');
   revalidatePath('/', 'layout');
+}
+
+export async function saveTourPackageAction(formData) {
+  await requireAdmin();
+  const imageFile = formData.get('imageFile');
+  let image = String(formData.get('image') || '');
+
+  if (imageFile && imageFile.size) {
+    try {
+      image = await uploadToCloudinary(imageFile, 'tourstaxi/packages');
+    } catch (error) {
+      console.error('Tour package image upload failed:', error);
+      if (!image) throw error;
+    }
+  }
+
+  await upsertTourPackage({
+    id: formData.get('id'),
+    slug: formData.get('slug'),
+    title: formData.get('title'),
+    duration: formData.get('duration'),
+    price: formData.get('price'),
+    image,
+    description: formData.get('description'),
+    inclusions: formData.get('inclusions'),
+    tag: formData.get('tag'),
+    status: formData.get('status'),
+  });
+
+  revalidatePath('/admin/tour-packages');
+  revalidatePath('/tour-packages');
+  revalidatePath('/tour-packages/[slug]', 'page');
+  revalidatePath('/');
+}
+
+export async function deleteTourPackageAction(formData) {
+  await requireAdmin();
+  await deleteTourPackage(String(formData.get('id') || ''));
+  revalidatePath('/admin/tour-packages');
+  revalidatePath('/tour-packages');
+  revalidatePath('/tour-packages/[slug]', 'page');
+  revalidatePath('/');
+}
+
+export async function saveBlogPostAction(formData) {
+  await requireAdmin();
+  const imageFile = formData.get('imageFile');
+  let image = String(formData.get('image') || '');
+
+  if (imageFile && imageFile.size) {
+    try {
+      image = await uploadToCloudinary(imageFile, 'tourstaxi/blog');
+    } catch (error) {
+      console.error('Blog image upload failed:', error);
+      if (!image) throw error;
+    }
+  }
+
+  await upsertBlogPost({
+    id: formData.get('id'),
+    slug: formData.get('slug'),
+    title: formData.get('title'),
+    excerpt: formData.get('excerpt'),
+    category: formData.get('category'),
+    author: formData.get('author'),
+    date: formData.get('date'),
+    readMin: formData.get('readMin'),
+    image,
+    content: formData.get('content'),
+    status: formData.get('status'),
+  });
+
+  revalidatePath('/admin/blog');
+  revalidatePath('/blog');
+  revalidatePath('/blog/[slug]', 'page');
+  revalidatePath('/');
+}
+
+export async function deleteBlogPostAction(formData) {
+  await requireAdmin();
+  await deleteBlogPost(String(formData.get('id') || ''));
+  revalidatePath('/admin/blog');
+  revalidatePath('/blog');
+  revalidatePath('/blog/[slug]', 'page');
+  revalidatePath('/');
 }
 
 export async function updateBookingAction(formData) {
@@ -143,7 +228,7 @@ export async function updateProfileAction(formData) {
   revalidatePath('/customer/dashboard');
 }
 
-async function uploadToCloudinary(file) {
+async function uploadToCloudinary(file, folder = 'tourstaxi/cabs') {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
@@ -153,7 +238,6 @@ async function uploadToCloudinary(file) {
   }
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const folder = 'tourstaxi/cabs';
   const crypto = await import('crypto');
   const signature = crypto
     .createHash('sha1')

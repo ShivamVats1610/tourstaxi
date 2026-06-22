@@ -37,14 +37,14 @@ const ITINERARIES = {
   ]
 };
 
-export default function TourSlugClient({ slug }) {
-  const pkg = PACKAGES.find(p => p.slug === slug);
+export default function TourSlugClient({ slug, packages = PACKAGES }) {
+  const pkg = packages.find(p => p.slug === slug);
   const { open } = useBooking();
 
-  const gallery = pkg ? [pkg.image, ...PACKAGES.filter(p => p.slug !== slug).slice(0, 3).map(p => p.image)] : [];
+  const gallery = pkg ? [pkg.image, ...packages.filter(p => p.slug !== slug).slice(0, 3).map(p => p.image)].filter(Boolean) : [];
   const [active, setActive] = useState(0);
   const itinerary = ITINERARIES[slug] || ITINERARIES['jaipur-tour'];
-  const related = PACKAGES.filter(p => p.slug !== slug).slice(0, 3);
+  const related = packages.filter(p => p.slug !== slug).slice(0, 3);
   if (!pkg) return notFound();
 
   return (

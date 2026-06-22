@@ -6,7 +6,7 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.1.175:3000
 - Environments: .env.local
-✓ Ready in 1364ms
+✓ Ready in 1358ms
 [mapbox:build] {
   tokenExists: true,
   tokenLength: 92,
@@ -18,19 +18,36 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
 - Experiments (use with caution):
   · serverActions
 
-○ Compiling /login ...
- GET /login 200 in 11.5s (next.js: 9.2s, proxy.ts: 286ms, application-code: 1993ms)
- GET /api/auth/me 200 in 1407ms (next.js: 1344ms, application-code: 63ms)
- GET /api/pricing-settings 200 in 1133ms (next.js: 1082ms, application-code: 51ms)
- GET / 200 in 2.3s (next.js: 1923ms, application-code: 335ms)
- POST /login 200 in 1623ms (next.js: 12ms, proxy.ts: 12ms, application-code: 1598ms)
-  └─ ƒ createFirebaseSession({"adminCode":"","email":"tourstaxi.com@gmail.com","firebaseUid":"kET2ExKYjYUYhtfYa8tdrec44y13","...":"2 items not stringified"}) in 1401ms app/actions/auth.js
- GET /admin/dashboard 200 in 3.6s (next.js: 1992ms, proxy.ts: 51ms, application-code: 1517ms)
- GET /admin/dashboard 200 in 1341ms (next.js: 128ms, proxy.ts: 46ms, application-code: 1167ms)
- GET /api/auth/me 200 in 87ms (next.js: 24ms, application-code: 63ms)
- GET /api/bookings 200 in 419ms (next.js: 347ms, application-code: 72ms)
- GET /api/bookings 200 in 489ms (next.js: 435ms, application-code: 54ms)
- GET /admin/cars 200 in 1187ms (next.js: 1004ms, proxy.ts: 11ms, application-code: 173ms)
- GET /api/auth/me 200 in 56ms (next.js: 14ms, application-code: 42ms)
- POST /admin/cars 200 in 3.3s (next.js: 17ms, proxy.ts: 25ms, application-code: 3.2s)
-  └─ ƒ saveCabAction({}) in 2963ms app/actions/crm.js
+○ Compiling / ...
+ GET / 200 in 14.3s (next.js: 11.6s, application-code: 2.7s)
+○ Compiling /api/auth/me ...
+ GET /api/auth/me 200 in 3.6s (next.js: 3.3s, application-code: 266ms)
+ GET /api/cabs 200 in 4.4s (next.js: 4.2s, application-code: 132ms)
+ GET / 200 in 573ms (next.js: 24ms, application-code: 550ms)
+ GET /admin/dashboard 200 in 5.7s (next.js: 3.0s, proxy.ts: 83ms, application-code: 2.5s)
+ GET /admin/dashboard 200 in 3.0s (next.js: 748ms, proxy.ts: 33ms, application-code: 2.2s)
+ GET /api/auth/me 200 in 78ms (next.js: 30ms, application-code: 48ms)
+ GET /api/bookings 200 in 516ms (next.js: 397ms, application-code: 119ms)
+ GET /api/bookings 200 in 650ms (next.js: 431ms, application-code: 219ms)
+○ Compiling /admin/tour-packages ...
+ GET /admin/tour-packages 200 in 4.2s (next.js: 3.6s, proxy.ts: 44ms, application-code: 504ms)
+ GET /api/auth/me 200 in 242ms (next.js: 91ms, application-code: 152ms)
+ GET /admin/blog 200 in 1395ms (next.js: 1117ms, proxy.ts: 10ms, application-code: 268ms)
+ GET /api/auth/me 200 in 82ms (next.js: 17ms, application-code: 66ms)
+ GET /admin/tour-packages 200 in 449ms (next.js: 28ms, proxy.ts: 25ms, application-code: 395ms)
+ GET /api/auth/me 200 in 118ms (next.js: 29ms, application-code: 89ms)
+ POST /admin/tour-packages 200 in 7.6s (next.js: 10ms, proxy.ts: 15ms, application-code: 7.6s)
+  └─ ƒ saveTourPackageAction({}) in 7297ms app/actions/crm.js
+ GET / 200 in 407ms (next.js: 34ms, application-code: 372ms)
+ GET /api/auth/me 200 in 66ms (next.js: 16ms, application-code: 50ms)
+ GET /api/cabs 200 in 126ms (next.js: 50ms, application-code: 76ms)
+ GET /tour-packages 200 in 1647ms (next.js: 1503ms, application-code: 144ms)
+ GET /api/auth/me 200 in 43ms (next.js: 15ms, application-code: 27ms)
+ GET /admin/dashboard 200 in 548ms (next.js: 14ms, proxy.ts: 19ms, application-code: 515ms)
+ GET /api/auth/me 200 in 89ms (next.js: 27ms, application-code: 62ms)
+ GET /api/bookings 200 in 153ms (next.js: 52ms, application-code: 101ms)
+ GET /api/bookings 200 in 115ms (next.js: 25ms, application-code: 90ms)
+ GET /admin/tour-packages 200 in 189ms (next.js: 7ms, proxy.ts: 8ms, application-code: 174ms)
+ GET /api/auth/me 200 in 53ms (next.js: 14ms, application-code: 38ms)
+ POST /admin/tour-packages 200 in 226ms (next.js: 8ms, proxy.ts: 8ms, application-code: 211ms)
+  └─ ƒ deleteTourPackageAction({}) in 70ms app/actions/crm.js
