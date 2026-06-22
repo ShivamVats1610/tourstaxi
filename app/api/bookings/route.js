@@ -11,6 +11,10 @@ function dateValue(value) {
 return required(value).slice(0, 10);
 }
 
+function dateTimeValue(date, time) {
+return `${dateValue(date)}T${required(time) || '00:00'}`;
+}
+
 function validCustomerName(value) {
 const parts = required(value).split(/\s+/).filter(Boolean);
 if (parts.length < 2) return false;
@@ -58,6 +62,13 @@ if (
   dateValue(body.returnDate || body.date) < dateValue(body.date)
 ) {
   errors.push('Return date cannot be before pickup date.');
+}
+
+if (
+  body.tripType === 'round-trip' &&
+  dateTimeValue(body.returnDate || body.date, body.returnTime) < dateTimeValue(body.date, body.time)
+) {
+  errors.push('Return date and time cannot be before pickup date and time.');
 }
 
 if (!required(body.vehicleSlug))

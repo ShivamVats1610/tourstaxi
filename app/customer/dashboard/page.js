@@ -108,7 +108,7 @@ function BookingsPanel({ bookings }) {
                 <h3 className="mt-2 text-lg font-black text-slate-950 sm:text-xl">{booking.vehicleName || booking.vehicleSlug || 'Vehicle pending'}</h3>
                 <div className="mt-3 grid gap-2 text-sm font-medium text-slate-700 md:grid-cols-2">
                   <span className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" /> {booking.pickup} to {booking.tripType === 'local' ? booking.rental : booking.drop}</span>
-                  <span className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0 text-teal-600" /> {booking.pickupDate || '-'} at {booking.pickupTime || '-'}</span>
+                  <span className="flex items-center gap-2"><Clock className="h-4 w-4 shrink-0 text-teal-600" /> {booking.pickupDate || '-'} at {formatClock(booking.pickupTime)}</span>
                   <span className="flex items-center gap-2"><Car className="h-4 w-4 shrink-0 text-teal-600" /> {labelTrip(booking.tripType)}</span>
                   <span className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0 text-teal-600" /> Support will call after confirmation</span>
                 </div>
@@ -230,4 +230,12 @@ function groupBookingsByDate(bookings) {
 function formatTripDate(value) {
   if (!value || value === 'Date not set') return value;
   return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${value}T00:00:00`));
+}
+
+function formatClock(value) {
+  if (!value) return '-';
+  const [hours, minutes = '00'] = String(value).split(':');
+  const date = new Date();
+  date.setHours(Number(hours) || 0, Number(minutes) || 0, 0, 0);
+  return date.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
 }

@@ -106,7 +106,8 @@ export function BookingTable({ bookings, title = 'Bookings' }) {
                 <div className="font-black capitalize">{booking.tripType?.replace('-', ' ') || 'Trip'}</div>
                 <div className="mt-1 break-words text-xs font-medium text-slate-700">{booking.pickup} to {booking.tripType === 'local' ? booking.rental : booking.drop}</div>
                 <div className="mt-1 text-xs font-semibold">{booking.vehicleName || booking.vehicleSlug || 'Vehicle pending'}</div>
-                <div className="text-xs font-medium text-slate-600">{booking.pickupDate || '-'} at {booking.pickupTime || '-'}</div>
+                <div className="text-xs font-medium text-slate-600">{booking.pickupDate || '-'} at {formatClock(booking.pickupTime)}</div>
+                <div className="text-xs font-medium text-slate-600">{booking.passengers || 'Passengers not set'}</div>
               </div>
               <div>
                 <div className="text-xl font-black text-teal-700">{booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div>
@@ -137,7 +138,7 @@ export function BookingTable({ bookings, title = 'Bookings' }) {
               <tr key={booking.id} className="align-top hover:bg-slate-50">
                 <td className="px-4 py-4"><div className="font-mono font-black">{booking.bookingId}</div><div className="mt-1 text-xs font-medium text-slate-600">{formatDate(booking.createdAt)}</div><StatusBadge status={booking.status} className="mt-2" /></td>
                 <td className="break-words px-4 py-4"><b>{booking.customer?.name || 'Guest'}</b><div className="text-xs font-medium text-slate-700">{booking.customer?.phone || 'No phone'}</div><div className="text-xs font-medium text-slate-700">{booking.customer?.email || 'No email'}</div></td>
-                <td className="break-words px-4 py-4"><b className="capitalize">{booking.tripType?.replace('-', ' ') || 'Trip'}</b><div className="mt-1 text-xs font-medium text-slate-700">{booking.pickup} to {booking.tripType === 'local' ? booking.rental : booking.drop}</div><div className="mt-1 text-xs font-semibold">{booking.vehicleName || booking.vehicleSlug || 'Vehicle pending'}</div><div className="text-xs font-medium text-slate-600">{booking.pickupDate || '-'} at {booking.pickupTime || '-'}</div></td>
+                <td className="break-words px-4 py-4"><b className="capitalize">{booking.tripType?.replace('-', ' ') || 'Trip'}</b><div className="mt-1 text-xs font-medium text-slate-700">{booking.pickup} to {booking.tripType === 'local' ? booking.rental : booking.drop}</div><div className="mt-1 text-xs font-semibold">{booking.vehicleName || booking.vehicleSlug || 'Vehicle pending'}</div><div className="text-xs font-medium text-slate-600">{booking.pickupDate || '-'} at {formatClock(booking.pickupTime)}</div><div className="text-xs font-medium text-slate-600">{booking.passengers || 'Passengers not set'}</div></td>
                 <td className="px-4 py-4"><div className="text-lg font-black text-teal-700">{booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div><FareBreakdown fare={booking.fare} /></td>
                 <td className="px-4 py-4">
                   <form action={updateBookingAction} className="grid min-w-48 gap-2">
@@ -232,9 +233,10 @@ export function Customers({ users }) {
                     </div>
                     <div className="mt-2 grid gap-1 text-slate-600 sm:grid-cols-2">
                       <div><b>Trip:</b> {booking.tripType?.replace('-', ' ') || '-'}</div>
-                      <div><b>Pickup:</b> {booking.pickupDate || '-'} {booking.pickupTime || ''}</div>
-                      {booking.returnDate && <div><b>Return:</b> {booking.returnDate} {booking.returnTime || ''}</div>}
+                      <div><b>Pickup:</b> {booking.pickupDate || '-'} {formatClock(booking.pickupTime)}</div>
+                      {booking.returnDate && <div><b>Return:</b> {booking.returnDate} {formatClock(booking.returnTime)}</div>}
                       <div><b>Cab:</b> {booking.vehicleName || booking.vehicleSlug || '-'}</div>
+                      <div><b>Passengers:</b> {booking.passengers || '-'}</div>
                       <div><b>Fare:</b> {booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div>
                     </div>
                   </div>
@@ -323,4 +325,12 @@ export function formatKm(value) {
 export function formatDate(value) {
   if (!value) return '-';
   return new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+}
+
+export function formatClock(value) {
+  if (!value) return '-';
+  const [hours, minutes = '00'] = String(value).split(':');
+  const date = new Date();
+  date.setHours(Number(hours) || 0, Number(minutes) || 0, 0, 0);
+  return date.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
 }

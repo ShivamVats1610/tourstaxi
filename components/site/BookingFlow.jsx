@@ -73,6 +73,14 @@ function formatDuration(minutes) {
   return `${hrs} hr${hrs > 1 ? 's' : ''}${mins ? ` ${mins} min` : ''}`;
 }
 
+function formatClock(value) {
+  if (!value) return '-';
+  const [hours, minutes = '00'] = String(value).split(':');
+  const date = new Date();
+  date.setHours(Number(hours) || 0, Number(minutes) || 0, 0, 0);
+  return date.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
 function dateTimeValue(date, time) {
   return `${date || todayValue()}T${time || '07:00'}`;
 }
@@ -152,6 +160,11 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
     const minTime = nextPickupTimeValue();
     const prefillDate = prefill.date || minDate;
     const prefillTime = prefill.time || '07:00';
+    const pickupTime = prefillDate === minDate && prefillTime < minTime ? minTime : prefillTime;
+    const prefillReturnDate = prefill.returnDate || '';
+    const prefillReturnTime = prefill.tripType === 'round-trip' && prefillReturnDate === prefillDate && (prefill.returnTime || '18:00') < pickupTime
+      ? pickupTime
+      : prefill.returnTime || '18:00';
 
     // Reset the modal to the latest booking request whenever it opens.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -161,9 +174,9 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       pickup: prefill.pickup || '',
       drop: prefill.drop || '',
       date: prefillDate,
-      time: prefillDate === minDate && prefillTime < minTime ? minTime : prefillTime,
-      returnDate: prefill.returnDate || '',
-      returnTime: prefill.returnTime || '18:00',
+      time: pickupTime,
+      returnDate: prefillReturnDate,
+      returnTime: prefillReturnTime,
       stops: Array.isArray(prefill.stops) ? prefill.stops : [],
       stopCoordinates: Array.isArray(prefill.stopCoordinates) ? prefill.stopCoordinates : [],
       rental: prefill.rental || '8 hrs / 80 km',
@@ -399,6 +412,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                   setData((current) => ({
                     ...current,
                     vehicleSlug: slug,
+                    passengers: `${Number(cab?.seats || 4)} Passengers`,
                     fuelType: allowed.includes(current.fuelType) ? current.fuelType : allowed[0] || 'cng',
                     address: current.address || current.pickup || '',
                     dropAddress: current.dropAddress || current.drop || ''
@@ -465,6 +479,7 @@ function Info({ label, value, invert = false }) {
 function DetailsPanel({ data, set, onSelectLocation, onContinue }) {
   const minDate = todayValue();
   const minTime = data.date === minDate ? nextPickupTimeValue() : undefined;
+  const minReturnTime = (data.returnDate || data.date) === data.date ? data.time : undefined;
   const canAddStop = ['one-way', 'round-trip', 'airport'].includes(data.tripType);
   const updateStop = (index, value) => {
     set('stops', (data.stops || []).map((stop, itemIndex) => itemIndex === index ? value : stop));
@@ -521,6 +536,9 @@ function DetailsPanel({ data, set, onSelectLocation, onContinue }) {
                 if (data.tripType === 'round-trip' && isBeforeDate(data.returnDate, nextDate)) {
                   set('returnDate', nextDate);
                 }
+                if (data.tripType === 'round-trip' && (data.returnDate || nextDate) === nextDate && (data.returnTime || '18:00') < nextTime) {
+                  set('returnTime', nextTime);
+                }
               }}
             />
             {data.tripType === 'round-trip' && (
@@ -529,10 +547,12 @@ function DetailsPanel({ data, set, onSelectLocation, onContinue }) {
                 date={data.returnDate || data.date}
                 time={data.returnTime || '18:00'}
                 minDate={data.date || minDate}
+                minTime={minReturnTime}
                 onChange={(value) => {
                   const { nextDate, nextTime } = splitDateTime(value);
-                  set('returnDate', isBeforeDate(nextDate, data.date) ? data.date : nextDate);
-                  set('returnTime', nextTime);
+                  const safeReturnDate = isBeforeDate(nextDate, data.date) ? data.date : nextDate;
+                  set('returnDate', safeReturnDate);
+                  set('returnTime', safeReturnDate === data.date && nextTime < data.time ? data.time : nextTime);
                 }}
               />
             )}
@@ -598,6 +618,7 @@ function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onCheckou
             const allowed = fuelOptions(cab);
             if (!allowed.includes(data.fuelType)) set('fuelType', allowed[0] || 'cng');
             set('vehicleSlug', slug);
+            set('passengers', `${Number(cab?.seats || 4)} Passengers`);
           }}
         />
       )}
@@ -790,8 +811,9 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
               <div className="mt-2 grid gap-1.5 text-xs text-slate-700 sm:grid-cols-2">
                 <div>Car Type: <b>{vehicle.name} or Equivalent</b></div>
                 <div>Fuel Type: <b>{fuelLabel(data.fuelType)}</b></div>
-                <div>Pickup: <b>{prettyDate(data.date)}, {data.time}</b></div>
-                {data.tripType === 'round-trip' && <div>Return: <b>{prettyDate(data.returnDate)}, {data.returnTime || '-'}</b></div>}
+                <div>Pickup: <b>{prettyDate(data.date)}, {formatClock(data.time)}</b></div>
+                {data.tripType === 'round-trip' && <div>Return: <b>{prettyDate(data.returnDate)}, {formatClock(data.returnTime)}</b></div>}
+                <div>Passengers: <b>{data.passengers || `${vehicle.seats || 4} Passengers`}</b></div>
                 {!!data.stops?.length && <div className="sm:col-span-2">Stops: <b>{data.stops.filter(Boolean).join(' | ') || '-'}</b></div>}
                 <div>Kms included: <b>{formatKm(fare.chargeableDistance || fare.distance)}</b></div>
                 <div>Estimated time: <b>{formatDuration(fare.durationMinutes)}</b></div>
@@ -980,7 +1002,7 @@ function DateTimeField({ label, date, time, minDate, minTime, onChange }) {
         <Calendar className="h-4 w-4 text-teal-600" /> {label}
       </span>
       <span className="flex h-8 items-center justify-between gap-3 text-sm font-black text-slate-950">
-        <span className="truncate">{prettyDate(date)} / {time || '07:00'}</span>
+        <span className="truncate">{prettyDate(date)} / {formatClock(time || '07:00')}</span>
         <Clock className="h-4 w-4 shrink-0 text-teal-600" />
       </span>
       <input
@@ -1009,7 +1031,7 @@ function Confirmed({ bookingId, data, vehicle, fare, onClose }) {
           <Info label="Cab" value={vehicle?.name || '-'} />
           <Info label="Fare" value={fare ? money(fare.total) : '-'} />
           <Info label="Pickup" value={data.pickup || '-'} />
-          <Info label="Date & Time" value={`${prettyDate(data.date)} ${data.time || ''}`} />
+          <Info label="Date & Time" value={`${prettyDate(data.date)} ${formatClock(data.time)}`} />
         </div>
       </div>
       <a href="tel:+918955458128" className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-black text-slate-950 shadow"><Phone className="h-5 w-5" /> Talk to us</a>

@@ -67,26 +67,40 @@ export default function BookingWidget() {
   const { open } = useBooking();
   const minDate = todayValue();
   const minTime = date === minDate ? nextPickupTimeValue() : undefined;
+  const minReturnTime = returnDate === date ? time : undefined;
 
   const updateDate = (value) => {
     const nextDate = value && value < minDate ? minDate : value;
     setDate(nextDate);
     if (returnDate < nextDate) setReturnDate(nextDate);
+    if (returnDate === nextDate && returnTime < time) setReturnTime(time);
     if (nextDate === minDate && time < nextPickupTimeValue()) {
       setTime(nextPickupTimeValue());
     }
   };
 
   const updateReturnDate = (value) => {
-    setReturnDate(value && value < date ? date : value);
+    const nextReturnDate = value && value < date ? date : value;
+    setReturnDate(nextReturnDate);
+    if (nextReturnDate === date && returnTime < time) setReturnTime(time);
   };
 
   const updateTime = (value) => {
+    const nextTime = date === minDate && value < nextPickupTimeValue() ? nextPickupTimeValue() : value;
     if (date === minDate && value < nextPickupTimeValue()) {
       setTime(nextPickupTimeValue());
+    } else {
+      setTime(value);
+    }
+    if (returnDate === date && returnTime < nextTime) setReturnTime(nextTime);
+  };
+
+  const updateReturnTime = (value) => {
+    if (returnDate === date && value < time) {
+      setReturnTime(time);
       return;
     }
-    setTime(value);
+    setReturnTime(value);
   };
 
   const changeTab = (nextTab) => {
@@ -156,10 +170,11 @@ export default function BookingWidget() {
           date={returnDate}
           time={returnTime}
           minDate={date}
+          minTime={minReturnTime}
           onChange={(value) => {
             const { nextDate, nextTime } = splitDateTime(value);
             updateReturnDate(nextDate);
-            setReturnTime(nextTime);
+            updateReturnTime(nextDate === date && nextTime < time ? time : nextTime);
           }}
         />
       )}
@@ -218,13 +233,10 @@ export default function BookingWidget() {
               <LineLocation
                 label="Pickup Location"
                 value={pickup}
-                onChange={setPickup}
-                onSelect={(location) => {
-                  setPickup(location.label);
-                  setPickupCoordinates(location.coordinates);
-                }}
+                setValue={setPickup}
+                setCoordinates={setPickupCoordinates}
                 placeholder="Pickup Location"
-                useCurrentLocation
+                showCurrentLocation
               />
               {commonDateFields}
             </div>
