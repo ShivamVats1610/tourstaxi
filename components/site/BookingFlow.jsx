@@ -109,24 +109,28 @@ function isBeforeDate(value, minimum) {
 
 function cabFare(cab, data, selectedAddons = [], pricingSettings = DEFAULT_PRICING_SETTINGS) {
   const addonObjects = selectedAddons.map((id) => {
-    const addon = pricedAddon(ADDONS.find((item) => item.id === id), pricingSettings);
+    const addon = pricedAddon(ADDONS.find((item) => item.id === id), pricingSettings, data);
     return addon;
   }).filter(Boolean);
   return calculateTripFare(cab, data, addonObjects, pricingSettings);
 }
 
-function selectedAddonDetails(selectedAddons = [], pricingSettings = DEFAULT_PRICING_SETTINGS) {
+function selectedAddonDetails(selectedAddons = [], pricingSettings = DEFAULT_PRICING_SETTINGS, data = {}) {
   return selectedAddons.map((id) => {
-    const addon = pricedAddon(ADDONS.find((item) => item.id === id), pricingSettings);
+    const addon = pricedAddon(ADDONS.find((item) => item.id === id), pricingSettings, data);
     return addon;
   }).filter(Boolean);
 }
 
-function pricedAddon(addon, pricingSettings = DEFAULT_PRICING_SETTINGS) {
+function pricedAddon(addon, pricingSettings = DEFAULT_PRICING_SETTINGS, data = {}) {
   if (!addon) return null;
   if (addon.id === 'carrier') return { ...addon, price: pricingSettings.carrierAddonPrice ?? addon.price };
   if (addon.id === 'new-car') return { ...addon, price: pricingSettings.newCarAddonPrice ?? addon.price };
-  if (addon.id === 'language') return { ...addon, price: pricingSettings.languageAddonPrice ?? addon.price };
+  if (addon.id === 'language') {
+    const language = String(data.languagePreference || '').toLowerCase();
+    const price = language === 'english' ? pricingSettings.languageAddonPrice ?? addon.price : 0;
+    return { ...addon, label: language === 'english' ? 'English chauffeur language' : 'Hindi chauffeur language', price };
+  }
   return addon;
 }
 
@@ -139,6 +143,36 @@ function serviceCityAllowed(value, settings = DEFAULT_PRICING_SETTINGS) {
   if (!cities.length || !value) return true;
   const city = cityToken(value);
   return cities.some((item) => city === String(item).trim().toLowerCase());
+}
+
+function holidayDates(settings = DEFAULT_PRICING_SETTINGS) {
+  return (Array.isArray(settings.holidays) ? settings.holidays : [])
+    .flatMap((item) => String(item || '').match(/\d{4}-\d{2}-\d{2}/g) || [])
+    .filter(Boolean);
+}
+
+function holidayConflict(data = {}, settings = DEFAULT_PRICING_SETTINGS) {
+  const holidays = holidayDates(settings);
+  if (!holidays.length) return null;
+  const dates = data.tripType === 'round-trip' ? dateRange(data.date, data.returnDate || data.date) : [data.date];
+  const blocked = dates.find((date) => holidays.includes(date));
+  return blocked || null;
+}
+
+function dateRange(start, end) {
+  if (!start) return [];
+  const dates = [];
+  const current = new Date(`${start}T00:00:00`);
+  const last = new Date(`${end || start}T00:00:00`);
+  if (Number.isNaN(current.getTime()) || Number.isNaN(last.getTime())) return [start];
+  while (current <= last) {
+    const year = current.getFullYear();
+    const month = String(current.getMonth() + 1).padStart(2, '0');
+    const day = String(current.getDate()).padStart(2, '0');
+    dates.push(`${year}-${month}-${day}`);
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
 }
 
 function fuelOptions(cab) {
@@ -287,6 +321,11 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
     : `${data.pickup || 'Pickup'} - ${data.drop || 'Drop'}`;
 
   const submit = async () => {
+    const blockedHoliday = holidayConflict(data, pricingSettings);
+    if (blockedHoliday) {
+      toast.error(`Bookings are not available on holiday ${prettyDate(blockedHoliday)}.`);
+      return;
+    }
     if (!data.name || !data.phone || !data.address || !vehicle || !fare) {
       toast.error('Please add name, phone and pickup location.');
       return;
@@ -313,7 +352,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
     setSubmitting(true);
     try {
       const fullPhone = `${data.phoneCountry || '+91'}${String(data.phone || '').replace(/\D/g, '')}`;
-      const addonDetails = selectedAddonDetails(selectedAddons, pricingSettings);
+      const addonDetails = selectedAddonDetails(selectedAddons, pricingSettings, data);
       const bookingPayload = {
         ...data,
         phone: fullPhone,
@@ -363,9 +402,14 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
         ) : (
           <div className="max-h-[96vh] overflow-y-auto bg-slate-50">
             {view === 'details' && (
-              <DetailsPanel data={data} set={set} onSelectLocation={selectLocation} onContinue={() => {
+              <DetailsPanel data={data} set={set} pricingSettings={pricingSettings} onSelectLocation={selectLocation} onContinue={() => {
                 if (!data.pickup?.trim() || (data.tripType !== 'local' && !data.drop?.trim())) {
                   toast.error(data.tripType === 'local' ? 'Please enter pickup location.' : 'Please enter pickup location and drop location.');
+                  return;
+                }
+                const blockedHoliday = holidayConflict(data, pricingSettings);
+                if (blockedHoliday) {
+                  toast.error(`Bookings are not available on holiday ${prettyDate(blockedHoliday)}.`);
                   return;
                 }
                 if (!serviceCityAllowed(data.pickup, pricingSettings) || (data.tripType !== 'local' && !serviceCityAllowed(data.drop, pricingSettings))) {
@@ -441,11 +485,12 @@ function Info({ label, value, invert = false }) {
   );
 }
 
-function DetailsPanel({ data, set, onSelectLocation, onContinue }) {
+function DetailsPanel({ data, set, pricingSettings, onSelectLocation, onContinue }) {
   const minDate = todayValue();
   const minTime = data.date === minDate ? nextPickupTimeValue() : undefined;
   const minReturnTime = (data.returnDate || data.date) === data.date ? data.time : undefined;
   const canAddStop = ['one-way', 'round-trip', 'airport'].includes(data.tripType);
+  const blockedHoliday = holidayConflict(data, pricingSettings);
   const updateStop = (index, value) => {
     set('stops', (data.stops || []).map((stop, itemIndex) => itemIndex === index ? value : stop));
     set('stopCoordinates', (data.stopCoordinates || []).map((coordinates, itemIndex) => itemIndex === index ? null : coordinates));
@@ -522,6 +567,11 @@ function DetailsPanel({ data, set, onSelectLocation, onContinue }) {
                   set('returnTime', safeReturnDate === data.date && nextTime < data.time ? data.time : nextTime);
                 }}
               />
+            )}
+            {blockedHoliday && (
+              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700">
+                Booking closed on holiday {prettyDate(blockedHoliday)}. Please choose another date.
+              </div>
             )}
           </div>
           <Button onClick={onContinue} className="h-11 self-end bg-amber-500 text-sm font-black text-slate-950 hover:bg-amber-400">Explore Cabs</Button>
@@ -779,6 +829,8 @@ function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payme
     data.address?.trim() &&
     (isLocalTrip || data.dropAddress?.trim())
   );
+  const blockedHoliday = holidayConflict(data, pricingSettings);
+  const canPay = detailsComplete && !blockedHoliday;
 
   if (!vehicle || !fare) return null;
   const toggleAddon = (id) => {
@@ -825,11 +877,16 @@ function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payme
                 Fill real first and last name, valid mobile number, valid email, {isLocalTrip ? 'and pickup details' : 'pickup and drop details'} to continue to payment.
               </div>
             )}
+            {blockedHoliday && (
+              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700">
+                Booking closed on holiday {prettyDate(blockedHoliday)}. Please choose another date.
+              </div>
+            )}
 
             <Section title="Personalize Your Journey" subtitle="Enhance your travel experience with our premium add-ons" compact>
               <div className="grid gap-2">
                 {ADDONS.map((baseAddon) => {
-                  const addon = pricedAddon(baseAddon, pricingSettings);
+                  const addon = pricedAddon(baseAddon, pricingSettings, data);
                   const selected = selectedAddons.includes(addon.id);
                   if (addon.id === 'language') {
                     return (
@@ -842,7 +899,9 @@ function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payme
                             <b className="min-w-0 text-black">{addon.label}</b>
                           </button>
                           <div className="flex gap-2">
-                            {['Hindi', 'English'].map((language) => (
+                            {['Hindi', 'English'].map((language) => {
+                              const languagePrice = language === 'English' ? pricingSettings.languageAddonPrice ?? ADDONS.find((item) => item.id === 'language')?.price ?? 0 : 0;
+                              return (
                               <button
                                 key={language}
                                 type="button"
@@ -852,9 +911,10 @@ function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payme
                                 }}
                                 className={`h-8 rounded-md border px-3 font-black ${data.languagePreference === language ? 'border-teal-600 bg-teal-50 text-teal-700' : 'border-slate-200 bg-white text-slate-700'}`}
                               >
-                                {language}
+                                {language} <span className="ml-1 text-[10px]">{languagePrice ? money(languagePrice) : 'Free'}</span>
                               </button>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
@@ -888,7 +948,7 @@ function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payme
                 </div>
               </div>
               <div className="mt-3 rounded-md border border-teal-200 bg-teal-50 p-2 text-xs font-bold text-teal-900">You will be redirected to a secure UPI payment page with QR code and app buttons.</div>
-              <Button onClick={onSubmit} disabled={submitting || !detailsComplete} className="mt-3 h-11 w-full rounded-md bg-teal-700 text-sm font-black uppercase text-white hover:bg-teal-800 disabled:opacity-50">
+              <Button onClick={onSubmit} disabled={submitting || !canPay} className="mt-3 h-11 w-full rounded-md bg-teal-700 text-sm font-black uppercase text-white hover:bg-teal-800 disabled:opacity-50">
                 {submitting ? 'Saving booking...' : `Pay Now ${money(payment === 'full' ? fare.total : fare.partPay)}`}
               </Button>
               <details className="mt-3 text-xs">
@@ -909,7 +969,7 @@ function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payme
                 </div>
               </details>
             </section>
-            <MobilePayBar fare={fare} payment={payment} detailsComplete={detailsComplete} submitting={submitting} onSubmit={onSubmit} setPayment={setPayment} />
+            <MobilePayBar fare={fare} payment={payment} detailsComplete={canPay} submitting={submitting} onSubmit={onSubmit} setPayment={setPayment} />
           </>
       </div>
     </div>

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeftRight, CalendarDays, ChevronDown, Plane, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useBooking } from '@/lib/booking-context';
@@ -50,6 +50,17 @@ function splitDateTime(value) {
   return { nextDate, nextTime: nextTime.slice(0, 5) };
 }
 
+function cityToken(value) {
+  return String(value || '').split(',')[0].trim().toLowerCase();
+}
+
+function serviceCityAllowed(value, settings = {}) {
+  const cities = Array.isArray(settings.serviceCities) ? settings.serviceCities : [];
+  if (!cities.length || !value) return true;
+  const city = cityToken(value);
+  return cities.some((item) => city === String(item).trim().toLowerCase());
+}
+
 export default function BookingWidget() {
   const [tab, setTab] = useState('one-way');
   const [pickup, setPickup] = useState('');
@@ -64,10 +75,24 @@ export default function BookingWidget() {
   const [returnTime, setReturnTime] = useState('18:00');
   const [stops, setStops] = useState([]);
   const [stopCoordinates, setStopCoordinates] = useState([]);
+  const [pricingSettings, setPricingSettings] = useState({});
   const { open } = useBooking();
   const minDate = todayValue();
   const minTime = date === minDate ? nextPickupTimeValue() : undefined;
   const minReturnTime = returnDate === date ? time : undefined;
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/pricing-settings', { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((result) => {
+        if (active && result?.settings) setPricingSettings(result.settings);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const updateDate = (value) => {
     const nextDate = value && value < minDate ? minDate : value;
@@ -130,6 +155,10 @@ export default function BookingWidget() {
 
     if (!nextPickup.trim() || (tab !== 'local' && !nextDrop.trim())) {
       toast.error(tab === 'local' ? 'Please enter pickup location.' : 'Please enter pickup location and drop location.');
+      return;
+    }
+    if (!serviceCityAllowed(nextPickup, pricingSettings) || (tab !== 'local' && !serviceCityAllowed(nextDrop, pricingSettings))) {
+      toast.error('This city is not service available.');
       return;
     }
 

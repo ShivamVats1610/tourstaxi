@@ -444,7 +444,7 @@ export function PricingSettingsForm({ settings }) {
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           <TextField name="serviceCities" label="Service Available Cities" defaultValue={settings.serviceCities?.join?.('\n') || ''} placeholder={`Jaipur\nKota\nSawai Madhopur`} />
-          <TextField name="holidays" label="Holiday Dates / Notes" defaultValue={settings.holidays?.join?.('\n') || ''} placeholder={`2026-08-15 Independence Day\n2026-10-20 Diwali`} />
+          <TextField name="holidays" label="Holiday Dates / Notes" defaultValue={settings.holidays?.join?.('\n') || ''} placeholder={`2026-08-15 Independence Day\n2026-10-20 Diwali`} helper="Add one holiday per line. Start each line with YYYY-MM-DD to block that date in booking." />
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           <Field name="facebookUrl" label="Facebook Page" defaultValue={settings.facebookUrl} placeholder="https://facebook.com/..." />
@@ -492,8 +492,8 @@ function Field({ label, ...props }) {
   return <label className="min-w-0 text-xs font-bold uppercase tracking-wider text-slate-700">{label}<input {...props} className="mt-1 h-10 w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium normal-case tracking-normal outline-none placeholder:text-slate-500 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15" /></label>;
 }
 
-function TextField({ label, ...props }) {
-  return <label className="min-w-0 text-xs font-bold uppercase tracking-wider text-slate-700">{label}<textarea {...props} className="mt-1 min-h-28 w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal outline-none placeholder:text-slate-500 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15" /></label>;
+function TextField({ label, helper, ...props }) {
+  return <label className="min-w-0 text-xs font-bold uppercase tracking-wider text-slate-700">{label}<textarea {...props} className="mt-1 min-h-28 w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal outline-none placeholder:text-slate-500 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15" />{helper && <span className="mt-1 block text-[11px] font-semibold normal-case tracking-normal text-slate-500">{helper}</span>}</label>;
 }
 
 function Input(props) {
