@@ -8,7 +8,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
-const UPI_APPS = ['Google Pay', 'PhonePe', 'Paytm', 'BHIM UPI', 'Other UPI Apps'];
+const UPI_APPS = [
+  { name: 'Google Pay', scheme: 'tez://upi/pay' },
+  { name: 'PhonePe', scheme: 'phonepe://pay' },
+  { name: 'Paytm', scheme: 'paytmmp://pay' },
+  { name: 'BHIM UPI', scheme: 'bhim://upi/pay' },
+  { name: 'Other UPI Apps', scheme: 'upi://pay' }
+];
+
+function upiAppLink(upiLink = '', scheme = 'upi://pay') {
+  const query = String(upiLink || '').split('?')[1] || '';
+  return query ? `${scheme}?${query}` : upiLink;
+}
 
 export default function PaymentClient({ bookingId }) {
   const [loading, setLoading] = useState(true);
@@ -32,6 +43,10 @@ export default function PaymentClient({ bookingId }) {
 
   const qrUrl = useMemo(() => (
     upi?.link ? `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(upi.link)}` : ''
+  ), [upi]);
+
+  const appLinks = useMemo(() => (
+    UPI_APPS.map((app) => ({ ...app, href: upiAppLink(upi?.link, app.scheme) }))
   ), [upi]);
 
   const submitPaid = async () => {
@@ -76,9 +91,9 @@ export default function PaymentClient({ bookingId }) {
               <div className="mt-3 rounded-md border border-slate-200 bg-white p-2">
                 <div className="text-xs font-black text-slate-950">Pay with UPI app</div>
                 <div className="mt-2 grid grid-cols-2 gap-1.5">
-                  {UPI_APPS.map((app) => (
-                    <a key={app} href={upi.link} className="rounded-md border border-slate-200 bg-slate-50 px-2 py-2 text-[11px] font-black text-slate-950 transition hover:border-teal-300 hover:bg-teal-50">
-                      {app}
+                  {appLinks.map((app) => (
+                    <a key={app.name} href={app.href} target="_blank" rel="noopener noreferrer" className="rounded-md border border-slate-200 bg-slate-50 px-2 py-2 text-[11px] font-black text-slate-950 transition hover:border-teal-300 hover:bg-teal-50">
+                      {app.name}
                     </a>
                   ))}
                 </div>

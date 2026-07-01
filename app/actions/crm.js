@@ -267,6 +267,7 @@ export async function updatePricingSettingsAction(formData) {
     languageAddonPrice: formData.get('languageAddonPrice'),
     serviceCities: formData.get('serviceCities'),
     holidays: formData.get('holidays'),
+    dutyEnabled: formData.get('dutyEnabled'),
     facebookUrl: formData.get('facebookUrl'),
     instagramUrl: formData.get('instagramUrl'),
     youtubeUrl: formData.get('youtubeUrl'),

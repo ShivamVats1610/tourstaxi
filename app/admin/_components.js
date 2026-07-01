@@ -435,7 +435,7 @@ export function PricingSettingsForm({ settings }) {
           <Field name="roundTripBaseFare" label="Round Trip Base Fare" type="number" min="0" defaultValue={settings.roundTripBaseFare} />
           <Field name="airportBaseFare" label="Airport Base Fare" type="number" min="0" defaultValue={settings.airportBaseFare} />
           <Field name="localBaseFare" label="Local Base Fare" type="number" min="0" defaultValue={settings.localBaseFare} />
-          <Field name="driverAllowancePerDay" label="Driver Allowance Per Day" type="number" min="0" defaultValue={settings.driverAllowancePerDay} />
+          <Field name="driverAllowancePerDay" label="Driver Night Charge After 9 PM" type="number" min="0" defaultValue={settings.driverAllowancePerDay} />
           <Field name="gstPercent" label="GST %" type="number" min="0" max="100" step="0.1" defaultValue={settings.gstPercent} />
           <Field name="dieselSurchargePerKm" label="Diesel Car Guarantee Per KM" type="number" min="0" step="0.1" defaultValue={settings.dieselSurchargePerKm} />
           <Field name="carrierAddonPrice" label="Luggage Carrier Add-on" type="number" min="0" defaultValue={settings.carrierAddonPrice} />
@@ -443,6 +443,14 @@ export function PricingSettingsForm({ settings }) {
           <Field name="languageAddonPrice" label="Language Chauffeur Add-on" type="number" min="0" defaultValue={settings.languageAddonPrice} />
         </div>
         <div className="grid gap-3 md:grid-cols-2">
+          <label className="min-w-0 text-xs font-bold uppercase tracking-wider text-slate-700">
+            Duty Status
+            <select name="dutyEnabled" defaultValue={settings.dutyEnabled === false ? 'off' : 'on'} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold normal-case tracking-normal outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15">
+              <option value="on">Duty On - Service Available</option>
+              <option value="off">Duty Off - Service Not Available</option>
+            </select>
+            <span className="mt-1 block text-[11px] font-semibold normal-case tracking-normal text-slate-500">Use Duty Off when the operator is closed or no cars should be bookable.</span>
+          </label>
           <TextField name="serviceCities" label="Service Available Cities" defaultValue={settings.serviceCities?.join?.('\n') || ''} placeholder={`Jaipur\nKota\nSawai Madhopur`} />
           <TextField name="holidays" label="Holiday Dates / Notes" defaultValue={settings.holidays?.join?.('\n') || ''} placeholder={`2026-08-15 Independence Day\n2026-10-20 Diwali`} helper="Add one holiday per line. Start each line with YYYY-MM-DD to block that date in booking." />
         </div>

@@ -12,6 +12,7 @@ import RouteMap from '@/components/site/booking/RouteMap';
 import FareCalculator from '@/components/site/booking/FareCalculator';
 import { calculateTripFare } from '@/lib/fare-policy';
 import { DEFAULT_PRICING_SETTINGS } from '@/lib/pricing-defaults';
+import { serviceCityAllowed } from '@/lib/service-cities';
 
 const TRIP_LABELS = {
   'one-way': 'One way',
@@ -60,6 +61,34 @@ function addHoursDateTime(date, time, hours) {
   next.setHours(next.getHours() + hours);
   next.setMinutes(next.getMinutes() - next.getTimezoneOffset());
   return { date: next.toISOString().slice(0, 10), time: next.toISOString().slice(11, 16) };
+}
+
+function addMinutesDateTime(date, time, minutes) {
+  const next = new Date(`${date || todayValue()}T${time || '07:00'}`);
+  next.setMinutes(next.getMinutes() + Number(minutes || 0));
+  next.setMinutes(next.getMinutes() - next.getTimezoneOffset());
+  return { date: next.toISOString().slice(0, 10), time: next.toISOString().slice(11, 16) };
+}
+
+function compareDateTime(leftDate, leftTime, rightDate, rightTime) {
+  return dateTimeValue(leftDate, leftTime).localeCompare(dateTimeValue(rightDate, rightTime));
+}
+
+function minimumReturnDateTime(data = {}) {
+  const duration = Number(data.durationMinutes || 0);
+  if (data.tripType === 'round-trip' && duration > 0) {
+    return addMinutesDateTime(data.date, data.time, duration);
+  }
+  return { date: data.date || todayValue(), time: data.time || nextPickupTimeValue() };
+}
+
+function clampReturnDateTime(data = {}, returnDate, returnTime) {
+  const minimum = minimumReturnDateTime(data);
+  const nextDate = isBeforeDate(returnDate, minimum.date) ? minimum.date : returnDate;
+  const nextTime = nextDate === minimum.date && compareDateTime(nextDate, returnTime, minimum.date, minimum.time) < 0
+    ? minimum.time
+    : returnTime;
+  return { date: nextDate, time: nextTime };
 }
 
 function money(value) {
@@ -132,17 +161,6 @@ function pricedAddon(addon, pricingSettings = DEFAULT_PRICING_SETTINGS, data = {
     return { ...addon, label: language === 'english' ? 'English chauffeur language' : 'Hindi chauffeur language', price };
   }
   return addon;
-}
-
-function cityToken(value) {
-  return String(value || '').split(',')[0].trim().toLowerCase();
-}
-
-function serviceCityAllowed(value, settings = DEFAULT_PRICING_SETTINGS) {
-  const cities = Array.isArray(settings.serviceCities) ? settings.serviceCities : [];
-  if (!cities.length || !value) return true;
-  const city = cityToken(value);
-  return cities.some((item) => city === String(item).trim().toLowerCase());
 }
 
 function holidayDates(settings = DEFAULT_PRICING_SETTINGS) {
@@ -312,7 +330,14 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       ...current,
       distanceKm: route?.distanceKm || null,
       durationMinutes: route?.durationMinutes || null,
-      routeGeometry: route?.geometry || null
+      routeGeometry: route?.geometry || null,
+      ...(current.tripType === 'round-trip' && route?.durationMinutes
+        ? (() => {
+            const nextData = { ...current, durationMinutes: route.durationMinutes };
+            const returnDateTime = clampReturnDateTime(nextData, current.returnDate || current.date, current.returnTime || current.time);
+            return { returnDate: returnDateTime.date, returnTime: returnDateTime.time };
+          })()
+        : {})
     }));
   }, []);
 
@@ -403,6 +428,10 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
           <div className="max-h-[96vh] overflow-y-auto bg-slate-50">
             {view === 'details' && (
               <DetailsPanel data={data} set={set} pricingSettings={pricingSettings} onSelectLocation={selectLocation} onContinue={() => {
+                if (pricingSettings.dutyEnabled === false) {
+                  toast.error('Service is not available right now. Please try again when duty is on.');
+                  return;
+                }
                 if (!data.pickup?.trim() || (data.tripType !== 'local' && !data.drop?.trim())) {
                   toast.error(data.tripType === 'local' ? 'Please enter pickup location.' : 'Please enter pickup location and drop location.');
                   return;
@@ -411,6 +440,14 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 if (blockedHoliday) {
                   toast.error(`Bookings are not available on holiday ${prettyDate(blockedHoliday)}.`);
                   return;
+                }
+                if (data.tripType === 'round-trip') {
+                  const safeReturn = clampReturnDateTime(data, data.returnDate || data.date, data.returnTime || data.time);
+                  if (safeReturn.date !== data.returnDate || safeReturn.time !== data.returnTime) {
+                    setData((current) => ({ ...current, returnDate: safeReturn.date, returnTime: safeReturn.time }));
+                    toast.error('Return time cannot be before the estimated arrival time.');
+                    return;
+                  }
                 }
                 if (!serviceCityAllowed(data.pickup, pricingSettings) || (data.tripType !== 'local' && !serviceCityAllowed(data.drop, pricingSettings))) {
                   toast.error('This city is not service available.');
@@ -488,7 +525,8 @@ function Info({ label, value, invert = false }) {
 function DetailsPanel({ data, set, pricingSettings, onSelectLocation, onContinue }) {
   const minDate = todayValue();
   const minTime = data.date === minDate ? nextPickupTimeValue() : undefined;
-  const minReturnTime = (data.returnDate || data.date) === data.date ? data.time : undefined;
+  const minimumReturn = minimumReturnDateTime(data);
+  const minReturnTime = (data.returnDate || data.date) === minimumReturn.date ? minimumReturn.time : undefined;
   const canAddStop = ['one-way', 'round-trip', 'airport'].includes(data.tripType);
   const blockedHoliday = holidayConflict(data, pricingSettings);
   const updateStop = (index, value) => {
@@ -547,7 +585,9 @@ function DetailsPanel({ data, set, pricingSettings, onSelectLocation, onContinue
                   set('returnDate', nextDate);
                 }
                 if (data.tripType === 'round-trip') {
-                  const defaultReturn = addHoursDateTime(nextDate, nextTime, 4);
+                  const defaultReturn = data.durationMinutes
+                    ? addMinutesDateTime(nextDate, nextTime, data.durationMinutes)
+                    : addHoursDateTime(nextDate, nextTime, 4);
                   set('returnDate', defaultReturn.date);
                   set('returnTime', defaultReturn.time);
                 }
@@ -558,13 +598,13 @@ function DetailsPanel({ data, set, pricingSettings, onSelectLocation, onContinue
                 label="Return Date & Time"
                 date={data.returnDate || data.date}
                 time={data.returnTime || '18:00'}
-                minDate={data.date || minDate}
+                minDate={minimumReturn.date || data.date || minDate}
                 minTime={minReturnTime}
                 onChange={(value) => {
                   const { nextDate, nextTime } = splitDateTime(value);
-                  const safeReturnDate = isBeforeDate(nextDate, data.date) ? data.date : nextDate;
-                  set('returnDate', safeReturnDate);
-                  set('returnTime', safeReturnDate === data.date && nextTime < data.time ? data.time : nextTime);
+                  const safeReturn = clampReturnDateTime(data, nextDate, nextTime);
+                  set('returnDate', safeReturn.date);
+                  set('returnTime', safeReturn.time);
                 }}
               />
             )}
@@ -620,6 +660,18 @@ function DetailsPanel({ data, set, pricingSettings, onSelectLocation, onContinue
 
 function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onModify, onCheckout }) {
   const selectedCab = fleet.find((cab) => cab.slug === data.vehicleSlug) || fleet[0] || null;
+
+  if (pricingSettings.dutyEnabled === false) {
+    return (
+      <div className="mx-auto max-w-3xl px-3 py-8 text-center sm:px-8">
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 shadow-sm">
+          <div className="text-lg font-black text-amber-900">Service is not available right now.</div>
+          <p className="mt-2 text-sm font-semibold text-amber-800">Duty is off from the admin panel. Please try again when duty is on.</p>
+          <Button type="button" onClick={onModify} className="mt-4 bg-amber-500 text-slate-950 hover:bg-amber-400">Modify Booking</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-3 pb-3 pt-1 sm:px-8 sm:pb-6 sm:pt-3">

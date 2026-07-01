@@ -117,14 +117,15 @@ return Response.json(
 } catch (error) {
 console.error('BOOKING API ERROR:', error);
 
+const message = error?.message || 'Unable to create booking';
 
 return Response.json(
   {
     success: false,
-    error: error?.message || 'Unable to create booking',
+    error: message,
   },
   {
-    status: 500,
+    status: message.includes('Service is not available') ? 503 : 500,
   }
 );
 

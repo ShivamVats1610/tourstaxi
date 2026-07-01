@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeftRight, CalendarDays, ChevronDown, Plane, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useBooking } from '@/lib/booking-context';
+import { serviceCityAllowed } from '@/lib/service-cities';
 import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
 import { toast } from 'sonner';
 
@@ -48,17 +49,6 @@ function dateTimeValue(date, time) {
 function splitDateTime(value) {
   const [nextDate, nextTime = '07:00'] = String(value || '').split('T');
   return { nextDate, nextTime: nextTime.slice(0, 5) };
-}
-
-function cityToken(value) {
-  return String(value || '').split(',')[0].trim().toLowerCase();
-}
-
-function serviceCityAllowed(value, settings = {}) {
-  const cities = Array.isArray(settings.serviceCities) ? settings.serviceCities : [];
-  if (!cities.length || !value) return true;
-  const city = cityToken(value);
-  return cities.some((item) => city === String(item).trim().toLowerCase());
 }
 
 export default function BookingWidget() {
@@ -153,6 +143,10 @@ export default function BookingWidget() {
     const nextPickup = tab === 'airport' ? (airportPickup ? airport : pickup) : pickup;
     const nextDrop = tab === 'local' ? '' : tab === 'airport' ? (airportPickup ? drop : airport) : drop;
 
+    if (pricingSettings.dutyEnabled === false) {
+      toast.error('Service is not available right now. Please try again when duty is on.');
+      return;
+    }
     if (!nextPickup.trim() || (tab !== 'local' && !nextDrop.trim())) {
       toast.error(tab === 'local' ? 'Please enter pickup location.' : 'Please enter pickup location and drop location.');
       return;
