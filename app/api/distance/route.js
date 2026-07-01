@@ -9,6 +9,8 @@ export async function GET(request) {
   const destination = searchParams.get('destination')?.trim() || '';
   const from = parseCoordinates(searchParams.get('fromLng'), searchParams.get('fromLat'));
   const to = parseCoordinates(searchParams.get('toLng'), searchParams.get('toLat'));
+  const waypointCoordinates = parseWaypointCoordinates(searchParams.getAll('waypoint'));
+  const waypointLabels = searchParams.getAll('stop').map((item) => item.trim()).filter(Boolean);
   const token = getMapboxToken();
   logMapboxEvent('route:request', {
     hasOrigin: Boolean(origin),
@@ -35,7 +37,13 @@ export async function GET(request) {
   }
 
   try {
-    const [routeFrom, routeTo] = from && to ? [from, to] : await Promise.all([geocode(origin, token), geocode(destination, token)]);
+    const [routeFrom, routeTo, routeWaypoints] = from && to
+      ? [from, to, waypointCoordinates]
+      : await Promise.all([
+          geocode(origin, token),
+          geocode(destination, token),
+          Promise.all(waypointLabels.map((label) => geocode(label, token)))
+        ]);
     if (!routeFrom || !routeTo) {
       const fallback = estimateFallbackRoute(origin, destination, from, to, 'location-not-found');
       return fallback
@@ -43,10 +51,11 @@ export async function GET(request) {
         : Response.json({ distanceKm: null, source: 'mapbox', error: 'location-not-found' }, { status: 404 });
     }
 
-    const result = await fetchMapboxJson(buildDirectionsUrl(routeFrom, routeTo, token), 'route');
+    const usableWaypoints = (routeWaypoints || []).filter(Boolean);
+    const result = await fetchMapboxJson(buildDirectionsUrl(routeFrom, routeTo, token, usableWaypoints), 'route');
     if (!result.ok) {
       const fallback = estimateFallbackRoute(origin, destination, from, to, result.error.message);
-      const body = fallback || estimateRoute(routeFrom, routeTo, result.error.message);
+      const body = fallback || estimateRouteWithStops(routeFrom, routeTo, usableWaypoints, result.error.message);
       return Response.json({
         ...body,
         source: fallback?.source || 'mapbox-estimate',
@@ -62,7 +71,7 @@ export async function GET(request) {
     if (!route) {
       const fallback = estimateFallbackRoute(origin, destination, from, to, data.message || 'route-not-found');
       return Response.json({
-        ...(fallback || estimateRoute(routeFrom, routeTo, data.message || 'route-not-found')),
+        ...(fallback || estimateRouteWithStops(routeFrom, routeTo, usableWaypoints, data.message || 'route-not-found')),
         tokenStatus: mapboxTokenStatus()
       });
     }
@@ -103,6 +112,13 @@ function parseCoordinates(lng, lat) {
   const longitude = Number(lng);
   const latitude = Number(lat);
   return usableCoordinates(longitude, latitude) ? [longitude, latitude] : null;
+}
+
+function parseWaypointCoordinates(values) {
+  return values.map((value) => {
+    const [lng, lat] = String(value || '').split(',').map(Number);
+    return usableCoordinates(lng, lat) ? [lng, lat] : null;
+  }).filter(Boolean);
 }
 
 async function geocode(query, token) {
@@ -149,6 +165,25 @@ function estimateRoute(from, to, reason) {
     durationMinutes,
     durationText: formatDuration(durationMinutes),
     geometry: { type: 'LineString', coordinates: [from, to] },
+    source: 'mapbox-estimate',
+    warning: reason
+  };
+}
+
+function estimateRouteWithStops(from, to, waypoints = [], reason) {
+  const points = [from, ...waypoints, to];
+  let distanceKm = 0;
+  for (let index = 0; index < points.length - 1; index += 1) {
+    distanceKm += haversineKm(points[index], points[index + 1]) * 1.28;
+  }
+  distanceKm = Number(distanceKm.toFixed(1));
+  const durationMinutes = Math.max(Math.round((distanceKm / 52) * 60), 1);
+  return {
+    distanceKm,
+    distanceText: `${distanceKm} km`,
+    durationMinutes,
+    durationText: formatDuration(durationMinutes),
+    geometry: { type: 'LineString', coordinates: points },
     source: 'mapbox-estimate',
     warning: reason
   };

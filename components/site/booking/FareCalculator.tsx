@@ -8,8 +8,10 @@ import type { Coordinates, FareDetails, RouteDetails, VehicleClass } from './typ
 type FareCalculatorProps = {
   pickupCoordinates?: Coordinates | null;
   dropCoordinates?: Coordinates | null;
+  stopCoordinates?: Coordinates[];
   pickupLabel?: string;
   dropLabel?: string;
+  stopLabels?: string[];
   vehicleClass?: VehicleClass;
   onRouteChange?: (route: RouteDetails | null) => void;
   onFareChange?: (fare: FareDetails | null) => void;
@@ -46,8 +48,10 @@ export function calculateFare(distanceKm: number, vehicleClass: VehicleClass = '
 export default function FareCalculator({
   pickupCoordinates,
   dropCoordinates,
+  stopCoordinates = [],
   pickupLabel = '',
   dropLabel = '',
+  stopLabels = [],
   vehicleClass = 'sedan',
   onRouteChange,
   onFareChange,
@@ -56,8 +60,14 @@ export default function FareCalculator({
   const [route, setRoute] = useState<RouteDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [serviceMessage, setServiceMessage] = useState('');
+  const stopCoordinateKey = stopCoordinates.map((coordinates) => coordinates?.join(',')).join('|');
+  const stopLabelKey = stopLabels.join('|');
 
   useEffect(() => {
+    const stableStopCoordinates = stopCoordinateKey
+      ? stopCoordinateKey.split('|').map((item) => item.split(',').map(Number) as Coordinates).filter((coordinates) => coordinates.length === 2 && coordinates.every(Number.isFinite))
+      : [];
+    const stableStopLabels = stopLabelKey ? stopLabelKey.split('|').filter(Boolean) : [];
     const hasCoordinates = Boolean(pickupCoordinates && dropCoordinates);
     const hasLabels = Boolean(pickupLabel.trim() && dropLabel.trim());
 
@@ -80,14 +90,19 @@ export default function FareCalculator({
           url.searchParams.set('fromLat', String(pickupCoordinates[1]));
           url.searchParams.set('toLng', String(dropCoordinates[0]));
           url.searchParams.set('toLat', String(dropCoordinates[1]));
+          stableStopCoordinates.filter(Boolean).forEach((coordinates) => {
+            url.searchParams.append('waypoint', `${coordinates[0]},${coordinates[1]}`);
+          });
         } else {
           url.searchParams.set('origin', pickupLabel);
           url.searchParams.set('destination', dropLabel);
+          stableStopLabels.filter(Boolean).forEach((label) => url.searchParams.append('stop', label));
         }
 
         console.info('[mapbox:browser:route:request]', {
           hasCoordinates: Boolean(pickupCoordinates && dropCoordinates),
-          hasLabels: Boolean(pickupLabel && dropLabel)
+          hasLabels: Boolean(pickupLabel && dropLabel),
+          stops: stableStopCoordinates.length || stableStopLabels.length
         });
         const response = await fetch(url);
         const data = await response.json();
@@ -138,7 +153,7 @@ export default function FareCalculator({
     return () => {
       active = false;
     };
-  }, [pickupCoordinates, dropCoordinates, pickupLabel, dropLabel, vehicleClass, onRouteChange, onFareChange]);
+  }, [pickupCoordinates, dropCoordinates, stopCoordinateKey, pickupLabel, dropLabel, stopLabelKey, vehicleClass, onRouteChange, onFareChange]);
 
   if (compact) return null;
 

@@ -437,7 +437,9 @@ export function PricingSettingsForm({ settings }) {
           <Field name="localBaseFare" label="Local Base Fare" type="number" min="0" defaultValue={settings.localBaseFare} />
           <Field name="driverAllowancePerDay" label="Driver Allowance Per Day" type="number" min="0" defaultValue={settings.driverAllowancePerDay} />
           <Field name="gstPercent" label="GST %" type="number" min="0" max="100" step="0.1" defaultValue={settings.gstPercent} />
-          <Field name="dieselSurchargePerKm" label="Diesel Surcharge Per KM" type="number" min="0" step="0.1" defaultValue={settings.dieselSurchargePerKm} />
+          <Field name="dieselSurchargePerKm" label="Diesel Car Guarantee Per KM" type="number" min="0" step="0.1" defaultValue={settings.dieselSurchargePerKm} />
+          <Field name="carrierAddonPrice" label="Luggage Carrier Add-on" type="number" min="0" defaultValue={settings.carrierAddonPrice} />
+          <Field name="newCarAddonPrice" label="New Car Promise Add-on" type="number" min="0" defaultValue={settings.newCarAddonPrice} />
           <Field name="languageAddonPrice" label="Language Chauffeur Add-on" type="number" min="0" defaultValue={settings.languageAddonPrice} />
         </div>
         <div className="grid gap-3 md:grid-cols-2">

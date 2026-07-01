@@ -109,8 +109,7 @@ function isBeforeDate(value, minimum) {
 
 function cabFare(cab, data, selectedAddons = [], pricingSettings = DEFAULT_PRICING_SETTINGS) {
   const addonObjects = selectedAddons.map((id) => {
-    const addon = ADDONS.find((item) => item.id === id);
-    if (addon?.id === 'language') return { ...addon, price: pricingSettings.languageAddonPrice ?? addon.price };
+    const addon = pricedAddon(ADDONS.find((item) => item.id === id), pricingSettings);
     return addon;
   }).filter(Boolean);
   return calculateTripFare(cab, data, addonObjects, pricingSettings);
@@ -118,10 +117,17 @@ function cabFare(cab, data, selectedAddons = [], pricingSettings = DEFAULT_PRICI
 
 function selectedAddonDetails(selectedAddons = [], pricingSettings = DEFAULT_PRICING_SETTINGS) {
   return selectedAddons.map((id) => {
-    const addon = ADDONS.find((item) => item.id === id);
-    if (addon?.id === 'language') return { ...addon, price: pricingSettings.languageAddonPrice ?? addon.price };
+    const addon = pricedAddon(ADDONS.find((item) => item.id === id), pricingSettings);
     return addon;
   }).filter(Boolean);
+}
+
+function pricedAddon(addon, pricingSettings = DEFAULT_PRICING_SETTINGS) {
+  if (!addon) return null;
+  if (addon.id === 'carrier') return { ...addon, price: pricingSettings.carrierAddonPrice ?? addon.price };
+  if (addon.id === 'new-car') return { ...addon, price: pricingSettings.newCarAddonPrice ?? addon.price };
+  if (addon.id === 'language') return { ...addon, price: pricingSettings.languageAddonPrice ?? addon.price };
+  return addon;
 }
 
 function cityToken(value) {
@@ -170,7 +176,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
   const [view, setView] = useState('cars');
   const [data, setData] = useState({});
   const [selectedAddons, setSelectedAddons] = useState([]);
-  const [, setPayment] = useState('upi');
+  const [payment, setPayment] = useState('part');
   const [bookingId, setBookingId] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [pricingSettings, setPricingSettings] = useState(DEFAULT_PRICING_SETTINGS);
@@ -236,7 +242,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       notes: ''
     });
     setSelectedAddons([]);
-    setPayment('upi');
+    setPayment('part');
     setBookingId('');
     setSubmitting(false);
   }, [open, prefill]);
@@ -298,7 +304,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       return;
     }
 
-    const paymentAmount = fare.total;
+    const paymentAmount = payment === 'full' ? fare.total : fare.partPay;
     if (paymentAmount <= 0) {
       toast.error('Payment amount is not valid.');
       return;
@@ -320,7 +326,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
           cabWithLuggageCarrier: selectedAddons.includes('carrier'),
           newCarPromise: selectedAddons.includes('new-car')
         },
-        fare: { ...fare, selectedAddons: addonDetails, paymentOption: 'upi', advancePaid: paymentAmount }
+        fare: { ...fare, selectedAddons: addonDetails, paymentOption: payment, advancePaid: paymentAmount }
       };
 
       const bookingResponse = await fetch('/api/bookings', {
@@ -377,13 +383,6 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 routeLabel={routeLabel}
                 pricingSettings={pricingSettings}
                 onModify={() => setView('details')}
-                selectedAddons={selectedAddons}
-                setSelectedAddons={setSelectedAddons}
-                setPayment={setPayment}
-                fare={fare}
-                vehicle={vehicle}
-                onSubmit={submit}
-                submitting={submitting}
                 onCheckout={(slug) => {
                   const cab = fleet.find((item) => item.slug === slug);
                   const allowed = fuelOptions(cab);
@@ -395,6 +394,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                     address: current.address || current.pickup || '',
                     dropAddress: current.dropAddress || current.drop || ''
                   }));
+                  setView('checkout');
                 }}
               />
             )}
@@ -405,6 +405,8 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 routeLabel={routeLabel}
                 vehicle={vehicle}
                 fare={fare}
+                pricingSettings={pricingSettings}
+                payment={payment}
                 selectedAddons={selectedAddons}
                 setSelectedAddons={setSelectedAddons}
                 setPayment={setPayment}
@@ -417,8 +419,10 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
               compact
               pickupCoordinates={data.pickupCoordinates}
               dropCoordinates={data.tripType === 'local' ? null : data.dropCoordinates}
+              stopCoordinates={data.tripType === 'local' ? [] : (data.stopCoordinates || []).filter(Boolean)}
               pickupLabel={data.pickup || ''}
               dropLabel={data.tripType === 'local' ? '' : data.drop || ''}
+              stopLabels={data.tripType === 'local' ? [] : (data.stops || []).filter(Boolean)}
               onRouteChange={handleRouteChange}
             />
           </div>
@@ -564,7 +568,7 @@ function DetailsPanel({ data, set, onSelectLocation, onContinue }) {
   );
 }
 
-function CabSelection({ fleet, data, set, routeLabel, pricingSettings, selectedAddons, setSelectedAddons, setPayment, fare, vehicle, onModify, onCheckout, onSubmit, submitting }) {
+function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onModify, onCheckout }) {
   const selectedCab = fleet.find((cab) => cab.slug === data.vehicleSlug) || fleet[0] || null;
 
   return (
@@ -591,21 +595,6 @@ function CabSelection({ fleet, data, set, routeLabel, pricingSettings, selectedA
           <CabCard key={selectedCab.slug} cab={selectedCab} data={data} set={set} pricingSettings={pricingSettings} routeLabel={routeLabel} index={0} onModify={onModify} onCheckout={onCheckout} />
         )}
       </div>
-      {vehicle && fare && (
-        <Checkout
-          data={data}
-          set={set}
-          routeLabel={routeLabel}
-          vehicle={vehicle}
-          fare={fare}
-          selectedAddons={selectedAddons}
-          setSelectedAddons={setSelectedAddons}
-          setPayment={setPayment}
-          onBack={onModify}
-          onSubmit={onSubmit}
-          submitting={submitting}
-        />
-      )}
       <div className="mt-5">
         <FeatureStrip />
       </div>
@@ -781,7 +770,7 @@ function CabCard({ cab, data, set, pricingSettings, index, onModify, onCheckout 
   );
 }
 
-function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSelectedAddons, setPayment, onBack, onSubmit, submitting }) {
+function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payment, setPayment, selectedAddons, setSelectedAddons, onBack, onSubmit, submitting }) {
   const isLocalTrip = data.tripType === 'local';
   const detailsComplete = Boolean(
     validCustomerName(data.name) &&
@@ -797,10 +786,10 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
   };
 
   return (
-    <div className="mt-4 text-sm">
+    <div className="mx-auto max-w-3xl px-3 pb-28 pt-3 text-sm sm:px-5 sm:pb-4 sm:pt-4">
       <div className="space-y-3">
         <>
-            <button onClick={onBack} className="text-xs font-black text-teal-700">Modify trip</button>
+            <button onClick={onBack} className="text-xs font-black text-teal-700">Back to cabs</button>
             <Section title="Trip Details" tone="blue" compact>
               <div className="text-base font-black text-black sm:text-lg">{routeLabel} <span className="text-xs font-normal text-black">({TRIP_LABELS[data.tripType]})</span></div>
               <div className="mt-2 grid gap-1.5 text-xs text-slate-700 sm:grid-cols-2">
@@ -837,9 +826,10 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
               </div>
             )}
 
-            <Section title="Add-ons" subtitle="Optional upgrades" compact>
+            <Section title="Personalize Your Journey" subtitle="Enhance your travel experience with our premium add-ons" compact>
               <div className="grid gap-2">
-                {ADDONS.map((addon) => {
+                {ADDONS.map((baseAddon) => {
+                  const addon = pricedAddon(baseAddon, pricingSettings);
                   const selected = selectedAddons.includes(addon.id);
                   if (addon.id === 'language') {
                     return (
@@ -887,18 +877,19 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
               </div>
             </Section>
 
-            <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+            <section className="hidden rounded-lg border border-slate-200 bg-white p-3 shadow-lg sm:block">
               <div className="mb-3 rounded-md border border-yellow-300 bg-yellow-50 px-3 py-2 text-xs font-bold text-yellow-900">Free cancellation till 1 hr of departure</div>
-              <h3 className="text-lg font-black text-black">UPI Payment</h3>
-              <div className="mt-3 grid gap-2 md:grid-cols-2">
-                <PaymentOption active onClick={() => setPayment('upi')} title="Pay with UPI" subtitle="Google Pay, PhonePe, Paytm, BHIM, or any UPI app" price={money(fare.total)} />
+              <h3 className="text-lg font-black text-black">Payment Options</h3>
+              <div className="mt-3 grid gap-2 md:grid-cols-3">
+                <PaymentOption active={payment === 'part'} onClick={() => setPayment('part')} title={`Pay ${fare.pricingPolicy.advancePercent}% token`} subtitle="Pay advance by UPI" price={money(fare.partPay)} />
+                <PaymentOption active={payment === 'full'} onClick={() => setPayment('full')} title="Pay 100%" subtitle="Pay full fare by UPI" price={money(fare.total)} />
                 <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs font-bold text-slate-700">
                   Booking is saved first as Pending Payment. After payment, upload screenshot and admin will verify it.
                 </div>
               </div>
               <div className="mt-3 rounded-md border border-teal-200 bg-teal-50 p-2 text-xs font-bold text-teal-900">You will be redirected to a secure UPI payment page with QR code and app buttons.</div>
               <Button onClick={onSubmit} disabled={submitting || !detailsComplete} className="mt-3 h-11 w-full rounded-md bg-teal-700 text-sm font-black uppercase text-white hover:bg-teal-800 disabled:opacity-50">
-                {submitting ? 'Saving booking...' : `Continue to UPI Payment ${money(fare.total)}`}
+                {submitting ? 'Saving booking...' : `Pay Now ${money(payment === 'full' ? fare.total : fare.partPay)}`}
               </Button>
               <details className="mt-3 text-xs">
                 <summary className="cursor-pointer font-bold text-teal-700">Fare break up</summary>
@@ -918,7 +909,28 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
                 </div>
               </details>
             </section>
+            <MobilePayBar fare={fare} payment={payment} detailsComplete={detailsComplete} submitting={submitting} onSubmit={onSubmit} setPayment={setPayment} />
           </>
+      </div>
+    </div>
+  );
+}
+
+function MobilePayBar({ fare, payment, detailsComplete, submitting, onSubmit, setPayment }) {
+  const amount = payment === 'full' ? fare.total : fare.partPay;
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white shadow-[0_-10px_30px_rgba(15,23,42,0.14)] sm:hidden">
+      <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
+        <div className="text-xs font-black text-slate-700">Total Fare</div>
+        <div className="text-xl font-black text-slate-950">{money(fare.total)}</div>
+      </div>
+      <div className="grid grid-cols-[1fr_1fr_1fr_1.45fr] gap-1.5 px-2 py-2">
+        <button type="button" className="min-h-12 rounded-md border border-slate-200 bg-white px-1 text-[10px] font-black text-slate-600">Book at Rs 0</button>
+        <button type="button" onClick={() => setPayment('part')} className={`min-h-12 rounded-md border px-1 text-[10px] font-black ${payment === 'part' ? 'border-sky-300 bg-sky-500 text-white' : 'border-slate-200 bg-white text-slate-600'}`}>Pay {fare.pricingPolicy.advancePercent}%</button>
+        <button type="button" onClick={() => setPayment('full')} className={`min-h-12 rounded-md border px-1 text-[10px] font-black ${payment === 'full' ? 'border-sky-300 bg-sky-500 text-white' : 'border-slate-200 bg-white text-slate-600'}`}>Pay 100%</button>
+        <button type="button" onClick={onSubmit} disabled={submitting || !detailsComplete} className="min-h-12 rounded-md bg-orange-500 px-2 text-xs font-black uppercase leading-tight text-white shadow-sm disabled:opacity-50">
+          {submitting ? 'Saving...' : <>Pay Now<br /><span className="text-[10px]">{money(amount)}</span></>}
+        </button>
       </div>
     </div>
   );

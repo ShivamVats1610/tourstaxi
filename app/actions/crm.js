@@ -262,6 +262,8 @@ export async function updatePricingSettingsAction(formData) {
     gstPercent: formData.get('gstPercent'),
     dieselSurchargePerKm: formData.get('dieselSurchargePerKm'),
     advancePercent: formData.get('advancePercent'),
+    carrierAddonPrice: formData.get('carrierAddonPrice'),
+    newCarAddonPrice: formData.get('newCarAddonPrice'),
     languageAddonPrice: formData.get('languageAddonPrice'),
     serviceCities: formData.get('serviceCities'),
     holidays: formData.get('holidays'),
