@@ -117,9 +117,12 @@ function BookingsPanel({ bookings }) {
                 <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Fare</div>
                 <div className="mt-1 text-xl font-black text-slate-950 sm:text-2xl">{booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div>
                 <div className="mt-2 text-xs font-semibold text-slate-600">{booking.passengers || 'Passengers not set'}</div>
+                <div className="mt-1 text-xs font-black capitalize text-teal-700">Payment: {String(booking.paymentStatus || 'pending').replaceAll('_', ' ')}</div>
               </div>
             </div>
             <FareBreakdown fare={booking.fare} />
+            <BookingExtras booking={booking} />
+            <PaymentPanel booking={booking} />
           </article>
             ))}
           </div>
@@ -166,6 +169,52 @@ function FareBreakdown({ fare }) {
   );
 }
 
+function BookingExtras({ booking }) {
+  const options = booking.selectedOptions || {};
+  const fare = booking.fare || {};
+  const addons = Array.isArray(options.addons) ? options.addons : Array.isArray(fare.selectedAddons) ? fare.selectedAddons : [];
+  const addonText = addons.map((addon) => addon.label || addon.id || addon).filter(Boolean).join(', ');
+  const fuel = options.fuelType ? (options.fuelType === 'diesel' ? 'Diesel' : 'CNG') : '';
+  const rows = [
+    fuel && ['Fuel Type', fuel],
+    options.languagePreference && ['Driver Language', options.languagePreference],
+    addonText && ['Selected Add-ons', addonText],
+    booking.stops?.filter(Boolean).length ? ['Stops', booking.stops.filter(Boolean).join(' | ')] : null,
+    booking.customer?.dropAddress && ['Drop Address', booking.customer.dropAddress],
+  ].filter(Boolean);
+  if (!rows.length) return null;
+  return (
+    <div className="mt-3 grid gap-2 rounded-md bg-teal-50 p-3 text-xs font-semibold text-teal-900 sm:grid-cols-2">
+      {rows.map(([label, value]) => (
+        <div key={label} className="flex justify-between gap-3">
+          <span>{label}</span>
+          <b>{value}</b>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PaymentPanel({ booking }) {
+  const status = booking.paymentStatus || 'pending';
+  const pending = ['pending', 'pending_payment', 'rejected'].includes(status) || booking.status === 'payment_rejected';
+  return (
+    <div className="mt-3 rounded-md border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700">
+      <div className="grid gap-2 sm:grid-cols-3">
+        <div><b className="block text-slate-950">Booking Status</b>{String(booking.status || '-').replaceAll('_', ' ')}</div>
+        <div><b className="block text-slate-950">Payment Status</b>{String(status).replaceAll('_', ' ')}</div>
+        <div><b className="block text-slate-950">Amount Paid</b>{status === 'paid' ? money(booking.paymentAmount || booking.fare?.total) : 'Pending'}</div>
+      </div>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {booking.paymentScreenshot && <a href={booking.paymentScreenshot} target="_blank" rel="noopener noreferrer" className="rounded-md bg-slate-100 px-3 py-2 font-black text-slate-700">View Uploaded Screenshot</a>}
+        {pending && <Link href={`/payment/${booking.bookingId}`} className="rounded-md bg-teal-700 px-3 py-2 font-black text-white">{status === 'rejected' ? 'Re-upload Screenshot' : 'Pay / Submit Payment'}</Link>}
+        {status === 'pending_verification' && <span className="rounded-md bg-amber-50 px-3 py-2 font-black text-amber-700">Payment Pending Verification</span>}
+        {status === 'paid' && <span className="rounded-md bg-emerald-50 px-3 py-2 font-black text-emerald-700">Payment Verified</span>}
+      </div>
+    </div>
+  );
+}
+
 function Labeled({ icon: Icon, label, children }) {
   return (
     <label className="grid gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700">
@@ -193,6 +242,9 @@ function StatusBadge({ status }) {
   const value = String(status || 'new');
   const tones = {
     new: 'bg-amber-50 text-amber-700 ring-amber-200',
+    pending_payment: 'bg-amber-50 text-amber-700 ring-amber-200',
+    pending_verification: 'bg-sky-50 text-sky-700 ring-sky-200',
+    payment_rejected: 'bg-red-50 text-red-700 ring-red-200',
     assigned: 'bg-teal-50 text-teal-700 ring-teal-200',
     confirmed: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
     completed: 'bg-slate-950 text-white ring-slate-950',

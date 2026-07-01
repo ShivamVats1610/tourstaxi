@@ -4,17 +4,19 @@ import { MessageCircle, PhoneCall } from 'lucide-react';
 import { COMPANY } from '@/lib/data';
 import { usePathname } from 'next/navigation';
 
-export default function WhatsAppButton() {
+export default function WhatsAppButton({ settings = {} }) {
   const pathname = usePathname();
   const message = encodeURIComponent('Hi ToursTaxi, I want to book a cab.');
-  const href = `https://wa.me/${COMPANY.phoneRaw.replace(/\D/g, '')}?text=${message}`;
+  const callNumber = settings.callingNumber || COMPANY.phoneRaw;
+  const whatsappNumber = settings.whatsappNumber || callNumber;
+  const href = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}?text=${message}`;
 
   if (pathname?.startsWith('/admin')) return null;
 
   return (
     <div className="fixed bottom-5 right-4 z-50 flex flex-col items-end gap-3 sm:right-6">
       <a
-        href={`tel:${COMPANY.phoneRaw}`}
+        href={`tel:${callNumber}`}
         aria-label="Call ToursTaxi"
         className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-[#f59e0b] text-slate-950 shadow-[0_14px_35px_rgba(15,23,42,0.28)] transition duration-300 hover:-translate-y-1 hover:bg-[#fbbf24]"
       >

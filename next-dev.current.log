@@ -4,9 +4,9 @@
 
 ▲ Next.js 16.2.7 (Turbopack)
 - Local:         http://localhost:3000
-- Network:       http://192.168.1.175:3000
+- Network:       http://172.20.10.2:3000
 - Environments: .env.local
-✓ Ready in 1358ms
+✓ Ready in 2.3s
 [mapbox:build] {
   tokenExists: true,
   tokenLength: 92,
@@ -18,156 +18,154 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
 - Experiments (use with caution):
   · serverActions
 
-○ Compiling / ...
- GET / 200 in 14.3s (next.js: 11.6s, application-code: 2.7s)
-○ Compiling /api/auth/me ...
- GET /api/auth/me 200 in 3.6s (next.js: 3.3s, application-code: 266ms)
- GET /api/cabs 200 in 4.4s (next.js: 4.2s, application-code: 132ms)
- GET / 200 in 573ms (next.js: 24ms, application-code: 550ms)
- GET /admin/dashboard 200 in 5.7s (next.js: 3.0s, proxy.ts: 83ms, application-code: 2.5s)
- GET /admin/dashboard 200 in 3.0s (next.js: 748ms, proxy.ts: 33ms, application-code: 2.2s)
- GET /api/auth/me 200 in 78ms (next.js: 30ms, application-code: 48ms)
- GET /api/bookings 200 in 516ms (next.js: 397ms, application-code: 119ms)
- GET /api/bookings 200 in 650ms (next.js: 431ms, application-code: 219ms)
-○ Compiling /admin/tour-packages ...
- GET /admin/tour-packages 200 in 4.2s (next.js: 3.6s, proxy.ts: 44ms, application-code: 504ms)
- GET /api/auth/me 200 in 242ms (next.js: 91ms, application-code: 152ms)
- GET /admin/blog 200 in 1395ms (next.js: 1117ms, proxy.ts: 10ms, application-code: 268ms)
- GET /api/auth/me 200 in 82ms (next.js: 17ms, application-code: 66ms)
- GET /admin/tour-packages 200 in 449ms (next.js: 28ms, proxy.ts: 25ms, application-code: 395ms)
- GET /api/auth/me 200 in 118ms (next.js: 29ms, application-code: 89ms)
- POST /admin/tour-packages 200 in 7.6s (next.js: 10ms, proxy.ts: 15ms, application-code: 7.6s)
-  └─ ƒ saveTourPackageAction({}) in 7297ms app/actions/crm.js
- GET / 200 in 407ms (next.js: 34ms, application-code: 372ms)
- GET /api/auth/me 200 in 66ms (next.js: 16ms, application-code: 50ms)
- GET /api/cabs 200 in 126ms (next.js: 50ms, application-code: 76ms)
- GET /tour-packages 200 in 1647ms (next.js: 1503ms, application-code: 144ms)
- GET /api/auth/me 200 in 43ms (next.js: 15ms, application-code: 27ms)
- GET /admin/dashboard 200 in 548ms (next.js: 14ms, proxy.ts: 19ms, application-code: 515ms)
- GET /api/auth/me 200 in 89ms (next.js: 27ms, application-code: 62ms)
- GET /api/bookings 200 in 153ms (next.js: 52ms, application-code: 101ms)
- GET /api/bookings 200 in 115ms (next.js: 25ms, application-code: 90ms)
- GET /admin/tour-packages 200 in 189ms (next.js: 7ms, proxy.ts: 8ms, application-code: 174ms)
- GET /api/auth/me 200 in 53ms (next.js: 14ms, application-code: 38ms)
- POST /admin/tour-packages 200 in 226ms (next.js: 8ms, proxy.ts: 8ms, application-code: 211ms)
-  └─ ƒ deleteTourPackageAction({}) in 70ms app/actions/crm.js
- GET /admin/tour-packages 200 in 121ms (next.js: 59ms, proxy.ts: 18ms, application-code: 45ms)
-○ Compiling /admin/cars ...
- GET /admin/tour-packages 200 in 3.2s (next.js: 21ms, proxy.ts: 28ms, application-code: 3.2s)
- GET /admin/blog 200 in 2.5s (next.js: 177ms, proxy.ts: 34ms, application-code: 2.3s)
- GET /api/auth/me 200 in 532ms (next.js: 395ms, application-code: 137ms)
- GET /admin/cars 200 in 12.0s (next.js: 11.4s, proxy.ts: 39ms, application-code: 566ms)
- GET /admin/tour-packages 200 in 289ms (next.js: 12ms, proxy.ts: 38ms, application-code: 239ms)
- GET /api/auth/me 200 in 43ms (next.js: 9ms, application-code: 34ms)
- GET /admin/tour-packages 200 in 35ms (next.js: 8ms, proxy.ts: 6ms, application-code: 21ms)
- GET /admin/tour-packages 200 in 775ms (next.js: 26ms, proxy.ts: 12ms, application-code: 737ms)
-✓ Compiled in 2.8s
- GET /admin/tour-packages 200 in 4.4s (next.js: 927ms, proxy.ts: 464ms, application-code: 3.0s)
- GET /admin/tour-packages 200 in 2.7s (next.js: 304ms, proxy.ts: 270ms, application-code: 2.1s)
- GET /admin/tour-packages 200 in 1630ms (next.js: 114ms, proxy.ts: 194ms, application-code: 1322ms)
- GET /admin/tour-packages 200 in 1750ms (next.js: 41ms, proxy.ts: 189ms, application-code: 1520ms)
- GET /admin/tour-packages 200 in 668ms (next.js: 21ms, proxy.ts: 15ms, application-code: 632ms)
- GET /admin/tour-packages 200 in 1054ms (next.js: 33ms, proxy.ts: 22ms, application-code: 999ms)
- GET /admin/tour-packages 200 in 928ms (next.js: 22ms, proxy.ts: 14ms, application-code: 892ms)
- GET /admin/tour-packages 200 in 3.3s (next.js: 225ms, proxy.ts: 196ms, application-code: 2.9s)
- GET /admin/tour-packages 200 in 3.4s (next.js: 344ms, proxy.ts: 200ms, application-code: 2.9s)
-✓ Compiled in 586ms
- GET /admin/tour-packages 200 in 2.4s (next.js: 394ms, proxy.ts: 189ms, application-code: 1771ms)
- GET /admin/tour-packages 200 in 1533ms (next.js: 8ms, proxy.ts: 9ms, application-code: 1515ms)
- GET /admin/tour-packages 200 in 1406ms (next.js: 151ms, proxy.ts: 223ms, application-code: 1032ms)
- GET /admin/tour-packages 200 in 1415ms (next.js: 34ms, proxy.ts: 223ms, application-code: 1158ms)
- GET /admin/tour-packages 200 in 1633ms (next.js: 255ms, proxy.ts: 225ms, application-code: 1154ms)
- GET /admin/tour-packages 200 in 1981ms (next.js: 375ms, proxy.ts: 234ms, application-code: 1372ms)
- GET /admin/tour-packages 200 in 735ms (next.js: 22ms, proxy.ts: 15ms, application-code: 698ms)
- GET /admin/tour-packages 200 in 616ms (next.js: 24ms, proxy.ts: 15ms, application-code: 577ms)
- GET /admin/tour-packages 200 in 506ms (next.js: 68ms, proxy.ts: 80ms, application-code: 358ms)
-✓ Compiled in 552ms
- GET /admin/tour-packages 200 in 1785ms (next.js: 390ms, proxy.ts: 269ms, application-code: 1126ms)
- GET /admin/tour-packages 200 in 1340ms (next.js: 14ms, proxy.ts: 282ms, application-code: 1043ms)
- GET /admin/tour-packages 200 in 955ms (next.js: 22ms, proxy.ts: 12ms, application-code: 921ms)
- GET /admin/tour-packages 200 in 967ms (next.js: 74ms, proxy.ts: 13ms, application-code: 880ms)
- GET /admin/tour-packages 200 in 977ms (next.js: 192ms, proxy.ts: 14ms, application-code: 771ms)
- GET /admin/tour-packages 200 in 3.6s (next.js: 680ms, proxy.ts: 310ms, application-code: 2.6s)
- GET /admin/tour-packages 200 in 3.1s (next.js: 30ms, proxy.ts: 27ms, application-code: 3.1s)
- GET /admin/tour-packages 200 in 2.8s (next.js: 96ms, proxy.ts: 69ms, application-code: 2.6s)
- GET /admin/tour-packages 200 in 2.8s (next.js: 338ms, proxy.ts: 77ms, application-code: 2.4s)
- GET /admin/tour-packages 200 in 3.2s (next.js: 788ms, proxy.ts: 94ms, application-code: 2.3s)
- GET /admin/tour-packages 200 in 2.2s (next.js: 18ms, proxy.ts: 26ms, application-code: 2.2s)
- GET /admin/tour-packages 200 in 1898ms (next.js: 86ms, proxy.ts: 27ms, application-code: 1785ms)
- GET /admin/tour-packages 200 in 1926ms (next.js: 30ms, proxy.ts: 25ms, application-code: 1872ms)
- GET /admin/tour-packages 200 in 1587ms (next.js: 15ms, proxy.ts: 6ms, application-code: 1566ms)
- GET /admin/tour-packages 200 in 1031ms (next.js: 9ms, proxy.ts: 14ms, application-code: 1007ms)
- GET /admin/tour-packages 200 in 2.0s (next.js: 66ms, proxy.ts: 89ms, application-code: 1881ms)
- GET /admin/tour-packages 200 in 5.7s (next.js: 606ms, proxy.ts: 84ms, application-code: 5.0s)
- GET /admin/tour-packages 200 in 1217ms (next.js: 70ms, proxy.ts: 173ms, application-code: 974ms)
- GET /admin/tour-packages 200 in 1152ms (next.js: 130ms, proxy.ts: 127ms, application-code: 895ms)
- GET /admin/tour-packages 200 in 2.9s (next.js: 302ms, proxy.ts: 134ms, application-code: 2.4s)
- GET /admin/tour-packages 200 in 2.3s (next.js: 17ms, proxy.ts: 22ms, application-code: 2.2s)
- GET /admin/tour-packages 200 in 3.1s (next.js: 405ms, proxy.ts: 132ms, application-code: 2.6s)
- GET /admin/tour-packages 200 in 3.1s (next.js: 499ms, proxy.ts: 131ms, application-code: 2.5s)
- GET /admin/tour-packages 200 in 2.5s (next.js: 17ms, proxy.ts: 132ms, application-code: 2.3s)
- GET /admin/tour-packages 200 in 2.7s (next.js: 26ms, proxy.ts: 30ms, application-code: 2.6s)
- GET /admin/tour-packages 200 in 964ms (next.js: 28ms, proxy.ts: 19ms, application-code: 918ms)
- GET /admin/tour-packages 200 in 1098ms (next.js: 10ms, proxy.ts: 12ms, application-code: 1077ms)
- GET /admin/tour-packages 200 in 999ms (next.js: 38ms, proxy.ts: 119ms, application-code: 842ms)
- GET /admin/tour-packages 200 in 1001ms (next.js: 62ms, proxy.ts: 130ms, application-code: 809ms)
- GET /admin/tour-packages 200 in 886ms (next.js: 24ms, proxy.ts: 38ms, application-code: 824ms)
- GET /admin/tour-packages 200 in 942ms (next.js: 88ms, proxy.ts: 109ms, application-code: 746ms)
- GET /admin/tour-packages 200 in 1060ms (next.js: 10ms, proxy.ts: 145ms, application-code: 905ms)
- GET /admin/tour-packages 200 in 1433ms (next.js: 25ms, proxy.ts: 9ms, application-code: 1398ms)
- GET /admin/tour-packages 200 in 1341ms (next.js: 65ms, proxy.ts: 95ms, application-code: 1181ms)
- GET /admin/tour-packages 200 in 1346ms (next.js: 12ms, proxy.ts: 95ms, application-code: 1239ms)
- GET /admin/tour-packages 200 in 1515ms (next.js: 20ms, proxy.ts: 34ms, application-code: 1461ms)
- GET /admin/tour-packages 200 in 2.0s (next.js: 245ms, proxy.ts: 28ms, application-code: 1736ms)
- GET /admin/tour-packages 200 in 2.3s (next.js: 35ms, proxy.ts: 261ms, application-code: 1981ms)
- GET /admin/tour-packages 200 in 1563ms (next.js: 53ms, proxy.ts: 38ms, application-code: 1472ms)
- GET /admin/tour-packages 200 in 1513ms (next.js: 28ms, proxy.ts: 164ms, application-code: 1321ms)
- GET /admin/tour-packages 200 in 1517ms (next.js: 167ms, proxy.ts: 171ms, application-code: 1180ms)
- GET /admin/tour-packages 200 in 1592ms (next.js: 14ms, proxy.ts: 91ms, application-code: 1487ms)
- GET /admin/tour-packages 200 in 1307ms (next.js: 166ms, proxy.ts: 32ms, application-code: 1109ms)
- GET /admin/tour-packages 200 in 1325ms (next.js: 44ms, proxy.ts: 29ms, application-code: 1251ms)
- GET /admin/tour-packages 200 in 1168ms (next.js: 85ms, proxy.ts: 97ms, application-code: 985ms)
- GET /admin/tour-packages 200 in 1412ms (next.js: 26ms, proxy.ts: 217ms, application-code: 1169ms)
- GET /admin/tour-packages 200 in 1280ms (next.js: 363ms, proxy.ts: 98ms, application-code: 819ms)
- GET /admin/tour-packages 200 in 1390ms (next.js: 32ms, proxy.ts: 23ms, application-code: 1335ms)
- GET /admin/tour-packages 200 in 1390ms (next.js: 92ms, proxy.ts: 115ms, application-code: 1183ms)
- GET /admin/tour-packages 200 in 1400ms (next.js: 35ms, proxy.ts: 114ms, application-code: 1251ms)
- GET /admin/tour-packages 200 in 2.4s (next.js: 391ms, proxy.ts: 345ms, application-code: 1690ms)
- GET /admin/tour-packages 200 in 2.3s (next.js: 300ms, proxy.ts: 522ms, application-code: 1429ms)
- GET /admin/tour-packages 200 in 2.3s (next.js: 194ms, proxy.ts: 513ms, application-code: 1560ms)
- GET /admin/tour-packages 200 in 1170ms (next.js: 28ms, proxy.ts: 145ms, application-code: 997ms)
- GET /admin/tour-packages 200 in 1219ms (next.js: 34ms, proxy.ts: 17ms, application-code: 1168ms)
- GET /admin/tour-packages 200 in 3.4s (next.js: 45ms, proxy.ts: 19ms, application-code: 3.3s)
- GET /admin/tour-packages 200 in 3.2s (next.js: 256ms, proxy.ts: 40ms, application-code: 2.9s)
- GET /admin/tour-packages 200 in 3.4s (next.js: 145ms, proxy.ts: 146ms, application-code: 3.1s)
- GET /admin/tour-packages 200 in 3.4s (next.js: 41ms, proxy.ts: 157ms, application-code: 3.2s)
- GET /admin/tour-packages 200 in 3.4s (next.js: 186ms, proxy.ts: 154ms, application-code: 3.1s)
- GET /admin/tour-packages 200 in 6.0s (next.js: 140ms, proxy.ts: 149ms, application-code: 5.7s)
- GET /admin/tour-packages 200 in 1624ms (next.js: 63ms, proxy.ts: 42ms, application-code: 1519ms)
- GET /admin/tour-packages 200 in 1595ms (next.js: 232ms, proxy.ts: 32ms, application-code: 1330ms)
- GET /admin/tour-packages 200 in 1608ms (next.js: 202ms, proxy.ts: 213ms, application-code: 1192ms)
- GET /admin/tour-packages 200 in 1624ms (next.js: 345ms, proxy.ts: 215ms, application-code: 1063ms)
- GET /admin/tour-packages 200 in 3.1s (next.js: 796ms, proxy.ts: 189ms, application-code: 2.1s)
- GET /admin/tour-packages 200 in 1912ms (next.js: 24ms, proxy.ts: 15ms, application-code: 1872ms)
- GET /admin/tour-packages 200 in 1819ms (next.js: 47ms, proxy.ts: 30ms, application-code: 1742ms)
- GET /admin/tour-packages 200 in 2.3s (next.js: 246ms, proxy.ts: 39ms, application-code: 1998ms)
- GET /admin/tour-packages 200 in 2.3s (next.js: 665ms, proxy.ts: 173ms, application-code: 1439ms)
- GET /admin/tour-packages 200 in 2.1s (next.js: 222ms, proxy.ts: 660ms, application-code: 1267ms)
- GET /admin/tour-packages 200 in 1752ms (next.js: 147ms, proxy.ts: 67ms, application-code: 1537ms)
- GET /admin/tour-packages 200 in 1775ms (next.js: 34ms, proxy.ts: 69ms, application-code: 1672ms)
- GET /admin/tour-packages 200 in 1441ms (next.js: 201ms, proxy.ts: 200ms, application-code: 1039ms)
- GET /admin/tour-packages 200 in 1401ms (next.js: 75ms, proxy.ts: 311ms, application-code: 1014ms)
- GET /admin/tour-packages 200 in 1559ms (next.js: 101ms, proxy.ts: 353ms, application-code: 1105ms)
- GET /admin/tour-packages 200 in 1548ms (next.js: 285ms, proxy.ts: 287ms, application-code: 975ms)
- GET /admin/tour-packages 200 in 1974ms (next.js: 40ms, proxy.ts: 26ms, application-code: 1909ms)
- GET /admin/tour-packages 200 in 1984ms (next.js: 205ms, proxy.ts: 16ms, application-code: 1763ms)
- GET /admin/tour-packages 200 in 1813ms (next.js: 151ms, proxy.ts: 142ms, application-code: 1520ms)
- GET /admin/tour-packages 200 in 1817ms (next.js: 158ms, proxy.ts: 235ms, application-code: 1424ms)
- GET /admin/tour-packages 200 in 1725ms (next.js: 463ms, proxy.ts: 217ms, application-code: 1045ms)
- GET /admin/tour-packages 200 in 1626ms (next.js: 526ms, proxy.ts: 217ms, application-code: 883ms)
- GET /admin/tour-packages 200 in 446ms (next.js: 48ms, proxy.ts: 27ms, application-code: 371ms)
- GET /admin/tour-packages 200 in 1181ms (next.js: 16ms, proxy.ts: 178ms, application-code: 987ms)
- GET /popular-routes 200 in 3.0s (next.js: 2.1s, application-code: 926ms)
-○ Compiling /admin/routes ...
- GET /admin/routes 200 in 5.3s (next.js: 4.1s, proxy.ts: 56ms, application-code: 1184ms)
- GET /api/auth/me 200 in 276ms (next.js: 178ms, application-code: 98ms)
+ GET / 200 in 5.1s (next.js: 883ms, application-code: 4.2s)
+ GET / 200 in 1105ms (next.js: 29ms, application-code: 1076ms)
+ GET /api/auth/me 200 in 849ms (next.js: 772ms, application-code: 77ms)
+ GET /api/cabs 200 in 1379ms (next.js: 1290ms, application-code: 89ms)
+○ Compiling /_not-found/page ...
+[mapbox:autocomplete:request] {
+  inputLength: 2,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:request] {
+  inputLength: 4,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=ko 200 in 1953ms (next.js: 1369ms, application-code: 584ms)
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=kota 200 in 1518ms (next.js: 1048ms, application-code: 470ms)
+ GET /staffflow-sw.js 404 in 7.3s (next.js: 7.0s, application-code: 352ms)
+[mapbox:autocomplete:request] {
+  inputLength: 2,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=ra 200 in 500ms (next.js: 13ms, application-code: 487ms)
+[mapbox:autocomplete:request] {
+  inputLength: 4,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:request] {
+  inputLength: 5,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=raja 200 in 385ms (next.js: 10ms, application-code: 375ms)
+[mapbox:autocomplete:request] {
+  inputLength: 6,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=rajas 200 in 482ms (next.js: 14ms, application-code: 469ms)
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=rajast 200 in 439ms (next.js: 14ms, application-code: 425ms)
+[mapbox:autocomplete:request] {
+  inputLength: 9,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=rajasthan 200 in 458ms (next.js: 10ms, application-code: 449ms)
+ GET /api/cabs 200 in 102ms (next.js: 13ms, application-code: 89ms)
+[mapbox:route:request] {
+  hasOrigin: false,
+  hasDestination: false,
+  hasCoordinates: true,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:route:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/distance?fromLng=75.85744&fromLat=25.173758&toLng=73.195368&toLat=26.971052 200 in 1402ms (next.js: 775ms, application-code: 627ms)
+ GET /api/pricing-settings 200 in 1487ms (next.js: 1372ms, application-code: 114ms)
+ POST /api/bookings 201 in 1075ms (next.js: 154ms, application-code: 920ms)
+ GET /payment/TTX000021 200 in 6.3s (next.js: 6.0s, application-code: 301ms)
+ GET /api/auth/me 200 in 53ms (next.js: 18ms, application-code: 35ms)
+ GET /staffflow-sw.js 404 in 397ms (next.js: 24ms, application-code: 373ms)
+ GET /api/bookings/TTX000021 200 in 4.4s (next.js: 4.3s, application-code: 130ms)

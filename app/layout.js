@@ -6,6 +6,7 @@ import WhatsAppButton from '@/components/site/WhatsAppButton';
 import { Toaster } from 'sonner';
 import BookingProvider from '@/lib/booking-context';
 import { listCabs } from '@/lib/crm';
+import { getPricingSettings } from '@/lib/pricing-settings';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -23,16 +24,19 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const cabs = await listCabs({ fallbackToFleet: false });
+  const [cabs, settings] = await Promise.all([
+    listCabs({ fallbackToFleet: false }),
+    getPricingSettings()
+  ]);
 
   return (
     <html lang="en" className={inter.variable}>
       <body className="bg-slate-50 font-sans text-slate-900 antialiased">
         <BookingProvider cabs={cabs}>
-          <Header />
+          <Header settings={settings} />
           <main className="min-h-screen">{children}</main>
-          <WhatsAppButton />
-          <Footer />
+          <WhatsAppButton settings={settings} />
+          <Footer settings={settings} />
         </BookingProvider>
         <Toaster
           position="top-right"

@@ -5,10 +5,16 @@ import { Phone, Mail, MapPin } from 'lucide-react';
 import { COMPANY, NAV } from '@/lib/data';
 import { usePathname } from 'next/navigation';
 
-const SOCIALS = ['f', 'ig', 'x', 'yt'];
-
-export default function Footer() {
+export default function Footer({ settings = {} }) {
   const pathname = usePathname();
+  const phone = settings.callingNumber || COMPANY.phoneRaw;
+  const socials = [
+    ['f', settings.facebookUrl],
+    ['ig', settings.instagramUrl],
+    ['x', settings.xUrl],
+    ['yt', settings.youtubeUrl],
+    ['g', settings.googleBusinessUrl],
+  ].filter(([, href]) => href);
 
   if (pathname?.startsWith('/admin')) return null;
 
@@ -25,8 +31,8 @@ export default function Footer() {
           </div>
           <p className="text-sm text-slate-400 leading-relaxed mb-4">India most-trusted cab partner for outstation trips, airport transfers and curated Rajasthan tours - serving 100+ cities since 2014.</p>
           <div className="flex gap-3">
-            {SOCIALS.map((label) => (
-              <a key={label} href="#" className="h-9 w-9 rounded-full bg-white/10 hover:bg-teal-700 flex items-center justify-center text-xs font-bold uppercase text-white transition-colors">{label}</a>
+            {socials.map(([label, href]) => (
+              <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="h-9 w-9 rounded-full bg-white/10 hover:bg-teal-700 flex items-center justify-center text-xs font-bold uppercase text-white transition-colors">{label}</a>
             ))}
           </div>
         </div>
@@ -51,7 +57,7 @@ export default function Footer() {
           <h4 className="text-white font-semibold mb-4">Get in Touch</h4>
           <ul className="space-y-3 text-sm">
             <li className="flex gap-3"><MapPin className="h-5 w-5 text-amber-400 shrink-0" /><span>{COMPANY.address}</span></li>
-            <li className="flex gap-3"><Phone className="h-5 w-5 text-amber-400 shrink-0" /><a href={`tel:${COMPANY.phoneRaw}`} className="hover:text-teal-300">{COMPANY.phone}</a></li>
+            <li className="flex gap-3"><Phone className="h-5 w-5 text-amber-400 shrink-0" /><a href={`tel:${phone}`} className="hover:text-teal-300">{phone}</a></li>
             <li className="flex gap-3"><Mail className="h-5 w-5 text-amber-400 shrink-0" /><a href={`mailto:${COMPANY.email}`} className="hover:text-teal-300 break-all">{COMPANY.email}</a></li>
           </ul>
         </div>

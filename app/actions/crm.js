@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { requireUser } from '@/lib/auth';
-import { deleteBlogPost, deleteBooking, deleteCab, deletePopularRoute, deleteTourPackage, deleteUser, updateBooking, updateUser, upsertBlogPost, upsertCab, upsertPopularRoute, upsertTourPackage } from '@/lib/crm';
+import { deleteBlogPost, deleteBooking, deleteCab, deletePopularRoute, deleteTourPackage, deleteUser, updateBooking, updateUser, upsertBlogPost, upsertCab, upsertPopularRoute, upsertTourPackage, verifyUpiPayment } from '@/lib/crm';
 import { updatePricingSettings } from '@/lib/pricing-settings';
 
 async function requireAdmin() {
@@ -204,6 +204,19 @@ export async function updateBookingAction(formData) {
   revalidatePath('/customer/dashboard');
 }
 
+export async function verifyUpiPaymentAction(formData) {
+  await requireAdmin();
+  await verifyUpiPayment({
+    id: formData.get('id'),
+    decision: formData.get('decision'),
+    notes: formData.get('notes'),
+  });
+  revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/bookings/new');
+  revalidatePath('/admin/bookings/old');
+  revalidatePath('/customer/dashboard');
+}
+
 export async function deleteBookingAction(formData) {
   await requireAdmin();
   await deleteBooking(String(formData.get('id') || ''));
@@ -249,6 +262,16 @@ export async function updatePricingSettingsAction(formData) {
     gstPercent: formData.get('gstPercent'),
     dieselSurchargePerKm: formData.get('dieselSurchargePerKm'),
     advancePercent: formData.get('advancePercent'),
+    languageAddonPrice: formData.get('languageAddonPrice'),
+    serviceCities: formData.get('serviceCities'),
+    holidays: formData.get('holidays'),
+    facebookUrl: formData.get('facebookUrl'),
+    instagramUrl: formData.get('instagramUrl'),
+    youtubeUrl: formData.get('youtubeUrl'),
+    xUrl: formData.get('xUrl'),
+    googleBusinessUrl: formData.get('googleBusinessUrl'),
+    whatsappNumber: formData.get('whatsappNumber'),
+    callingNumber: formData.get('callingNumber'),
   });
   revalidatePath('/admin/dashboard');
   revalidatePath('/admin/pricing');

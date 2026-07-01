@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { COMPANY, NAV } from '@/lib/data';
 import { usePathname } from 'next/navigation';
 
-export default function Header() {
+export default function Header({ settings = {} }) {
   const [open, setOpen] = useState(false);
   const [session, setSession] = useState(null);
   const pathname = usePathname();
@@ -34,6 +34,8 @@ export default function Header() {
 
   const dashboardHref = session?.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard';
   const visibleNav = NAV.filter((item) => ['Home', 'Services', 'Fleet', 'Routes', 'Tour Packages', 'Contact'].includes(item.label));
+  const callNumber = settings.callingNumber || COMPANY.phoneRaw;
+  const callLabel = callNumber.replace(/^\+91\s?/, '').replace(/^\+91/, '');
 
   if (pathname?.startsWith('/admin')) return null;
 
@@ -47,12 +49,12 @@ export default function Header() {
           </span>
         </Link>
 
-        <a href={`tel:${COMPANY.phoneRaw}`} className="hidden h-9 min-w-0 items-center justify-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-2 text-[11px] font-bold text-teal-800 max-[359px]:w-9 max-[359px]:px-0 min-[390px]:px-2.5 min-[390px]:text-xs sm:h-11 md:flex md:items-stretch md:overflow-hidden md:rounded-md md:p-0">
+        <a href={`tel:${callNumber}`} className="hidden h-9 min-w-0 items-center justify-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-2 text-[11px] font-bold text-teal-800 max-[359px]:w-9 max-[359px]:px-0 min-[390px]:px-2.5 min-[390px]:text-xs sm:h-11 md:flex md:items-stretch md:overflow-hidden md:rounded-md md:p-0">
           <span className="hidden items-center gap-1.5 bg-white px-3 text-slate-950 md:flex">
             <Phone className="h-4 w-4 text-teal-600" /> 24x7
           </span>
           <Phone className="h-4 w-4 md:hidden" />
-          <span className="truncate max-[359px]:hidden md:bg-teal-600 md:px-3 md:py-2 md:text-white">{COMPANY.phone.replace('+91 ', '')}</span>
+          <span className="truncate max-[359px]:hidden md:bg-teal-600 md:px-3 md:py-2 md:text-white">{callLabel}</span>
         </a>
 
         <nav className="hidden flex-1 items-center justify-center gap-1 xl:flex">

@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { BookOpen, CalendarClock, Car, CheckCircle2, IndianRupee, LayoutDashboard, LogOut, Map, Plus, Settings, Trash2, Upload, Users } from 'lucide-react';
 import { logoutAction } from '@/app/actions/auth';
-import { deleteBlogPostAction, deleteBookingAction, deleteCabAction, deletePopularRouteAction, deleteTourPackageAction, deleteUserAction, saveBlogPostAction, saveCabAction, savePopularRouteAction, saveTourPackageAction, updateBookingAction, updatePricingSettingsAction, updateUserAction } from '@/app/actions/crm';
+import { deleteBlogPostAction, deleteBookingAction, deleteCabAction, deletePopularRouteAction, deleteTourPackageAction, deleteUserAction, saveBlogPostAction, saveCabAction, savePopularRouteAction, saveTourPackageAction, updateBookingAction, updatePricingSettingsAction, updateUserAction, verifyUpiPaymentAction } from '@/app/actions/crm';
 import ToastSubmitButton from '@/components/ui/toast-submit-button';
 
-export const STATUSES = ['new', 'assigned', 'confirmed', 'completed', 'cancelled'];
+export const STATUSES = ['pending_payment', 'pending_verification', 'payment_rejected', 'new', 'assigned', 'confirmed', 'completed', 'cancelled'];
 
 export const ADMIN_NAV = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -87,8 +87,45 @@ export function Panel({ title, subtitle, icon: Icon, children, className = '' })
 }
 
 export function BookingTable({ bookings, title = 'Bookings' }) {
+  const pendingPayments = bookings.filter((booking) => ['pending_payment', 'pending_verification', 'rejected'].includes(booking.paymentStatus) || ['pending_payment', 'pending_verification', 'payment_rejected'].includes(booking.status));
   return (
     <Panel title={title} subtitle="Update fare, status, notes, and remove test enquiries." icon={CalendarClock}>
+      {!!pendingPayments.length && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+          <div className="font-black text-amber-950">Pending Payments</div>
+          <div className="mt-3 grid gap-3 lg:grid-cols-2">
+            {pendingPayments.map((booking) => (
+              <article key={`payment-${booking.id}`} className="rounded-md border border-amber-200 bg-white p-3 text-sm shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="font-mono font-black">{booking.bookingId}</div>
+                    <div className="font-bold">{booking.customer?.name || 'Guest'} | {booking.customer?.phone || 'No phone'}</div>
+                    <div className="text-xs font-semibold text-slate-600">{booking.pickupDate || '-'} at {formatClock(booking.pickupTime)}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-black text-teal-700">{money(booking.paymentAmount || booking.fare?.total)}</div>
+                    <StatusBadge status={booking.paymentStatus || 'pending'} />
+                  </div>
+                </div>
+                {booking.paymentScreenshot ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <a href={booking.paymentScreenshot} target="_blank" rel="noopener noreferrer" className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-700">View Screenshot</a>
+                    <a href={booking.paymentScreenshot} download className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-700">Download</a>
+                  </div>
+                ) : <div className="mt-3 rounded bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">No screenshot uploaded yet.</div>}
+                <form action={verifyUpiPaymentAction} className="mt-3 grid gap-2">
+                  <input type="hidden" name="id" value={booking.id} />
+                  <Input name="notes" defaultValue={booking.notes || ''} placeholder="Admin payment notes" />
+                  <div className="flex gap-2">
+                    <button name="decision" value="approve" className="h-9 flex-1 rounded-md bg-emerald-600 px-3 text-xs font-black text-white hover:bg-emerald-700">Approve Payment</button>
+                    <button name="decision" value="reject" className="h-9 flex-1 rounded-md bg-red-600 px-3 text-xs font-black text-white hover:bg-red-700">Reject Payment</button>
+                  </div>
+                </form>
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="grid gap-3 xl:hidden">
         {bookings.map((booking) => (
           <article key={booking.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -111,6 +148,7 @@ export function BookingTable({ bookings, title = 'Bookings' }) {
                 <div className="mt-1 text-xs font-semibold">{booking.vehicleName || booking.vehicleSlug || 'Vehicle pending'}</div>
                 <div className="text-xs font-medium text-slate-600">{booking.pickupDate || '-'} at {formatClock(booking.pickupTime)}</div>
                 <div className="text-xs font-medium text-slate-600">{booking.passengers || 'Passengers not set'}</div>
+                <BookingExtras booking={booking} />
               </div>
               <div>
                 <div className="text-xl font-black text-teal-700">{booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div>
@@ -141,7 +179,7 @@ export function BookingTable({ bookings, title = 'Bookings' }) {
               <tr key={booking.id} className="align-top hover:bg-slate-50">
                 <td className="px-4 py-4"><div className="font-mono font-black">{booking.bookingId}</div><div className="mt-1 text-xs font-medium text-slate-600">{formatDate(booking.createdAt)}</div><StatusBadge status={booking.status} className="mt-2" /></td>
                 <td className="break-words px-4 py-4"><b>{booking.customer?.name || 'Guest'}</b><div className="text-xs font-medium text-slate-700">{booking.customer?.phone || 'No phone'}</div><div className="text-xs font-medium text-slate-700">{booking.customer?.email || 'No email'}</div></td>
-                <td className="break-words px-4 py-4"><b className="capitalize">{booking.tripType?.replace('-', ' ') || 'Trip'}</b><div className="mt-1 text-xs font-medium text-slate-700">{booking.pickup} to {booking.tripType === 'local' ? booking.rental : booking.drop}</div><div className="mt-1 text-xs font-semibold">{booking.vehicleName || booking.vehicleSlug || 'Vehicle pending'}</div><div className="text-xs font-medium text-slate-600">{booking.pickupDate || '-'} at {formatClock(booking.pickupTime)}</div><div className="text-xs font-medium text-slate-600">{booking.passengers || 'Passengers not set'}</div></td>
+                <td className="break-words px-4 py-4"><b className="capitalize">{booking.tripType?.replace('-', ' ') || 'Trip'}</b><div className="mt-1 text-xs font-medium text-slate-700">{booking.pickup} to {booking.tripType === 'local' ? booking.rental : booking.drop}</div><div className="mt-1 text-xs font-semibold">{booking.vehicleName || booking.vehicleSlug || 'Vehicle pending'}</div><div className="text-xs font-medium text-slate-600">{booking.pickupDate || '-'} at {formatClock(booking.pickupTime)}</div><div className="text-xs font-medium text-slate-600">{booking.passengers || 'Passengers not set'}</div><BookingExtras booking={booking} /></td>
                 <td className="px-4 py-4"><div className="text-lg font-black text-teal-700">{booking.fare?.total ? money(booking.fare.total) : 'Pending'}</div><FareBreakdown fare={booking.fare} /></td>
                 <td className="px-4 py-4">
                   <form action={updateBookingAction} className="grid min-w-48 gap-2">
@@ -400,6 +438,20 @@ export function PricingSettingsForm({ settings }) {
           <Field name="driverAllowancePerDay" label="Driver Allowance Per Day" type="number" min="0" defaultValue={settings.driverAllowancePerDay} />
           <Field name="gstPercent" label="GST %" type="number" min="0" max="100" step="0.1" defaultValue={settings.gstPercent} />
           <Field name="dieselSurchargePerKm" label="Diesel Surcharge Per KM" type="number" min="0" step="0.1" defaultValue={settings.dieselSurchargePerKm} />
+          <Field name="languageAddonPrice" label="Language Chauffeur Add-on" type="number" min="0" defaultValue={settings.languageAddonPrice} />
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <TextField name="serviceCities" label="Service Available Cities" defaultValue={settings.serviceCities?.join?.('\n') || ''} placeholder={`Jaipur\nKota\nSawai Madhopur`} />
+          <TextField name="holidays" label="Holiday Dates / Notes" defaultValue={settings.holidays?.join?.('\n') || ''} placeholder={`2026-08-15 Independence Day\n2026-10-20 Diwali`} />
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <Field name="facebookUrl" label="Facebook Page" defaultValue={settings.facebookUrl} placeholder="https://facebook.com/..." />
+          <Field name="instagramUrl" label="Instagram" defaultValue={settings.instagramUrl} placeholder="https://instagram.com/..." />
+          <Field name="youtubeUrl" label="YouTube" defaultValue={settings.youtubeUrl} placeholder="https://youtube.com/..." />
+          <Field name="xUrl" label="X Account" defaultValue={settings.xUrl} placeholder="https://x.com/..." />
+          <Field name="googleBusinessUrl" label="Google Business Profile" defaultValue={settings.googleBusinessUrl} placeholder="https://g.page/..." />
+          <Field name="whatsappNumber" label="WhatsApp Number" defaultValue={settings.whatsappNumber} placeholder="+918955458128" />
+          <Field name="callingNumber" label="Calling Mobile Number" defaultValue={settings.callingNumber} placeholder="+918955458128" />
         </div>
         <div className="break-words rounded-lg border border-teal-100 bg-teal-50 p-4 text-sm font-semibold text-teal-950">Car rates come from Add Cab. These rules add minimum KM, base fare, driver allowance, GST, diesel surcharge, and advance payment across one way, round trip, local, and airport bookings.</div>
         <ToastSubmitButton message="Saving fare settings" description="Fare calculation policy is being updated." className="h-11 w-full rounded-md bg-teal-700 px-4 text-sm font-black text-white hover:bg-teal-800 sm:w-fit">Save Fare Settings</ToastSubmitButton>
@@ -413,6 +465,23 @@ function FareBreakdown({ fare }) {
   return <div className="mt-2 grid gap-1 rounded-md bg-slate-50 p-2 text-[11px] font-semibold text-slate-700"><Row label="Actual" value={formatKm(fare.actualDistance)} /><Row label="Minimum" value={formatKm(fare.minimumDistance)} /><Row label="Chargeable" value={formatKm(fare.chargeableDistance)} /><Row label="Rate" value={`Rs ${fare.vehicleRate || 0}/KM`} />{!!fare.base && <Row label="Base" value={money(fare.base)} />}{!!fare.driver && <Row label="Driver" value={money(fare.driver)} />}{!!fare.fuelSurcharge && <Row label="Fuel" value={money(fare.fuelSurcharge)} />}{!!fare.gst && <Row label="GST" value={money(fare.gst)} />}{fare.minimumApplied && <div className="mt-1 rounded bg-amber-50 px-2 py-1 text-amber-700">Minimum billing rule applied.</div>}</div>;
 }
 
+function BookingExtras({ booking }) {
+  const options = booking.selectedOptions || {};
+  const fare = booking.fare || {};
+  const addons = Array.isArray(options.addons) ? options.addons : Array.isArray(fare.selectedAddons) ? fare.selectedAddons : [];
+  const addonText = addons.map((addon) => addon.label || addon.id || addon).filter(Boolean).join(', ');
+  const fuel = options.fuelType ? (options.fuelType === 'diesel' ? 'Diesel' : 'CNG') : '';
+  const rows = [
+    fuel && `Fuel: ${fuel}`,
+    options.languagePreference && `Language: ${options.languagePreference}`,
+    addonText && `Add-ons: ${addonText}`,
+    booking.stops?.filter(Boolean).length ? `Stops: ${booking.stops.filter(Boolean).join(' | ')}` : '',
+    booking.customer?.dropAddress && `Drop address: ${booking.customer.dropAddress}`,
+  ].filter(Boolean);
+  if (!rows.length) return null;
+  return <div className="mt-2 grid gap-1 rounded-md bg-teal-50 p-2 text-[11px] font-bold text-teal-900">{rows.map((row) => <div key={row}>{row}</div>)}</div>;
+}
+
 function Row({ label, value }) {
   return <div className="flex justify-between gap-2"><span>{label}</span><b>{value}</b></div>;
 }
@@ -421,13 +490,17 @@ function Field({ label, ...props }) {
   return <label className="min-w-0 text-xs font-bold uppercase tracking-wider text-slate-700">{label}<input {...props} className="mt-1 h-10 w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 text-sm font-medium normal-case tracking-normal outline-none placeholder:text-slate-500 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15" /></label>;
 }
 
+function TextField({ label, ...props }) {
+  return <label className="min-w-0 text-xs font-bold uppercase tracking-wider text-slate-700">{label}<textarea {...props} className="mt-1 min-h-28 w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal outline-none placeholder:text-slate-500 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15" /></label>;
+}
+
 function Input(props) {
   return <input {...props} className="h-10 min-w-0 rounded-md border border-slate-300 bg-white px-2 font-medium outline-none placeholder:text-slate-500" />;
 }
 
 function StatusBadge({ status, className = '' }) {
   const value = String(status || 'new');
-  const tones = { active: 'bg-emerald-50 text-emerald-700 ring-emerald-200', inactive: 'bg-slate-100 text-slate-600 ring-slate-200', new: 'bg-amber-50 text-amber-700 ring-amber-200', assigned: 'bg-teal-50 text-teal-700 ring-teal-200', confirmed: 'bg-emerald-50 text-emerald-700 ring-emerald-200', completed: 'bg-slate-950 text-white ring-slate-950', cancelled: 'bg-red-50 text-red-700 ring-red-200', admin: 'bg-teal-50 text-teal-700 ring-teal-200', customer: 'bg-slate-100 text-slate-700 ring-slate-200' };
+  const tones = { active: 'bg-emerald-50 text-emerald-700 ring-emerald-200', inactive: 'bg-slate-100 text-slate-600 ring-slate-200', pending: 'bg-amber-50 text-amber-700 ring-amber-200', pending_payment: 'bg-amber-50 text-amber-700 ring-amber-200', pending_verification: 'bg-sky-50 text-sky-700 ring-sky-200', payment_rejected: 'bg-red-50 text-red-700 ring-red-200', rejected: 'bg-red-50 text-red-700 ring-red-200', paid: 'bg-emerald-50 text-emerald-700 ring-emerald-200', new: 'bg-amber-50 text-amber-700 ring-amber-200', assigned: 'bg-teal-50 text-teal-700 ring-teal-200', confirmed: 'bg-emerald-50 text-emerald-700 ring-emerald-200', completed: 'bg-slate-950 text-white ring-slate-950', cancelled: 'bg-red-50 text-red-700 ring-red-200', admin: 'bg-teal-50 text-teal-700 ring-teal-200', customer: 'bg-slate-100 text-slate-700 ring-slate-200' };
   return <span className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wide ring-1 ${tones[value] || tones.new} ${className}`}>{value}</span>;
 }
 

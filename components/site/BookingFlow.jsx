@@ -23,7 +23,7 @@ const TRIP_LABELS = {
 const ADDONS = [
   { id: 'carrier', label: 'Cab with Luggage Carrier', price: 149, tag: 'Most Popular' },
   { id: 'new-car', label: 'New Car Promise - Model that is 2023 or newer', price: 249 },
-  { id: 'language', label: 'Chauffeurs who know your language', price: 0 }
+  { id: 'language', label: 'Chauffeurs who know your language', price: 149 }
 ];
 
 const COUNTRY_CODES = [
@@ -44,8 +44,22 @@ function todayValue() {
 
 function nextPickupTimeValue() {
   const now = new Date();
-  now.setMinutes(now.getMinutes() + 30);
+  now.setHours(now.getHours() + 1);
   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+}
+
+function defaultPickupDateTime() {
+  const next = new Date();
+  next.setHours(next.getHours() + 1);
+  next.setMinutes(next.getMinutes() - next.getTimezoneOffset());
+  return { date: next.toISOString().slice(0, 10), time: next.toISOString().slice(11, 16) };
+}
+
+function addHoursDateTime(date, time, hours) {
+  const next = new Date(`${date || todayValue()}T${time || '07:00'}`);
+  next.setHours(next.getHours() + hours);
+  next.setMinutes(next.getMinutes() - next.getTimezoneOffset());
+  return { date: next.toISOString().slice(0, 10), time: next.toISOString().slice(11, 16) };
 }
 
 function money(value) {
@@ -94,8 +108,31 @@ function isBeforeDate(value, minimum) {
 }
 
 function cabFare(cab, data, selectedAddons = [], pricingSettings = DEFAULT_PRICING_SETTINGS) {
-  const addonObjects = selectedAddons.map((id) => ADDONS.find((item) => item.id === id)).filter(Boolean);
+  const addonObjects = selectedAddons.map((id) => {
+    const addon = ADDONS.find((item) => item.id === id);
+    if (addon?.id === 'language') return { ...addon, price: pricingSettings.languageAddonPrice ?? addon.price };
+    return addon;
+  }).filter(Boolean);
   return calculateTripFare(cab, data, addonObjects, pricingSettings);
+}
+
+function selectedAddonDetails(selectedAddons = [], pricingSettings = DEFAULT_PRICING_SETTINGS) {
+  return selectedAddons.map((id) => {
+    const addon = ADDONS.find((item) => item.id === id);
+    if (addon?.id === 'language') return { ...addon, price: pricingSettings.languageAddonPrice ?? addon.price };
+    return addon;
+  }).filter(Boolean);
+}
+
+function cityToken(value) {
+  return String(value || '').split(',')[0].trim().toLowerCase();
+}
+
+function serviceCityAllowed(value, settings = DEFAULT_PRICING_SETTINGS) {
+  const cities = Array.isArray(settings.serviceCities) ? settings.serviceCities : [];
+  if (!cities.length || !value) return true;
+  const city = cityToken(value);
+  return cities.some((item) => city === String(item).trim().toLowerCase());
 }
 
 function fuelOptions(cab) {
@@ -133,7 +170,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
   const [view, setView] = useState('cars');
   const [data, setData] = useState({});
   const [selectedAddons, setSelectedAddons] = useState([]);
-  const [payment, setPayment] = useState('part');
+  const [, setPayment] = useState('upi');
   const [bookingId, setBookingId] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [pricingSettings, setPricingSettings] = useState(DEFAULT_PRICING_SETTINGS);
@@ -155,15 +192,17 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
   useEffect(() => {
     if (!open) return;
 
-    const minDate = todayValue();
-    const minTime = nextPickupTimeValue();
-    const prefillDate = prefill.date || minDate;
-    const prefillTime = prefill.time || '07:00';
+    const defaults = defaultPickupDateTime();
+    const minDate = defaults.date;
+    const minTime = defaults.time;
+    const prefillDate = prefill.date || defaults.date;
+    const prefillTime = prefill.time || defaults.time;
     const pickupTime = prefillDate === minDate && prefillTime < minTime ? minTime : prefillTime;
-    const prefillReturnDate = prefill.returnDate || '';
-    const prefillReturnTime = prefill.tripType === 'round-trip' && prefillReturnDate === prefillDate && (prefill.returnTime || '18:00') < pickupTime
+    const defaultReturn = addHoursDateTime(prefillDate, pickupTime, 4);
+    const prefillReturnDate = prefill.returnDate || (prefill.tripType === 'round-trip' ? defaultReturn.date : '');
+    const prefillReturnTime = prefill.tripType === 'round-trip' && prefillReturnDate === prefillDate && (prefill.returnTime || defaultReturn.time) < pickupTime
       ? pickupTime
-      : prefill.returnTime || '18:00';
+      : prefill.returnTime || defaultReturn.time;
 
     // Reset the modal to the latest booking request whenever it opens.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -197,7 +236,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       notes: ''
     });
     setSelectedAddons([]);
-    setPayment('part');
+    setPayment('upi');
     setBookingId('');
     setSubmitting(false);
   }, [open, prefill]);
@@ -259,8 +298,8 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       return;
     }
 
-    const paymentAmount = payment === 'after' ? 0 : payment === 'full' ? fare.total : fare.partPay;
-    if (payment !== 'after' && paymentAmount <= 0) {
+    const paymentAmount = fare.total;
+    if (paymentAmount <= 0) {
       toast.error('Payment amount is not valid.');
       return;
     }
@@ -268,113 +307,40 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
     setSubmitting(true);
     try {
       const fullPhone = `${data.phoneCountry || '+91'}${String(data.phone || '').replace(/\D/g, '')}`;
+      const addonDetails = selectedAddonDetails(selectedAddons, pricingSettings);
       const bookingPayload = {
         ...data,
         phone: fullPhone,
         vehicleName: vehicle.name,
-        fare: { ...fare, selectedAddons, paymentOption: payment, advancePaid: paymentAmount }
+        selectedOptions: {
+          fuelType: data.fuelType,
+          languagePreference: data.languagePreference,
+          addons: addonDetails,
+          stops: data.stops || [],
+          cabWithLuggageCarrier: selectedAddons.includes('carrier'),
+          newCarPromise: selectedAddons.includes('new-car')
+        },
+        fare: { ...fare, selectedAddons: addonDetails, paymentOption: 'upi', advancePaid: paymentAmount }
       };
 
-      if (payment === 'after') {
-        const bookingResponse = await fetch('/api/bookings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(bookingPayload)
-        });
-        const bookingResult = await bookingResponse.json();
-        if (!bookingResponse.ok) {
-          toast.error(bookingResult.error || bookingResult.errors?.[0] || 'Unable to save booking');
-          return;
-        }
-
-        setBookingId(bookingResult.booking.bookingId);
-        toast.success('Booking received.', {
-          description: `Reference ${bookingResult.booking.bookingId}. Pay after your ride.`
-        });
-        setView('confirmed');
-        return;
-      }
-
-      const checkoutLoaded = await loadRazorpayCheckout();
-      if (!checkoutLoaded || !window.Razorpay) {
-        toast.error('Unable to load Razorpay checkout.');
-        return;
-      }
-
-      const orderResponse = await fetch('/api/payments/razorpay/order', {
+      const bookingResponse = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: paymentAmount,
-          paymentOption: payment,
-          receipt: `ttx_${Date.now()}`
-        })
+        body: JSON.stringify(bookingPayload)
       });
-      const orderResult = await orderResponse.json();
-      if (!orderResponse.ok) {
-        toast.error(orderResult.error || 'Unable to start Razorpay payment');
+      const bookingResult = await bookingResponse.json();
+      if (!bookingResponse.ok) {
+        toast.error(bookingResult.error || bookingResult.errors?.[0] || 'Unable to save booking');
         return;
       }
 
-      const razorpay = new window.Razorpay({
-        key: orderResult.keyId,
-        amount: orderResult.order.amount,
-        currency: orderResult.order.currency,
-        name: 'ToursTaxi',
-        description: payment === 'full' ? 'Full cab booking payment' : 'Advance cab booking payment',
-        order_id: orderResult.order.id,
-        prefill: {
-          name: data.name,
-          email: data.email,
-          contact: fullPhone
-        },
-        notes: {
-          vehicle: vehicle.name,
-          tripType: data.tripType
-        },
-        theme: {
-          color: '#0f766e'
-        },
-        modal: {
-          confirm_close: true,
-          ondismiss: () => setSubmitting(false)
-        },
-        handler: async (paymentResponse) => {
-          try {
-            const verifyResponse = await fetch('/api/payments/razorpay/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                payment: paymentResponse,
-                booking: bookingPayload
-              })
-            });
-            const verifyResult = await verifyResponse.json();
-            if (!verifyResponse.ok) {
-              toast.error(verifyResult.error || 'Payment verification failed.');
-              return;
-            }
-            setBookingId(verifyResult.booking.bookingId);
-            toast.success('Payment verified. Booking confirmed.', {
-              description: `Reference ${verifyResult.booking.bookingId}. Our team will call shortly.`
-            });
-            setView('confirmed');
-          } catch {
-            toast.error('Payment completed, but verification could not be saved. Please contact support.');
-          } finally {
-            setSubmitting(false);
-          }
-        }
+      setBookingId(bookingResult.booking.bookingId);
+      toast.success('Booking saved. Continue to UPI payment.', {
+        description: `Reference ${bookingResult.booking.bookingId}.`
       });
-
-      razorpay.on('payment.failed', (response) => {
-        toast.error(response.error?.description || 'Razorpay payment failed.');
-        setSubmitting(false);
-      });
-
-      razorpay.open();
+      window.location.href = `/payment/${bookingResult.booking.bookingId}`;
     } catch {
-      toast.error('Unable to connect to Razorpay payment server');
+      toast.error('Unable to save booking for UPI payment');
       setSubmitting(false);
     }
   };
@@ -396,6 +362,10 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                   toast.error(data.tripType === 'local' ? 'Please enter pickup location.' : 'Please enter pickup location and drop location.');
                   return;
                 }
+                if (!serviceCityAllowed(data.pickup, pricingSettings) || (data.tripType !== 'local' && !serviceCityAllowed(data.drop, pricingSettings))) {
+                  toast.error('This city is not service available.');
+                  return;
+                }
                 setView('cars');
               }} />
             )}
@@ -407,6 +377,13 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 routeLabel={routeLabel}
                 pricingSettings={pricingSettings}
                 onModify={() => setView('details')}
+                selectedAddons={selectedAddons}
+                setSelectedAddons={setSelectedAddons}
+                setPayment={setPayment}
+                fare={fare}
+                vehicle={vehicle}
+                onSubmit={submit}
+                submitting={submitting}
                 onCheckout={(slug) => {
                   const cab = fleet.find((item) => item.slug === slug);
                   const allowed = fuelOptions(cab);
@@ -418,7 +395,6 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                     address: current.address || current.pickup || '',
                     dropAddress: current.dropAddress || current.drop || ''
                   }));
-                  setView('checkout');
                 }}
               />
             )}
@@ -431,7 +407,6 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 fare={fare}
                 selectedAddons={selectedAddons}
                 setSelectedAddons={setSelectedAddons}
-                payment={payment}
                 setPayment={setPayment}
                 onBack={() => setView('cars')}
                 onSubmit={submit}
@@ -451,21 +426,6 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
       </DialogContent>
     </Dialog>
   );
-}
-
-function loadRazorpayCheckout() {
-  return new Promise((resolve) => {
-    if (window.Razorpay) {
-      resolve(true);
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
 }
 
 function Info({ label, value, invert = false }) {
@@ -537,8 +497,10 @@ function DetailsPanel({ data, set, onSelectLocation, onContinue }) {
                 if (data.tripType === 'round-trip' && isBeforeDate(data.returnDate, nextDate)) {
                   set('returnDate', nextDate);
                 }
-                if (data.tripType === 'round-trip' && (data.returnDate || nextDate) === nextDate && (data.returnTime || '18:00') < nextTime) {
-                  set('returnTime', nextTime);
+                if (data.tripType === 'round-trip') {
+                  const defaultReturn = addHoursDateTime(nextDate, nextTime, 4);
+                  set('returnDate', defaultReturn.date);
+                  set('returnTime', defaultReturn.time);
                 }
               }}
             />
@@ -602,7 +564,7 @@ function DetailsPanel({ data, set, onSelectLocation, onContinue }) {
   );
 }
 
-function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onModify, onCheckout }) {
+function CabSelection({ fleet, data, set, routeLabel, pricingSettings, selectedAddons, setSelectedAddons, setPayment, fare, vehicle, onModify, onCheckout, onSubmit, submitting }) {
   const selectedCab = fleet.find((cab) => cab.slug === data.vehicleSlug) || fleet[0] || null;
 
   return (
@@ -629,6 +591,21 @@ function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onModify,
           <CabCard key={selectedCab.slug} cab={selectedCab} data={data} set={set} pricingSettings={pricingSettings} routeLabel={routeLabel} index={0} onModify={onModify} onCheckout={onCheckout} />
         )}
       </div>
+      {vehicle && fare && (
+        <Checkout
+          data={data}
+          set={set}
+          routeLabel={routeLabel}
+          vehicle={vehicle}
+          fare={fare}
+          selectedAddons={selectedAddons}
+          setSelectedAddons={setSelectedAddons}
+          setPayment={setPayment}
+          onBack={onModify}
+          onSubmit={onSubmit}
+          submitting={submitting}
+        />
+      )}
       <div className="mt-5">
         <FeatureStrip />
       </div>
@@ -759,7 +736,14 @@ function CabCard({ cab, data, set, pricingSettings, index, onModify, onCheckout 
             <span className="flex min-w-0 items-center gap-1.5"><Check className="h-4 w-4 shrink-0 text-emerald-500 sm:h-5 sm:w-5" /> <span className="truncate">{formatKm(fare.chargeableDistance || fare.distance)} included</span></span>
             <span className="flex min-w-0 items-center gap-1.5"><ArrowLeftRight className="h-4 w-4 shrink-0 text-teal-600 sm:h-5 sm:w-5" /> <span className="truncate">Post limit: Rs {cab.pricePerKm || 16}/km</span></span>
           </div>
-          <div className="mt-3 rounded-md border border-dashed border-teal-200 bg-teal-50/70 p-3 text-xs text-slate-800 sm:mt-4 sm:text-sm">
+        </div>
+        <div className="min-w-0">
+          <div className="flex min-h-24 items-start justify-center overflow-visible sm:min-h-60 lg:min-h-72">
+            <img src={cab.image} alt={cab.name} className="h-auto max-h-28 w-full max-w-[132px] object-contain sm:max-h-72 sm:max-w-[360px] lg:max-h-80 lg:max-w-[440px]" />
+          </div>
+        </div>
+        <div className="col-span-2 grid grid-cols-[minmax(0,1fr)_132px] gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(280px,0.75fr)] sm:gap-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-6">
+          <div className="rounded-md border border-dashed border-teal-200 bg-teal-50/70 p-3 text-xs text-slate-800 sm:text-sm">
             <div className="flex items-center justify-between gap-3">
               <div className="font-black text-slate-950">Modify Trip</div>
               <Button type="button" variant="outline" onClick={onModify} className="h-8 shrink-0 rounded-md bg-white px-3 text-xs font-black text-teal-700">
@@ -773,12 +757,7 @@ function CabCard({ cab, data, set, pricingSettings, index, onModify, onCheckout 
               <div>{prettyDate(data.date)} at {formatClock(data.time)}</div>
             </div>
           </div>
-        </div>
-        <div className="min-w-0">
-          <div className="flex min-h-24 items-start justify-center overflow-visible sm:min-h-60 lg:min-h-72">
-            <img src={cab.image} alt={cab.name} className="h-auto max-h-28 w-full max-w-[132px] object-contain sm:max-h-72 sm:max-w-[360px] lg:max-h-80 lg:max-w-[440px]" />
-          </div>
-          <div className="mt-2 rounded-md border border-slate-100 bg-white/80 p-2.5 sm:mt-3 sm:p-3">
+          <div className="rounded-md border border-slate-100 bg-white/80 p-2.5 sm:p-3">
             <div className="text-xs font-bold text-black sm:text-sm">Fuel Type</div>
             <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-black sm:text-sm">
               {fuels.map((fuel) => (
@@ -802,30 +781,26 @@ function CabCard({ cab, data, set, pricingSettings, index, onModify, onCheckout 
   );
 }
 
-function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSelectedAddons, payment, setPayment, onBack, onSubmit, submitting }) {
-  const [paymentStep, setPaymentStep] = useState(false);
+function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSelectedAddons, setPayment, onBack, onSubmit, submitting }) {
+  const isLocalTrip = data.tripType === 'local';
   const detailsComplete = Boolean(
     validCustomerName(data.name) &&
     validCustomerPhone(data.phone, data.phoneCountry) &&
     validCustomerEmail(data.email) &&
     data.address?.trim() &&
-    data.dropAddress?.trim()
+    (isLocalTrip || data.dropAddress?.trim())
   );
-  const activePaymentStep = paymentStep && detailsComplete;
 
   if (!vehicle || !fare) return null;
-  const advancePercent = Math.min(Math.max(Number(fare.pricingPolicy?.advancePercent ?? DEFAULT_PRICING_SETTINGS.advancePercent), 0), 100);
-
   const toggleAddon = (id) => {
     setSelectedAddons((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-3 py-3 text-sm sm:px-5 sm:py-4">
+    <div className="mt-4 text-sm">
       <div className="space-y-3">
-        {!activePaymentStep ? (
-          <>
-            <button onClick={onBack} className="text-xs font-black text-teal-700">Back to cabs</button>
+        <>
+            <button onClick={onBack} className="text-xs font-black text-teal-700">Modify trip</button>
             <Section title="Trip Details" tone="blue" compact>
               <div className="text-base font-black text-black sm:text-lg">{routeLabel} <span className="text-xs font-normal text-black">({TRIP_LABELS[data.tripType]})</span></div>
               <div className="mt-2 grid gap-1.5 text-xs text-slate-700 sm:grid-cols-2">
@@ -851,23 +826,16 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
                 <Input value={data.phone} onChange={(event) => set('phone', event.target.value)} placeholder="Mobile No." className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500" />
                 <Input value={data.email} onChange={(event) => set('email', event.target.value)} placeholder="Email ID" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />
                 <Input value={data.address} onChange={(event) => set('address', event.target.value)} placeholder="Pickup Location" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />
-                <Input value={data.dropAddress} onChange={(event) => set('dropAddress', event.target.value)} placeholder="Drop Location" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />
+                {!isLocalTrip && <Input value={data.dropAddress} onChange={(event) => set('dropAddress', event.target.value)} placeholder="Drop Location" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />}
                 <Textarea value={data.notes} onChange={(event) => set('notes', event.target.value)} placeholder="Any notes for driver" className="min-h-16 bg-slate-100 text-sm sm:col-span-3" />
               </div>
             </Section>
 
             {!detailsComplete && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900">
-                Fill real first and last name, valid mobile number, valid email, pickup and drop details to continue to payment.
+                Fill real first and last name, valid mobile number, valid email, {isLocalTrip ? 'and pickup details' : 'pickup and drop details'} to continue to payment.
               </div>
             )}
-            <Button onClick={() => setPaymentStep(true)} disabled={!detailsComplete} className="h-11 w-full rounded-md bg-teal-700 text-sm font-black uppercase text-white hover:bg-teal-800 disabled:opacity-50">
-              Continue to Payment
-            </Button>
-          </>
-        ) : (
-          <>
-            <button onClick={() => setPaymentStep(false)} className="text-xs font-black text-teal-700">Back to details</button>
 
             <Section title="Add-ons" subtitle="Optional upgrades" compact>
               <div className="grid gap-2">
@@ -921,13 +889,16 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
 
             <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
               <div className="mb-3 rounded-md border border-yellow-300 bg-yellow-50 px-3 py-2 text-xs font-bold text-yellow-900">Free cancellation till 1 hr of departure</div>
-              <h3 className="text-lg font-black text-black">Payment Options</h3>
-              <PaymentOption active={payment === 'part'} onClick={() => setPayment('part')} title={`Pay ${advancePercent}% advance`} subtitle="Razorpay secure payment" price={money(fare.partPay)} />
-              <PaymentOption active={payment === 'full'} onClick={() => setPayment('full')} title="Pay full fare" subtitle="Confirm with full payment" price={money(fare.total)} />
-              <PaymentOption active={payment === 'after'} onClick={() => setPayment('after')} title="Pay after ride" subtitle="No online payment now" price={money(0)} />
-              <div className="mt-3 rounded-md border border-teal-200 bg-teal-50 p-2 text-xs font-bold text-teal-900">{payment === 'after' ? 'Booking will be sent to admin without online payment.' : 'Confirmation appears only after Razorpay payment is verified.'}</div>
-              <Button onClick={onSubmit} disabled={submitting} className="mt-3 h-11 w-full rounded-md bg-teal-700 text-sm font-black uppercase text-white hover:bg-teal-800">
-                {submitting ? (payment === 'after' ? 'Saving booking...' : 'Opening Razorpay...') : payment === 'after' ? 'Book Now' : `Pay ${payment === 'full' ? money(fare.total) : money(fare.partPay)}`}
+              <h3 className="text-lg font-black text-black">UPI Payment</h3>
+              <div className="mt-3 grid gap-2 md:grid-cols-2">
+                <PaymentOption active onClick={() => setPayment('upi')} title="Pay with UPI" subtitle="Google Pay, PhonePe, Paytm, BHIM, or any UPI app" price={money(fare.total)} />
+                <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs font-bold text-slate-700">
+                  Booking is saved first as Pending Payment. After payment, upload screenshot and admin will verify it.
+                </div>
+              </div>
+              <div className="mt-3 rounded-md border border-teal-200 bg-teal-50 p-2 text-xs font-bold text-teal-900">You will be redirected to a secure UPI payment page with QR code and app buttons.</div>
+              <Button onClick={onSubmit} disabled={submitting || !detailsComplete} className="mt-3 h-11 w-full rounded-md bg-teal-700 text-sm font-black uppercase text-white hover:bg-teal-800 disabled:opacity-50">
+                {submitting ? 'Saving booking...' : `Continue to UPI Payment ${money(fare.total)}`}
               </Button>
               <details className="mt-3 text-xs">
                 <summary className="cursor-pointer font-bold text-teal-700">Fare break up</summary>
@@ -948,7 +919,6 @@ function Checkout({ data, set, routeLabel, vehicle, fare, selectedAddons, setSel
               </details>
             </section>
           </>
-        )}
       </div>
     </div>
   );
