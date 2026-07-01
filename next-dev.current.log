@@ -33,3 +33,10 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
  GET /staffflow-sw.js 404 in 304ms (next.js: 35ms, application-code: 269ms)
 ✓ Compiled in 706ms
 ✓ Compiled in 272ms
+✓ Compiled in 379ms
+✓ Compiled in 284ms
+✓ Compiled in 426ms
+✓ Compiled in 2s
+✓ Compiled in 652ms
+✓ Compiled in 446ms
+✓ Compiled in 2.3s

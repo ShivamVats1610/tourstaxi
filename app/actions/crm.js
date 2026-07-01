@@ -268,6 +268,8 @@ export async function updatePricingSettingsAction(formData) {
     serviceCities: formData.get('serviceCities'),
     holidays: formData.get('holidays'),
     dutyEnabled: formData.get('dutyEnabled'),
+    dutyOffStart: formData.get('dutyOffStart'),
+    dutyOffEnd: formData.get('dutyOffEnd'),
     facebookUrl: formData.get('facebookUrl'),
     instagramUrl: formData.get('instagramUrl'),
     youtubeUrl: formData.get('youtubeUrl'),

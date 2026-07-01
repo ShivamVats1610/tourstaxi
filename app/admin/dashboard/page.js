@@ -18,6 +18,7 @@ export default async function AdminDashboard() {
   const activeCabs = cabs.filter((cab) => cab.status !== 'inactive').length;
   const revenue = bookings.reduce((sum, booking) => sum + Number(booking.fare?.total || 0), 0);
   const latest = bookings[0];
+  const activeBookings = bookings.filter((booking) => !['completed', 'cancelled'].includes(booking.status));
 
   return (
     <div className="grid gap-5">
@@ -31,7 +32,7 @@ export default async function AdminDashboard() {
         <Stat icon={IndianRupee} label="Fare Value" value={money(revenue)} hint="Visible bookings" href="/admin/bookings/old" />
       </div>
       <PricingSettingsForm settings={pricingSettings} />
-      <BookingTable bookings={bookings.slice(0, 10)} title="Latest Bookings" />
+      <BookingTable bookings={activeBookings.slice(0, 10)} title="Latest Active Bookings" />
     </div>
   );
 }

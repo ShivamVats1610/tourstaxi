@@ -451,6 +451,11 @@ export function PricingSettingsForm({ settings }) {
             </select>
             <span className="mt-1 block text-[11px] font-semibold normal-case tracking-normal text-slate-500">Use Duty Off when the operator is closed or no cars should be bookable.</span>
           </label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field name="dutyOffStart" label="Scheduled Off From" type="datetime-local" defaultValue={settings.dutyOffStart} />
+            <Field name="dutyOffEnd" label="Scheduled Off Until" type="datetime-local" defaultValue={settings.dutyOffEnd} />
+            <div className="sm:col-span-2 text-[11px] font-semibold text-slate-500">Optional. Bookings with pickup time inside this window will be blocked even when duty is on.</div>
+          </div>
           <TextField name="serviceCities" label="Service Available Cities" defaultValue={settings.serviceCities?.join?.('\n') || ''} placeholder={`Jaipur\nKota\nSawai Madhopur`} />
           <TextField name="holidays" label="Holiday Dates / Notes" defaultValue={settings.holidays?.join?.('\n') || ''} placeholder={`2026-08-15 Independence Day\n2026-10-20 Diwali`} helper="Add one holiday per line. Start each line with YYYY-MM-DD to block that date in booking." />
         </div>

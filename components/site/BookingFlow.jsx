@@ -224,6 +224,25 @@ function validCustomerEmail(value) {
   return domain.includes('.') && !domain.startsWith('.') && !domain.endsWith('.');
 }
 
+function serviceUnavailableReason(data = {}, settings = {}) {
+  if (settings.dutyEnabled === false) {
+    return 'Service is not available right now. Please try again when duty is on.';
+  }
+  const pickup = localDateTime(data.date, data.time);
+  const start = localDateTime(settings.dutyOffStart);
+  const end = localDateTime(settings.dutyOffEnd);
+  if (pickup && start && end && end > start && pickup >= start && pickup <= end) {
+    return 'Service is unavailable for the selected date and time.';
+  }
+  return '';
+}
+
+function localDateTime(date, time = '') {
+  const value = time ? `${String(date || '').slice(0, 10)}T${time}` : String(date || '');
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) {
   const [view, setView] = useState('cars');
   const [data, setData] = useState({});
@@ -428,8 +447,9 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
           <div className="max-h-[96vh] overflow-y-auto bg-slate-50">
             {view === 'details' && (
               <DetailsPanel data={data} set={set} pricingSettings={pricingSettings} onSelectLocation={selectLocation} onContinue={() => {
-                if (pricingSettings.dutyEnabled === false) {
-                  toast.error('Service is not available right now. Please try again when duty is on.');
+                const unavailableReason = serviceUnavailableReason(data, pricingSettings);
+                if (unavailableReason) {
+                  toast.error(unavailableReason);
                   return;
                 }
                 if (!data.pickup?.trim() || (data.tripType !== 'local' && !data.drop?.trim())) {
@@ -449,8 +469,8 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                     return;
                   }
                 }
-                if (!serviceCityAllowed(data.pickup, pricingSettings) || (data.tripType !== 'local' && !serviceCityAllowed(data.drop, pricingSettings))) {
-                  toast.error('This city is not service available.');
+                if (!serviceCityAllowed(data.pickup, pricingSettings)) {
+                  toast.error('Pickup city is not service available.');
                   return;
                 }
                 setView('cars');
@@ -660,13 +680,14 @@ function DetailsPanel({ data, set, pricingSettings, onSelectLocation, onContinue
 
 function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onModify, onCheckout }) {
   const selectedCab = fleet.find((cab) => cab.slug === data.vehicleSlug) || fleet[0] || null;
+  const unavailableReason = serviceUnavailableReason(data, pricingSettings);
 
-  if (pricingSettings.dutyEnabled === false) {
+  if (unavailableReason) {
     return (
       <div className="mx-auto max-w-3xl px-3 py-8 text-center sm:px-8">
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 shadow-sm">
           <div className="text-lg font-black text-amber-900">Service is not available right now.</div>
-          <p className="mt-2 text-sm font-semibold text-amber-800">Duty is off from the admin panel. Please try again when duty is on.</p>
+          <p className="mt-2 text-sm font-semibold text-amber-800">{unavailableReason}</p>
           <Button type="button" onClick={onModify} className="mt-4 bg-amber-500 text-slate-950 hover:bg-amber-400">Modify Booking</Button>
         </div>
       </div>
