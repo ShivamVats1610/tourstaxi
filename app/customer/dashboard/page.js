@@ -174,7 +174,7 @@ function BookingExtras({ booking }) {
   const fare = booking.fare || {};
   const addons = Array.isArray(options.addons) ? options.addons : Array.isArray(fare.selectedAddons) ? fare.selectedAddons : [];
   const addonText = addons.map((addon) => addon.label || addon.id || addon).filter(Boolean).join(', ');
-  const fuel = options.fuelType ? (options.fuelType === 'diesel' ? 'Diesel' : 'CNG') : '';
+  const fuel = options.fuelType ? (options.fuelType === 'diesel' ? 'Diesel' : options.fuelType === 'petrol' ? 'Petrol' : 'CNG') : '';
   const rows = [
     fuel && ['Fuel Type', fuel],
     options.languagePreference && ['Driver Language', options.languagePreference],

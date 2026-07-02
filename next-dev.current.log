@@ -1,12 +1,12 @@
 
 > tourstaxi@0.1.0 dev
-> next dev
+> next dev -p 3000
 
 ▲ Next.js 16.2.7 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://172.20.10.2:3000
 - Environments: .env.local
-✓ Ready in 2.3s
+✓ Ready in 2.1s
 [mapbox:build] {
   tokenExists: true,
   tokenLength: 92,
@@ -18,25 +18,3 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
 - Experiments (use with caution):
   · serverActions
 
-○ Compiling / ...
- GET / 200 in 11.0s (next.js: 8.7s, application-code: 2.3s)
- GET / 200 in 340ms (next.js: 16ms, application-code: 324ms)
-✓ Compiled in 251ms
-✓ Compiled in 288ms
- GET / 200 in 1468ms (next.js: 400ms, application-code: 1068ms)
- GET /api/auth/me 200 in 1423ms (next.js: 1337ms, application-code: 85ms)
- GET /staffflow-sw.js 404 in 2.8s (next.js: 2.5s, application-code: 326ms)
- GET /api/bookings/TTX000021 200 in 6.2s (next.js: 6.1s, application-code: 112ms)
- GET /payment/TTX000021 200 in 7.2s (next.js: 6.8s, application-code: 373ms)
- GET /api/auth/me 200 in 65ms (next.js: 28ms, application-code: 37ms)
- GET /api/bookings/TTX000021 200 in 108ms (next.js: 28ms, application-code: 81ms)
- GET /staffflow-sw.js 404 in 304ms (next.js: 35ms, application-code: 269ms)
-✓ Compiled in 706ms
-✓ Compiled in 272ms
-✓ Compiled in 379ms
-✓ Compiled in 284ms
-✓ Compiled in 426ms
-✓ Compiled in 2s
-✓ Compiled in 652ms
-✓ Compiled in 446ms
-✓ Compiled in 2.3s

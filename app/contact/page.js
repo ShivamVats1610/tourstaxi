@@ -12,10 +12,25 @@ import { toast } from 'sonner';
 export default function ContactPage() {
   const [sending, setSending] = useState(false);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setSending(true);
-    setTimeout(() => { setSending(false); toast.success('Message sent!', { description: 'Our team will call you within 30 minutes.' }); e.target.reset(); }, 900);
+    const form = new FormData(e.currentTarget);
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(form.entries()))
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Unable to send message.');
+      toast.success('Message sent!', { description: result.emailSkipped ? 'Saved in admin records. Email credentials need checking.' : 'Our team will call you within 30 minutes.' });
+      e.currentTarget.reset();
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -36,12 +51,12 @@ export default function ContactPage() {
               <p className="text-slate-600 mt-1 text-sm">We typically reply within 30 minutes.</p>
               <form onSubmit={submit} className="mt-6 space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <Input required placeholder="Full Name" />
-                  <Input required type="tel" placeholder="Phone Number" />
+                  <Input required name="name" placeholder="Full Name" />
+                  <Input required name="phone" type="tel" placeholder="Phone Number" />
                 </div>
-                <Input required type="email" placeholder="Email Address" />
-                <Input placeholder="Subject (e.g. Ranthambore tour for 4)" />
-                <Textarea required placeholder="Tell us about your trip - dates, destinations, group size..." rows={5} />
+                <Input required name="email" type="email" placeholder="Email Address" />
+                <Input name="subject" placeholder="Subject (e.g. Ranthambore tour for 4)" />
+                <Textarea required name="message" placeholder="Tell us about your trip - dates, destinations, group size..." rows={5} />
                 <Button type="submit" disabled={sending} className="w-full h-12 bg-amber-400 text-slate-950 hover:bg-amber-300 font-bold">{sending ? 'Sending...' : <>Send Message <Send className="h-4 w-4 ml-2" /></>}</Button>
               </form>
             </CardContent></Card>

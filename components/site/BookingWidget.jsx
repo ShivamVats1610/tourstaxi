@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeftRight, CalendarDays, ChevronDown, Plane, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useBooking } from '@/lib/booking-context';
-import { serviceCityAllowed } from '@/lib/service-cities';
+import { airportServiceAllowed, serviceCityAllowed } from '@/lib/service-cities';
 import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
 import { toast } from 'sonner';
 
@@ -151,8 +151,12 @@ export default function BookingWidget() {
       toast.error(tab === 'local' ? 'Please enter pickup location.' : 'Please enter pickup location and drop location.');
       return;
     }
-    if (!serviceCityAllowed(nextPickup, pricingSettings) || (tab !== 'local' && !serviceCityAllowed(nextDrop, pricingSettings))) {
-      toast.error('This city is not service available.');
+    if (!serviceCityAllowed(nextPickup, pricingSettings)) {
+      toast.error('Pickup city is not service available.');
+      return;
+    }
+    if (tab === 'airport' && !airportServiceAllowed(airport, pricingSettings)) {
+      toast.error('Selected airport is not service available.');
       return;
     }
 

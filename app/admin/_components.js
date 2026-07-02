@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BookOpen, CalendarClock, Car, CheckCircle2, IndianRupee, LayoutDashboard, LogOut, Map, Plus, Settings, Trash2, Upload, Users } from 'lucide-react';
+import { BookOpen, CalendarClock, Car, CheckCircle2, IndianRupee, LayoutDashboard, LogOut, Mail, Map, Plus, Settings, Trash2, Upload, Users } from 'lucide-react';
 import { logoutAction } from '@/app/actions/auth';
 import { deleteBlogPostAction, deleteBookingAction, deleteCabAction, deletePopularRouteAction, deleteTourPackageAction, deleteUserAction, saveBlogPostAction, saveCabAction, savePopularRouteAction, saveTourPackageAction, updateBookingAction, updatePricingSettingsAction, updateUserAction, verifyUpiPaymentAction } from '@/app/actions/crm';
 import ToastSubmitButton from '@/components/ui/toast-submit-button';
@@ -11,6 +11,7 @@ export const ADMIN_NAV = [
   { label: 'New Bookings', href: '/admin/bookings/new', icon: CalendarClock },
   { label: 'Old Bookings', href: '/admin/bookings/old', icon: CheckCircle2 },
   { label: 'Customers', href: '/admin/customers', icon: Users },
+  { label: 'Contact Messages', href: '/admin/contact-messages', icon: Mail },
   { label: 'Cars', href: '/admin/cars', icon: Car },
   { label: 'Routes', href: '/admin/routes', icon: Map },
   { label: 'Tour Packages', href: '/admin/tour-packages', icon: Map },
@@ -360,7 +361,7 @@ function CabForm({ cab = {} }) {
       <label className="text-xs font-bold uppercase tracking-wider text-slate-700"><span className="mb-1 flex items-center gap-1.5"><Upload className="h-3.5 w-3.5 text-teal-600" /> Upload Cab Image</span><input name="imageFile" type="file" accept="image/*" className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-950 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white" /></label>
       <Field name="features" label="Features" defaultValue={cab.features?.join?.(', ') || ''} />
       <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Description<textarea name="description" defaultValue={cab.description || ''} className="mt-1 min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal" /></label>
-      <div className="grid gap-3 sm:grid-cols-[1fr_1fr_2fr]"><label className="flex h-10 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold"><input type="checkbox" name="ac" defaultChecked={cab.ac !== false} className="accent-teal-600" /> AC cab</label><div className="flex h-10 items-center gap-3 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold"><label><input type="checkbox" name="fuelOptions" value="cng" defaultChecked={!cab.fuelOptions?.length || cab.fuelOptions?.includes('cng')} className="accent-teal-600" /> CNG</label><label><input type="checkbox" name="fuelOptions" value="diesel" defaultChecked={!cab.fuelOptions?.length || cab.fuelOptions?.includes('diesel')} className="accent-teal-600" /> Diesel</label></div><label className="text-xs font-bold uppercase tracking-wider text-slate-700">Status<select name="status" defaultValue={cab.status || 'active'} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold normal-case"><option value="active">Active</option><option value="inactive">Inactive</option></select></label></div>
+      <div className="grid gap-3 sm:grid-cols-[1fr_1fr_2fr]"><label className="flex h-10 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold"><input type="checkbox" name="ac" defaultChecked={cab.ac !== false} className="accent-teal-600" /> AC cab</label><div className="flex h-10 flex-wrap items-center gap-3 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold"><label><input type="checkbox" name="fuelOptions" value="cng" defaultChecked={!cab.fuelOptions?.length || cab.fuelOptions?.includes('cng')} className="accent-teal-600" /> CNG</label><label><input type="checkbox" name="fuelOptions" value="petrol" defaultChecked={cab.fuelOptions?.includes('petrol')} className="accent-teal-600" /> Petrol</label><label><input type="checkbox" name="fuelOptions" value="diesel" defaultChecked={!cab.fuelOptions?.length || cab.fuelOptions?.includes('diesel')} className="accent-teal-600" /> Diesel</label></div><label className="text-xs font-bold uppercase tracking-wider text-slate-700">Status<select name="status" defaultValue={cab.status || 'active'} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold normal-case"><option value="active">Active</option><option value="inactive">Inactive</option></select></label></div>
       <ToastSubmitButton message="Saving cab details" description="Fleet details are being updated." className="inline-flex h-11 items-center justify-center rounded-md bg-[#12233f] px-4 text-sm font-black text-white hover:bg-[#0f1c33]"><CheckCircle2 className="mr-2 h-4 w-4" /> Save Cab</ToastSubmitButton>
     </form>
   );
@@ -435,7 +436,9 @@ export function PricingSettingsForm({ settings }) {
           <Field name="roundTripBaseFare" label="Round Trip Base Fare" type="number" min="0" defaultValue={settings.roundTripBaseFare} />
           <Field name="airportBaseFare" label="Airport Base Fare" type="number" min="0" defaultValue={settings.airportBaseFare} />
           <Field name="localBaseFare" label="Local Base Fare" type="number" min="0" defaultValue={settings.localBaseFare} />
-          <Field name="driverAllowancePerDay" label="Driver Night Charge After 9 PM" type="number" min="0" defaultValue={settings.driverAllowancePerDay} />
+          <Field name="driverAllowancePerDay" label="Driver Night Charge" type="number" min="0" defaultValue={settings.driverAllowancePerDay} />
+          <Field name="nightChargeStartTime" label="Night Charge Start Time" type="time" defaultValue={settings.nightChargeStartTime || '21:00'} />
+          <Field name="nightChargeEndTime" label="Night Charge End Time" type="time" defaultValue={settings.nightChargeEndTime || '06:00'} />
           <Field name="gstPercent" label="GST %" type="number" min="0" max="100" step="0.1" defaultValue={settings.gstPercent} />
           <Field name="dieselSurchargePerKm" label="Diesel Car Guarantee Per KM" type="number" min="0" step="0.1" defaultValue={settings.dieselSurchargePerKm} />
           <Field name="carrierAddonPrice" label="Luggage Carrier Add-on" type="number" min="0" defaultValue={settings.carrierAddonPrice} />
@@ -457,6 +460,7 @@ export function PricingSettingsForm({ settings }) {
             <div className="sm:col-span-2 text-[11px] font-semibold text-slate-500">Optional. Bookings with pickup time inside this window will be blocked even when duty is on.</div>
           </div>
           <TextField name="serviceCities" label="Service Available Cities" defaultValue={settings.serviceCities?.join?.('\n') || ''} placeholder={`Jaipur\nKota\nSawai Madhopur`} />
+          <TextField name="airportServiceLocations" label="Service Airports" defaultValue={settings.airportServiceLocations?.join?.('\n') || ''} placeholder={`Jaipur International Airport\nIndira Gandhi International Airport\nUdaipur Airport`} helper="Airport booking will continue only when the selected airport matches one of these saved airports. Leave empty to allow all airports." />
           <TextField name="holidays" label="Holiday Dates / Notes" defaultValue={settings.holidays?.join?.('\n') || ''} placeholder={`2026-08-15 Independence Day\n2026-10-20 Diwali`} helper="Add one holiday per line. Start each line with YYYY-MM-DD to block that date in booking." />
         </div>
         <div className="grid gap-3 md:grid-cols-2">
@@ -475,6 +479,33 @@ export function PricingSettingsForm({ settings }) {
   );
 }
 
+export function ContactMessages({ messages }) {
+  return (
+    <Panel title="Contact Messages" subtitle="Messages submitted from the contact page." icon={Mail}>
+      <div className="grid gap-3">
+        {messages.map((item) => (
+          <article key={item.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="font-black">{item.name || 'Website visitor'}</div>
+                <div className="mt-1 text-xs font-semibold text-slate-600">{formatDate(item.createdAt)}</div>
+              </div>
+              <StatusBadge status={item.status || 'new'} />
+            </div>
+            <div className="mt-3 grid gap-1 text-sm font-semibold text-slate-700 sm:grid-cols-2">
+              <a href={`tel:${item.phone}`} className="break-words hover:text-teal-700">{item.phone || '-'}</a>
+              <a href={`mailto:${item.email}`} className="break-words hover:text-teal-700">{item.email || '-'}</a>
+            </div>
+            {item.subject && <div className="mt-3 text-sm font-black text-slate-950">{item.subject}</div>}
+            <p className="mt-2 whitespace-pre-wrap text-sm font-medium leading-6 text-slate-700">{item.message || '-'}</p>
+          </article>
+        ))}
+        {!messages.length && <EmptyState title="No contact messages" text="Contact page messages will appear here." />}
+      </div>
+    </Panel>
+  );
+}
+
 function FareBreakdown({ fare }) {
   if (!fare) return <div className="mt-2 text-xs font-medium text-slate-500">Fare breakdown pending</div>;
   return <div className="mt-2 grid gap-1 rounded-md bg-slate-50 p-2 text-[11px] font-semibold text-slate-700"><Row label="Actual" value={formatKm(fare.actualDistance)} /><Row label="Minimum" value={formatKm(fare.minimumDistance)} /><Row label="Chargeable" value={formatKm(fare.chargeableDistance)} /><Row label="Rate" value={`Rs ${fare.vehicleRate || 0}/KM`} />{!!fare.base && <Row label="Base" value={money(fare.base)} />}{!!fare.driver && <Row label="Driver" value={money(fare.driver)} />}{!!fare.fuelSurcharge && <Row label="Fuel" value={money(fare.fuelSurcharge)} />}{!!fare.gst && <Row label="GST" value={money(fare.gst)} />}{fare.minimumApplied && <div className="mt-1 rounded bg-amber-50 px-2 py-1 text-amber-700">Minimum billing rule applied.</div>}</div>;
@@ -485,7 +516,7 @@ function BookingExtras({ booking }) {
   const fare = booking.fare || {};
   const addons = Array.isArray(options.addons) ? options.addons : Array.isArray(fare.selectedAddons) ? fare.selectedAddons : [];
   const addonText = addons.map((addon) => addon.label || addon.id || addon).filter(Boolean).join(', ');
-  const fuel = options.fuelType ? (options.fuelType === 'diesel' ? 'Diesel' : 'CNG') : '';
+  const fuel = options.fuelType ? (options.fuelType === 'diesel' ? 'Diesel' : options.fuelType === 'petrol' ? 'Petrol' : 'CNG') : '';
   const rows = [
     fuel && `Fuel: ${fuel}`,
     options.languagePreference && `Language: ${options.languagePreference}`,

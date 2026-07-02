@@ -12,7 +12,7 @@ import RouteMap from '@/components/site/booking/RouteMap';
 import FareCalculator from '@/components/site/booking/FareCalculator';
 import { calculateTripFare } from '@/lib/fare-policy';
 import { DEFAULT_PRICING_SETTINGS } from '@/lib/pricing-defaults';
-import { serviceCityAllowed } from '@/lib/service-cities';
+import { airportServiceAllowed, serviceCityAllowed } from '@/lib/service-cities';
 
 const TRIP_LABELS = {
   'one-way': 'One way',
@@ -195,11 +195,13 @@ function dateRange(start, end) {
 
 function fuelOptions(cab) {
   const options = Array.isArray(cab?.fuelOptions) && cab.fuelOptions.length ? cab.fuelOptions : ['cng', 'diesel'];
-  return [...new Set(options.map((item) => String(item).toLowerCase()).filter((item) => ['cng', 'diesel'].includes(item)))];
+  return [...new Set(options.map((item) => String(item).toLowerCase()).filter((item) => ['cng', 'diesel', 'petrol'].includes(item)))];
 }
 
 function fuelLabel(value) {
-  return value === 'diesel' ? 'Diesel' : 'CNG';
+  if (value === 'diesel') return 'Diesel';
+  if (value === 'petrol') return 'Petrol';
+  return 'CNG';
 }
 
 function validCustomerName(value) {
@@ -471,6 +473,10 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 }
                 if (!serviceCityAllowed(data.pickup, pricingSettings)) {
                   toast.error('Pickup city is not service available.');
+                  return;
+                }
+                if (data.tripType === 'airport' && !airportServiceAllowed(data.pickup, pricingSettings) && !airportServiceAllowed(data.drop, pricingSettings)) {
+                  toast.error('Selected airport is not service available.');
                   return;
                 }
                 setView('cars');
@@ -772,7 +778,7 @@ function CabOptionRail({ fleet, data, pricingSettings, selectedSlug, onSelect })
           const fare = cabFare(cab, data, [], pricingSettings);
           const active = cab.slug === selectedSlug;
           const allowedFuel = fuelOptions(cab);
-          const fuel = allowedFuel.length > 1 ? 'CNG/DSL' : allowedFuel[0] === 'diesel' ? 'DSL' : 'CNG';
+          const fuel = allowedFuel.map((item) => fuelLabel(item).slice(0, 3).toUpperCase()).join('/') || 'CNG';
           const category = cab.category?.split(/[/|]/)[0]?.trim() || (cab.seats > 6 ? 'Traveller' : cab.seats > 4 ? 'SUV' : 'Sedan');
 
           return (

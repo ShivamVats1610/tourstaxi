@@ -9,18 +9,41 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 const UPI_APPS = [
-  { name: 'Google Pay', packageName: 'com.google.android.apps.nbu.paisa.user' },
-  { name: 'PhonePe', packageName: 'com.phonepe.app' },
-  { name: 'Paytm', packageName: 'net.one97.paytm' },
-  { name: 'BHIM UPI', packageName: 'in.org.npci.upiapp' },
+  { name: 'Google Pay', scheme: 'gpay', packageName: 'com.google.android.apps.nbu.paisa.user' },
+  { name: 'PhonePe', scheme: 'phonepe', packageName: 'com.phonepe.app' },
+  { name: 'Paytm', scheme: 'paytmmp', packageName: 'net.one97.paytm' },
+  { name: 'BHIM UPI', scheme: 'upi', packageName: 'in.org.npci.upiapp' },
   { name: 'Other UPI Apps' }
 ];
 
-function upiAppLink(upiLink = '', packageName = '') {
+function upiAppLink(upiLink = '', app = {}) {
   const query = String(upiLink || '').split('?')[1] || '';
   if (!query) return upiLink;
-  if (packageName) return `intent://pay?${query}#Intent;scheme=upi;package=${packageName};end`;
+  if (app.scheme) return `${app.scheme}://upi/pay?${query}`;
   return `upi://pay?${query}`;
+}
+
+function upiIntentLink(upiLink = '', app = {}) {
+  const query = String(upiLink || '').split('?')[1] || '';
+  if (!query || !app.packageName) return '';
+  return `intent://pay?${query}#Intent;scheme=upi;package=${app.packageName};end`;
+}
+
+function openUpiApp(event, app) {
+  event.preventDefault();
+  const href = app.href || '';
+  const intentHref = app.intentHref || '';
+  window.location.href = href;
+  if (intentHref) {
+    window.setTimeout(() => {
+      window.location.href = intentHref;
+    }, 700);
+  }
+}
+
+function copyUpiFallback(upiId) {
+  navigator.clipboard?.writeText(upiId);
+  toast.success('UPI ID copied. Open any UPI app and paste it if the app did not open.');
 }
 
 export default function PaymentClient({ bookingId }) {
@@ -48,7 +71,7 @@ export default function PaymentClient({ bookingId }) {
   ), [upi]);
 
   const appLinks = useMemo(() => (
-    UPI_APPS.map((app) => ({ ...app, href: upiAppLink(upi?.link, app.packageName) }))
+    UPI_APPS.map((app) => ({ ...app, href: upiAppLink(upi?.link, app), intentHref: upiIntentLink(upi?.link, app) }))
   ), [upi]);
 
   const submitPaid = async () => {
@@ -94,7 +117,7 @@ export default function PaymentClient({ bookingId }) {
                 <div className="text-xs font-black text-slate-950">Pay with UPI app</div>
                 <div className="mt-2 grid grid-cols-2 gap-1.5">
                   {appLinks.map((app) => (
-                    <a key={app.name} href={app.href} onClick={() => { window.location.href = app.href; }} className="rounded-md border border-slate-200 bg-slate-50 px-2 py-2 text-[11px] font-black text-slate-950 transition hover:border-teal-300 hover:bg-teal-50">
+                    <a key={app.name} href={app.href} onClick={(event) => openUpiApp(event, app)} className="rounded-md border border-slate-200 bg-slate-50 px-2 py-2 text-[11px] font-black text-slate-950 transition hover:border-teal-300 hover:bg-teal-50">
                       {app.name}
                     </a>
                   ))}
@@ -105,8 +128,7 @@ export default function PaymentClient({ bookingId }) {
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">UPI ID</div>
                 <div className="break-all text-xs font-black text-slate-950">{upi.id}</div>
                 <Button type="button" variant="outline" onClick={() => {
-                  navigator.clipboard?.writeText(upi.id);
-                  toast.success('UPI ID copied.');
+                  copyUpiFallback(upi.id);
                 }} className="mt-2 h-8 w-full rounded-md bg-white text-xs"><Copy className="h-3.5 w-3.5" /> Copy UPI ID</Button>
               </div>
 
