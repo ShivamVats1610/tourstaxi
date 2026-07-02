@@ -64,7 +64,7 @@ export default function Footer({ settings = {} }) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-        <div>&copy; {new Date().getFullYear()} ToursTaxi. All rights reserved.</div>
+        <div>&copy; {new Date().getFullYear()} ToursTaxi. All rights reserved. Powered by Amar Web Connect.</div>
         <div className="flex gap-5">
           <Link href="/privacy-policy" className="hover:text-teal-300">Privacy Policy</Link>
           <Link href="/terms-conditions" className="hover:text-teal-300">Terms & Conditions</Link>

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { requireUser } from '@/lib/auth';
-import { deleteBlogPost, deleteBooking, deleteCab, deletePopularRoute, deleteTourPackage, deleteUser, updateBooking, updateUser, upsertBlogPost, upsertCab, upsertPopularRoute, upsertTourPackage, verifyUpiPayment } from '@/lib/crm';
+import { deleteBlogPost, deleteBooking, deleteCab, deleteContactMessage, deletePopularRoute, deleteTourPackage, deleteUser, updateBooking, updateUser, upsertBlogPost, upsertCab, upsertPopularRoute, upsertTourPackage, verifyUpiPayment } from '@/lib/crm';
 import { updatePricingSettings } from '@/lib/pricing-settings';
 
 async function requireAdmin() {
@@ -223,6 +223,13 @@ export async function deleteBookingAction(formData) {
   revalidatePath('/admin/dashboard');
   revalidatePath('/admin/bookings/new');
   revalidatePath('/admin/bookings/old');
+}
+
+export async function deleteContactMessageAction(formData) {
+  await requireAdmin();
+  await deleteContactMessage(String(formData.get('id') || ''));
+  revalidatePath('/admin/contact-messages');
+  revalidatePath('/admin/dashboard');
 }
 
 export async function updateUserAction(formData) {

@@ -1,6 +1,7 @@
 import { CalendarClock, Car, IndianRupee, Phone, Users } from 'lucide-react';
 import { adminStats, listAdminBookings, listCabs, listUsers } from '@/lib/crm';
 import { getPricingSettings } from '@/lib/pricing-settings';
+import { isNewBooking, todayDateValue } from '@/lib/booking-groups';
 import { BookingTable, Notice, PricingSettingsForm, Stat, money } from '../_components';
 import AdminBookingNotifier from './AdminBookingNotifier';
 
@@ -18,7 +19,8 @@ export default async function AdminDashboard() {
   const activeCabs = cabs.filter((cab) => cab.status !== 'inactive').length;
   const revenue = bookings.reduce((sum, booking) => sum + Number(booking.fare?.total || 0), 0);
   const latest = bookings[0];
-  const activeBookings = bookings.filter((booking) => !['completed', 'cancelled'].includes(booking.status));
+  const today = todayDateValue();
+  const activeBookings = bookings.filter((booking) => isNewBooking(booking, today));
 
   return (
     <div className="grid gap-5">

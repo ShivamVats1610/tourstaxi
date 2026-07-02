@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { BookOpen, CalendarClock, Car, CheckCircle2, IndianRupee, LayoutDashboard, LogOut, Mail, Map, Plus, Settings, Trash2, Upload, Users } from 'lucide-react';
 import { logoutAction } from '@/app/actions/auth';
-import { deleteBlogPostAction, deleteBookingAction, deleteCabAction, deletePopularRouteAction, deleteTourPackageAction, deleteUserAction, saveBlogPostAction, saveCabAction, savePopularRouteAction, saveTourPackageAction, updateBookingAction, updatePricingSettingsAction, updateUserAction, verifyUpiPaymentAction } from '@/app/actions/crm';
+import { deleteBlogPostAction, deleteBookingAction, deleteCabAction, deleteContactMessageAction, deletePopularRouteAction, deleteTourPackageAction, deleteUserAction, saveBlogPostAction, saveCabAction, savePopularRouteAction, saveTourPackageAction, updateBookingAction, updatePricingSettingsAction, updateUserAction, verifyUpiPaymentAction } from '@/app/actions/crm';
 import ToastSubmitButton from '@/components/ui/toast-submit-button';
 
 export const STATUSES = ['pending_payment', 'pending_verification', 'payment_rejected', 'new', 'assigned', 'confirmed', 'completed', 'cancelled'];
@@ -87,10 +87,11 @@ export function Panel({ title, subtitle, icon: Icon, children, className = '' })
   );
 }
 
-export function BookingTable({ bookings, title = 'Bookings' }) {
+export function BookingTable({ bookings, title = 'Bookings', tone = 'default' }) {
   const pendingPayments = bookings.filter((booking) => ['pending_payment', 'pending_verification', 'rejected'].includes(booking.paymentStatus) || ['pending_payment', 'pending_verification', 'payment_rejected'].includes(booking.status));
+  const oldTone = tone === 'old';
   return (
-    <Panel title={title} subtitle="Update fare, status, notes, and remove test enquiries." icon={CalendarClock}>
+    <Panel title={title} subtitle={oldTone ? 'Past trips and completed bookings are kept here for records.' : 'Update fare, status, notes, and remove test enquiries.'} icon={CalendarClock} className={oldTone ? 'border-slate-300 bg-slate-50' : ''}>
       {!!pendingPayments.length && (
         <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
           <div className="font-black text-amber-950">Pending Payments</div>
@@ -172,7 +173,7 @@ export function BookingTable({ bookings, title = 'Bookings' }) {
       </div>
       <div className="hidden overflow-x-auto xl:block">
         <table className="w-full min-w-[920px] table-fixed text-left text-sm">
-          <thead className="bg-slate-100 text-[11px] uppercase tracking-wider text-slate-700">
+          <thead className={`${oldTone ? 'bg-slate-800 text-slate-100' : 'bg-slate-100 text-slate-700'} text-[11px] uppercase tracking-wider`}>
             <tr><th className="w-[17%] px-4 py-3">Booking</th><th className="w-[21%] px-4 py-3">Customer</th><th className="w-[28%] px-4 py-3">Trip</th><th className="w-[16%] px-4 py-3">Fare</th><th className="w-[14%] px-4 py-3">Manage</th><th className="w-[4%] px-4 py-3">Delete</th></tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -490,7 +491,15 @@ export function ContactMessages({ messages }) {
                 <div className="font-black">{item.name || 'Website visitor'}</div>
                 <div className="mt-1 text-xs font-semibold text-slate-600">{formatDate(item.createdAt)}</div>
               </div>
-              <StatusBadge status={item.status || 'new'} />
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge status={item.status || 'new'} />
+                <form action={deleteContactMessageAction}>
+                  <input type="hidden" name="id" value={item.id} />
+                  <button className="inline-flex h-8 items-center rounded-md border border-red-200 bg-red-50 px-2.5 text-xs font-bold text-red-700 hover:bg-red-100">
+                    <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
+                  </button>
+                </form>
+              </div>
             </div>
             <div className="mt-3 grid gap-1 text-sm font-semibold text-slate-700 sm:grid-cols-2">
               <a href={`tel:${item.phone}`} className="break-words hover:text-teal-700">{item.phone || '-'}</a>
