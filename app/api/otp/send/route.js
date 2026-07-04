@@ -5,6 +5,8 @@ export const dynamic = 'force-dynamic';
 const AQUASMS_API_KEY = process.env.AQUASMS_API_KEY || 'd0bd7a75-2aaa-4722-8cfd-46d6c3f0d856';
 const AQUASMS_USERNAME = process.env.AQUASMS_USERNAME || '8952074176otp';
 const AQUASMS_SENDER = process.env.AQUASMS_SENDER || 'CRTFUL';
+const AQUASMS_PE_ID = process.env.AQUASMS_PE_ID || '';
+const AQUASMS_TEMPLATE_ID = process.env.AQUASMS_TEMPLATE_ID || '';
 
 export async function POST(request) {
   try {
@@ -17,7 +19,7 @@ export async function POST(request) {
     }
 
     const otp = generateOtp();
-    const message = `Your ToursTaxi booking OTP is ${otp}. It is valid for 10 minutes.`;
+    const message = `Your OTP code for verification is : ${otp} CRTFUL`;
     const url = new URL('https://login.aquasms.com/sendSMS');
     url.searchParams.set('username', AQUASMS_USERNAME);
     url.searchParams.set('message', message);
@@ -25,6 +27,8 @@ export async function POST(request) {
     url.searchParams.set('smstype', 'TRANS');
     url.searchParams.set('numbers', smsNumber);
     url.searchParams.set('apikey', AQUASMS_API_KEY);
+    if (AQUASMS_PE_ID) url.searchParams.set('peid', AQUASMS_PE_ID);
+    if (AQUASMS_TEMPLATE_ID) url.searchParams.set('templateid', AQUASMS_TEMPLATE_ID);
 
     const smsResponse = await fetch(url, { cache: 'no-store' });
     const smsText = await smsResponse.text();

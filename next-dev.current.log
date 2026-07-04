@@ -1,12 +1,12 @@
 
 > tourstaxi@0.1.0 dev
-> next dev -p 3000
+> next dev
 
 ▲ Next.js 16.2.7 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://172.20.10.2:3000
 - Environments: .env.local
-✓ Ready in 2.1s
+✓ Ready in 1370ms
 [mapbox:build] {
   tokenExists: true,
   tokenLength: 92,
@@ -18,11 +18,16 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
 - Experiments (use with caution):
   · serverActions
 
- GET /payment/TTX000021 200 in 3.6s
- GET / 200 in 6.7s (next.js: 283ms, application-code: 6.4s)
- GET /api/auth/me 200 in 539ms (next.js: 426ms, application-code: 113ms)
- GET /api/pricing-settings 200 in 2.6s (next.js: 2.2s, application-code: 421ms)
- GET /api/cabs 200 in 2.6s (next.js: 2.5s, application-code: 128ms)
+ GET / 200 in 4.1s (next.js: 1320ms, application-code: 2.8s)
+ GET /api/auth/me 200 in 443ms (next.js: 149ms, application-code: 294ms)
+ GET /api/pricing-settings 200 in 440ms (next.js: 274ms, application-code: 166ms)
+ GET /api/cabs 200 in 480ms (next.js: 415ms, application-code: 65ms)
+ GET /staffflow-sw.js 404 in 318ms (next.js: 102ms, application-code: 216ms)
+ POST /api/otp/send 400 in 81ms (next.js: 65ms, application-code: 16ms)
+ GET / 200 in 669ms (next.js: 28ms, application-code: 641ms)
+ GET /api/auth/me 200 in 82ms (next.js: 20ms, application-code: 62ms)
+ GET /api/pricing-settings 200 in 182ms (next.js: 51ms, application-code: 132ms)
+ GET /api/cabs 200 in 183ms (next.js: 88ms, application-code: 95ms)
 [mapbox:autocomplete:request] {
   inputLength: 2,
   tokenExists: true,
@@ -39,445 +44,6 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
   tokenLooksPublic: true,
   nodeEnv: 'development'
 }
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=ja 200 in 796ms (next.js: 292ms, application-code: 504ms)
-[mapbox:autocomplete:request] {
-  inputLength: 4,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /staffflow-sw.js 404 in 500ms (next.js: 155ms, application-code: 345ms)
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=jai 200 in 273ms (next.js: 17ms, application-code: 257ms)
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=jaip 200 in 113ms (next.js: 21ms, application-code: 92ms)
-[mapbox:autocomplete:request] {
-  inputLength: 6,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=jaipur+ 200 in 154ms (next.js: 12ms, application-code: 142ms)
-[mapbox:autocomplete:request] {
-  inputLength: 2,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=ko 200 in 242ms (next.js: 21ms, application-code: 220ms)
-[mapbox:autocomplete:request] {
-  inputLength: 3,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=kol 200 in 258ms (next.js: 22ms, application-code: 236ms)
-[mapbox:autocomplete:request] {
-  inputLength: 5,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=kolka 200 in 212ms (next.js: 8ms, application-code: 204ms)
-[mapbox:autocomplete:request] {
-  inputLength: 7,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=kolkata 200 in 434ms (next.js: 12ms, application-code: 421ms)
- GET /api/pricing-settings 200 in 147ms (next.js: 17ms, application-code: 130ms)
- GET /api/cabs 200 in 161ms (next.js: 58ms, application-code: 104ms)
-[mapbox:route:request] {
-  hasOrigin: false,
-  hasDestination: false,
-  hasCoordinates: true,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:route:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/distance?fromLng=75.79507&fromLat=26.836164&toLng=88.35465&toLat=22.556843 200 in 1536ms (next.js: 567ms, application-code: 969ms)
-[mapbox:autocomplete:request] {
-  inputLength: 62,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=Jaipur+International+Airport%2C+Jaipur%2C+Jaipur%2C+Rajasthan%2C+India 200 in 608ms (next.js: 14ms, application-code: 595ms)
-[mapbox:autocomplete:request] {
-  inputLength: 2,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:request] {
-  inputLength: 3,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=tr 200 in 340ms (next.js: 14ms, application-code: 327ms)
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=tri 200 in 582ms (next.js: 9ms, application-code: 573ms)
-[mapbox:autocomplete:request] {
-  inputLength: 6,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=triven 200 in 405ms (next.js: 15ms, application-code: 390ms)
-[mapbox:autocomplete:request] {
-  inputLength: 7,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=triveni+ 200 in 445ms (next.js: 21ms, application-code: 423ms)
-[mapbox:autocomplete:request] {
-  inputLength: 12,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:request] {
-  inputLength: 13,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=triveni+naga 200 in 475ms (next.js: 15ms, application-code: 459ms)
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=triveni+nagar 200 in 365ms (next.js: 8ms, application-code: 357ms)
-[mapbox:autocomplete:request] {
-  inputLength: 13,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=triveni+nagar+ 200 in 144ms (next.js: 17ms, application-code: 128ms)
-[mapbox:autocomplete:request] {
-  inputLength: 16,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:request] {
-  inputLength: 17,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=triveni+nagar+ja 200 in 390ms (next.js: 10ms, application-code: 380ms)
-[mapbox:autocomplete:request] {
-  inputLength: 18,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=triveni+nagar+jai 200 in 384ms (next.js: 7ms, application-code: 376ms)
-[mapbox:autocomplete:request] {
-  inputLength: 20,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=triveni+nagar+jaip 200 in 504ms (next.js: 7ms, application-code: 498ms)
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=triveni+nagar+jaipur 200 in 393ms (next.js: 15ms, application-code: 378ms)
-[mapbox:route:request] {
-  hasOrigin: false,
-  hasDestination: false,
-  hasCoordinates: true,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:route:request] {
-  hasOrigin: false,
-  hasDestination: false,
-  hasCoordinates: true,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/pricing-settings 200 in 183ms (next.js: 81ms, application-code: 103ms)
- GET /api/cabs 200 in 138ms (next.js: 53ms, application-code: 85ms)
-[mapbox:route:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/distance?fromLng=75.79507&fromLat=26.836164&toLng=88.35465&toLat=22.556843 200 in 470ms (next.js: 18ms, application-code: 452ms)
-[mapbox:route:request] {
-  hasOrigin: false,
-  hasDestination: false,
-  hasCoordinates: true,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:route:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/distance?fromLng=75.79507&fromLat=26.836164&toLng=88.35465&toLat=22.556843 200 in 151ms (next.js: 16ms, application-code: 135ms)
-[mapbox:route:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/distance?fromLng=75.776855&fromLat=26.862015&toLng=88.35465&toLat=22.556843 200 in 982ms (next.js: 8ms, application-code: 974ms)
-[mapbox:autocomplete:request] {
-  inputLength: 60,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=Triveni+Nagar%2C+Arjun+Nagar%2C+Jaipur%2C+Jaipur%2C+Rajasthan%2C+India 200 in 392ms (next.js: 7ms, application-code: 385ms)
-[mapbox:autocomplete:request] {
-  inputLength: 3,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:autocomplete:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/places?input=del 200 in 183ms (next.js: 15ms, application-code: 168ms)
 [mapbox:autocomplete:request] {
   inputLength: 4,
   tokenExists: true,
@@ -494,7 +60,25 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
   tokenLooksPublic: true,
   nodeEnv: 'development'
 }
- GET /api/places?input=delh 200 in 167ms (next.js: 8ms, application-code: 160ms)
+ GET /api/places?input=saw 200 in 327ms (next.js: 9ms, application-code: 319ms)
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=sa 200 in 654ms (next.js: 152ms, application-code: 502ms)
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=sawa 200 in 239ms (next.js: 6ms, application-code: 232ms)
 [mapbox:autocomplete:request] {
   inputLength: 5,
   tokenExists: true,
@@ -511,68 +95,17 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
   tokenLooksPublic: true,
   nodeEnv: 'development'
 }
- GET /api/places?input=delhi 200 in 117ms (next.js: 8ms, application-code: 108ms)
-[mapbox:route:request] {
-  hasOrigin: false,
-  hasDestination: false,
-  hasCoordinates: true,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/pricing-settings 200 in 176ms (next.js: 83ms, application-code: 92ms)
-[mapbox:route:request] {
-  hasOrigin: false,
-  hasDestination: false,
-  hasCoordinates: true,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/cabs 200 in 113ms (next.js: 15ms, application-code: 98ms)
-[mapbox:route:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/distance?fromLng=75.776855&fromLat=26.862015&toLng=88.35465&toLat=22.556843 200 in 279ms (next.js: 18ms, application-code: 261ms)
-[mapbox:route:request] {
-  hasOrigin: false,
-  hasDestination: false,
-  hasCoordinates: true,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:route:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/distance?fromLng=75.776855&fromLat=26.862015&toLng=88.35465&toLat=22.556843 200 in 130ms (next.js: 14ms, application-code: 116ms)
-[mapbox:route:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/distance?fromLng=77.209006&fromLat=28.613895&toLng=88.35465&toLat=22.556843 200 in 943ms (next.js: 11ms, application-code: 932ms)
+ GET /api/places?input=sawai 200 in 254ms (next.js: 19ms, application-code: 235ms)
 [mapbox:autocomplete:request] {
-  inputLength: 12,
+  inputLength: 2,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:request] {
+  inputLength: 4,
   tokenExists: true,
   tokenLength: 92,
   tokenPrefix: 'pk.eyJ1I',
@@ -587,7 +120,16 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
   tokenLooksPublic: true,
   nodeEnv: 'development'
 }
- GET /api/places?input=Delhi%2C+India 200 in 98ms (next.js: 6ms, application-code: 92ms)
+ GET /api/places?input=ko 200 in 635ms (next.js: 14ms, application-code: 621ms)
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=kota 200 in 257ms (next.js: 8ms, application-code: 249ms)
 [mapbox:route:request] {
   hasOrigin: false,
   hasDestination: false,
@@ -598,7 +140,128 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
   tokenLooksPublic: true,
   nodeEnv: 'development'
 }
- GET /api/pricing-settings 200 in 166ms (next.js: 12ms, application-code: 154ms)
+ GET /api/pricing-settings 200 in 321ms (next.js: 8ms, application-code: 313ms)
+ GET /api/cabs 200 in 331ms (next.js: 36ms, application-code: 295ms)
+[mapbox:route:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/distance?fromLng=76.356094&fromLat=26.012226&toLng=75.85744&toLat=25.173758 200 in 368ms (next.js: 202ms, application-code: 166ms)
+ POST /api/otp/send 200 in 1021ms (next.js: 6ms, application-code: 1015ms)
+ POST /api/otp/send 200 in 1910ms (next.js: 370ms, application-code: 1539ms)
+ GET / 200 in 1240ms (next.js: 609ms, application-code: 631ms)
+ POST /api/otp/send 400 in 171ms (next.js: 134ms, application-code: 37ms)
+ POST /api/otp/send 200 in 1484ms (next.js: 15ms, application-code: 1469ms)
+ GET / 200 in 1072ms (next.js: 32ms, application-code: 1040ms)
+ GET /api/auth/me 200 in 210ms (next.js: 165ms, application-code: 46ms)
+ GET /api/pricing-settings 200 in 606ms (next.js: 344ms, application-code: 262ms)
+ GET /api/cabs 200 in 522ms (next.js: 381ms, application-code: 141ms)
+[mapbox:autocomplete:request] {
+  inputLength: 2,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=sa 200 in 429ms (next.js: 93ms, application-code: 336ms)
+[mapbox:autocomplete:request] {
+  inputLength: 4,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=sawa 200 in 103ms (next.js: 10ms, application-code: 93ms)
+[mapbox:autocomplete:request] {
+  inputLength: 5,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=sawai 200 in 114ms (next.js: 14ms, application-code: 100ms)
+[mapbox:autocomplete:request] {
+  inputLength: 2,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=ko 200 in 241ms (next.js: 14ms, application-code: 227ms)
+[mapbox:autocomplete:request] {
+  inputLength: 3,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:request] {
+  inputLength: 4,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=kot 200 in 386ms (next.js: 11ms, application-code: 374ms)
+[mapbox:autocomplete:success] {
+  status: 200,
+  tokenExists: true,
+  tokenLength: 92,
+  tokenPrefix: 'pk.eyJ1I',
+  tokenLooksPublic: true,
+  nodeEnv: 'development'
+}
+ GET /api/places?input=kota 200 in 180ms (next.js: 9ms, application-code: 171ms)
 [mapbox:route:request] {
   hasOrigin: false,
   hasDestination: false,
@@ -609,7 +272,8 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
   tokenLooksPublic: true,
   nodeEnv: 'development'
 }
- GET /api/cabs 200 in 119ms (next.js: 23ms, application-code: 96ms)
+ GET /api/pricing-settings 200 in 213ms (next.js: 10ms, application-code: 202ms)
+ GET /api/cabs 200 in 217ms (next.js: 40ms, application-code: 177ms)
 [mapbox:route:success] {
   status: 200,
   tokenExists: true,
@@ -618,44 +282,6 @@ Creating turbopack project { dir: 'D:\\amar web connect\\tourstaxi', testMode: t
   tokenLooksPublic: true,
   nodeEnv: 'development'
 }
- GET /api/distance?fromLng=77.209006&fromLat=28.613895&toLng=88.35465&toLat=22.556843 200 in 252ms (next.js: 46ms, application-code: 205ms)
-[mapbox:route:request] {
-  hasOrigin: false,
-  hasDestination: false,
-  hasCoordinates: true,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
-[mapbox:route:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/distance?fromLng=77.209006&fromLat=28.613895&toLng=88.35465&toLat=22.556843 200 in 127ms (next.js: 6ms, application-code: 121ms)
-[mapbox:route:success] {
-  status: 200,
-  tokenExists: true,
-  tokenLength: 92,
-  tokenPrefix: 'pk.eyJ1I',
-  tokenLooksPublic: true,
-  nodeEnv: 'development'
-}
- GET /api/distance?fromLng=81.57691&fromLat=24.643995&toLng=88.35465&toLat=22.556843 200 in 891ms (next.js: 14ms, application-code: 876ms)
-✓ Compiled in 1729ms
-✓ Compiled in 910ms
- GET / 200 in 3.7s (next.js: 1248ms, application-code: 2.4s)
- GET / 200 in 1900ms (next.js: 49ms, application-code: 1850ms)
- GET / 200 in 2.0s (next.js: 239ms, application-code: 1811ms)
- GET / 200 in 2.1s (next.js: 437ms, application-code: 1643ms)
- GET / 200 in 2.1s (next.js: 622ms, application-code: 1465ms)
- GET / 200 in 2.4s (next.js: 33ms, application-code: 2.3s)
- GET / 200 in 509ms (next.js: 82ms, application-code: 427ms)
- GET / 200 in 505ms (next.js: 283ms, application-code: 222ms)
-✓ Compiled in 461ms
- GET / 200 in 440ms (next.js: 260ms, application-code: 180ms)
+ GET /api/distance?fromLng=76.356094&fromLat=26.012226&toLng=75.85744&toLat=25.173758 200 in 223ms (next.js: 105ms, application-code: 118ms)
+ POST /api/otp/send 200 in 1143ms (next.js: 15ms, application-code: 1128ms)
+ POST /api/otp/verify 200 in 1662ms (next.js: 1619ms, application-code: 43ms)

@@ -226,6 +226,19 @@ function validCustomerEmail(value) {
   return domain.includes('.') && !domain.startsWith('.') && !domain.endsWith('.');
 }
 
+async function readJsonResponse(response) {
+  const text = await response.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {
+      success: false,
+      error: response.ok ? 'Unexpected server response.' : 'Server returned an error page. Please refresh and try again.',
+    };
+  }
+}
+
 function serviceUnavailableReason(data = {}, settings = {}) {
   if (settings.dutyEnabled === false) {
     return 'Service is not available right now. Please try again when duty is on.';
@@ -941,7 +954,7 @@ function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payme
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: otpPhone }),
       });
-      const result = await response.json();
+      const result = await readJsonResponse(response);
       if (!response.ok || !result.success) throw new Error(result.error || 'Unable to send OTP.');
       setOtp('');
       setOtpSentPhone(otpPhone);
@@ -965,7 +978,7 @@ function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payme
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: otpPhone, otp }),
       });
-      const result = await response.json();
+      const result = await readJsonResponse(response);
       if (!response.ok || !result.success) throw new Error(result.error || 'Invalid OTP.');
       setOtpVerifiedPhone(otpPhone);
       toast.success('Mobile number verified.');
