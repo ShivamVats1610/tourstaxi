@@ -2,6 +2,7 @@
 
 import { createBooking, listAdminBookings } from '@/lib/crm';
 import { getSession } from '@/lib/auth';
+import { getCookieValue, VERIFIED_COOKIE, verifyPhoneCookie } from '@/lib/otp-verification';
 
 function required(value) {
 return String(value || '').trim();
@@ -83,6 +84,8 @@ if (!required(body.phone))
   errors.push('Customer phone is required.');
 else if (!validCustomerPhone(body.phone))
   errors.push('Please enter a valid mobile number.');
+else if (!verifyPhoneCookie(getCookieValue(request, VERIFIED_COOKIE), body.phone))
+  errors.push('Please verify your mobile number with OTP.');
 
 if (!required(body.email))
   errors.push('Customer email is required.');

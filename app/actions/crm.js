@@ -36,6 +36,7 @@ export async function saveCabAction(formData) {
     ac: formData.get('ac') === 'on',
     features: formData.get('features'),
     pricePerKm: formData.get('pricePerKm'),
+    petrolPricePerKm: formData.get('petrolPricePerKm'),
     localPricePerKm: formData.get('localPricePerKm'),
     local4hrPrice: formData.get('local4hrPrice'),
     local8hrPrice: formData.get('local8hrPrice'),
@@ -196,6 +197,10 @@ export async function updateBookingAction(formData) {
     id: formData.get('id'),
     status: formData.get('status'),
     totalFare: formData.get('totalFare'),
+    pickupDate: formData.get('pickupDate'),
+    pickupTime: formData.get('pickupTime'),
+    returnDate: formData.get('returnDate'),
+    returnTime: formData.get('returnTime'),
     notes: formData.get('notes'),
   });
   revalidatePath('/admin/dashboard');
@@ -278,6 +283,7 @@ export async function updatePricingSettingsAction(formData) {
     airportServiceLocations: formData.get('airportServiceLocations'),
     holidays: formData.get('holidays'),
     dutyEnabled: formData.get('dutyEnabled'),
+    oneWayEnabled: formData.get('oneWayEnabled'),
     dutyOffStart: formData.get('dutyOffStart'),
     dutyOffEnd: formData.get('dutyOffEnd'),
     facebookUrl: formData.get('facebookUrl'),
@@ -287,6 +293,8 @@ export async function updatePricingSettingsAction(formData) {
     googleBusinessUrl: formData.get('googleBusinessUrl'),
     whatsappNumber: formData.get('whatsappNumber'),
     callingNumber: formData.get('callingNumber'),
+    upiId: formData.get('upiId'),
+    upiBusinessName: formData.get('upiBusinessName'),
   });
   revalidatePath('/admin/dashboard');
   revalidatePath('/admin/pricing');

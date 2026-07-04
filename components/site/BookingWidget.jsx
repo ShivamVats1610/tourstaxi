@@ -147,6 +147,10 @@ export default function BookingWidget() {
       toast.error('Service is not available right now. Please try again when duty is on.');
       return;
     }
+    if (tab === 'one-way' && pricingSettings.oneWayEnabled === false) {
+      toast.error('One way service is not available right now. Please choose another trip type.');
+      return;
+    }
     if (!nextPickup.trim() || (tab !== 'local' && !nextDrop.trim())) {
       toast.error(tab === 'local' ? 'Please enter pickup location.' : 'Please enter pickup location and drop location.');
       return;

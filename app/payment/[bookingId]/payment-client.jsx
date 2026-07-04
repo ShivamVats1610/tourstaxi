@@ -9,17 +9,16 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 const UPI_APPS = [
-  { name: 'Google Pay', scheme: 'gpay', packageName: 'com.google.android.apps.nbu.paisa.user' },
-  { name: 'PhonePe', scheme: 'phonepe', packageName: 'com.phonepe.app' },
-  { name: 'Paytm', scheme: 'paytmmp', packageName: 'net.one97.paytm' },
-  { name: 'BHIM UPI', scheme: 'upi', packageName: 'in.org.npci.upiapp' },
+  { name: 'Google Pay', packageName: 'com.google.android.apps.nbu.paisa.user' },
+  { name: 'PhonePe', packageName: 'com.phonepe.app' },
+  { name: 'Paytm', packageName: 'net.one97.paytm' },
+  { name: 'BHIM UPI', packageName: 'in.org.npci.upiapp' },
   { name: 'Other UPI Apps' }
 ];
 
-function upiAppLink(upiLink = '', app = {}) {
+function upiAppLink(upiLink = '') {
   const query = String(upiLink || '').split('?')[1] || '';
   if (!query) return upiLink;
-  if (app.scheme) return `${app.scheme}://upi/pay?${query}`;
   return `upi://pay?${query}`;
 }
 
@@ -33,12 +32,11 @@ function openUpiApp(event, app) {
   event.preventDefault();
   const href = app.href || '';
   const intentHref = app.intentHref || '';
-  window.location.href = href;
   if (intentHref) {
-    window.setTimeout(() => {
-      window.location.href = intentHref;
-    }, 700);
+    window.location.href = intentHref;
+    return;
   }
+  window.location.href = href;
 }
 
 function copyUpiFallback(upiId) {
@@ -71,7 +69,7 @@ export default function PaymentClient({ bookingId }) {
   ), [upi]);
 
   const appLinks = useMemo(() => (
-    UPI_APPS.map((app) => ({ ...app, href: upiAppLink(upi?.link, app), intentHref: upiIntentLink(upi?.link, app) }))
+    UPI_APPS.map((app) => ({ ...app, href: upiAppLink(upi?.link), intentHref: upiIntentLink(upi?.link, app) }))
   ), [upi]);
 
   const submitPaid = async () => {

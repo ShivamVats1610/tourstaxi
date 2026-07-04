@@ -194,7 +194,7 @@ function dateRange(start, end) {
 }
 
 function fuelOptions(cab) {
-  const options = Array.isArray(cab?.fuelOptions) && cab.fuelOptions.length ? cab.fuelOptions : ['cng', 'diesel'];
+  const options = Array.isArray(cab?.fuelOptions) && cab.fuelOptions.length ? cab.fuelOptions : ['cng', 'petrol', 'diesel'];
   return [...new Set(options.map((item) => String(item).toLowerCase()).filter((item) => ['cng', 'diesel', 'petrol'].includes(item)))];
 }
 
@@ -229,6 +229,9 @@ function validCustomerEmail(value) {
 function serviceUnavailableReason(data = {}, settings = {}) {
   if (settings.dutyEnabled === false) {
     return 'Service is not available right now. Please try again when duty is on.';
+  }
+  if (data.tripType === 'one-way' && settings.oneWayEnabled === false) {
+    return 'One way service is not available right now. Please choose another trip type.';
   }
   const pickup = localDateTime(data.date, data.time);
   const start = localDateTime(settings.dutyOffStart);
@@ -489,6 +492,7 @@ export default function BookingFlow({ open, prefill = {}, onClose, cabs = [] }) 
                 set={set}
                 routeLabel={routeLabel}
                 pricingSettings={pricingSettings}
+                setSelectedAddons={setSelectedAddons}
                 onModify={() => setView('details')}
                 onCheckout={(slug) => {
                   const cab = fleet.find((item) => item.slug === slug);
@@ -684,7 +688,7 @@ function DetailsPanel({ data, set, pricingSettings, onSelectLocation, onContinue
   );
 }
 
-function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onModify, onCheckout }) {
+function CabSelection({ fleet, data, set, routeLabel, pricingSettings, setSelectedAddons, onModify, onCheckout }) {
   const selectedCab = fleet.find((cab) => cab.slug === data.vehicleSlug) || fleet[0] || null;
   const unavailableReason = serviceUnavailableReason(data, pricingSettings);
 
@@ -712,7 +716,9 @@ function CabSelection({ fleet, data, set, routeLabel, pricingSettings, onModify,
           onSelect={(slug) => {
             const cab = fleet.find((item) => item.slug === slug);
             const allowed = fuelOptions(cab);
-            if (!allowed.includes(data.fuelType)) set('fuelType', allowed[0] || 'cng');
+            setSelectedAddons([]);
+            set('fuelType', allowed[0] || 'cng');
+            set('languagePreference', '');
             set('vehicleSlug', slug);
             set('passengers', `${Number(cab?.seats || 4)} Passengers`);
           }}
@@ -852,7 +858,7 @@ function CabCard({ cab, data, set, pricingSettings, index, onModify, onCheckout 
             <span className="flex min-w-0 items-center gap-1.5"><User className="h-4 w-4 shrink-0 text-teal-600 sm:h-5 sm:w-5" /> <span className="truncate">Driver allowance included</span></span>
             <span className="flex min-w-0 items-center gap-1.5"><Briefcase className="h-4 w-4 shrink-0 text-teal-600 sm:h-5 sm:w-5" /> <span className="truncate">{cab.luggage}</span></span>
             <span className="flex min-w-0 items-center gap-1.5"><Check className="h-4 w-4 shrink-0 text-emerald-500 sm:h-5 sm:w-5" /> <span className="truncate">{formatKm(fare.chargeableDistance || fare.distance)} included</span></span>
-            <span className="flex min-w-0 items-center gap-1.5"><ArrowLeftRight className="h-4 w-4 shrink-0 text-teal-600 sm:h-5 sm:w-5" /> <span className="truncate">Post limit: Rs {cab.pricePerKm || 16}/km</span></span>
+            <span className="flex min-w-0 items-center gap-1.5"><ArrowLeftRight className="h-4 w-4 shrink-0 text-teal-600 sm:h-5 sm:w-5" /> <span className="truncate">Post limit: Rs {fare.vehicleRate || cab.pricePerKm || 16}/km</span></span>
           </div>
         </div>
         <div className="min-w-0">
@@ -901,6 +907,14 @@ function CabCard({ cab, data, set, pricingSettings, index, onModify, onCheckout 
 
 function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payment, setPayment, selectedAddons, setSelectedAddons, onBack, onSubmit, submitting }) {
   const isLocalTrip = data.tripType === 'local';
+  const otpPhone = `${data.phoneCountry || '+91'}${String(data.phone || '').replace(/\D/g, '')}`;
+  const [otp, setOtp] = useState('');
+  const [otpSentPhone, setOtpSentPhone] = useState('');
+  const [otpVerifiedPhone, setOtpVerifiedPhone] = useState('');
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const otpSent = otpSentPhone === otpPhone;
+  const otpVerified = otpVerifiedPhone === otpPhone;
   const detailsComplete = Boolean(
     validCustomerName(data.name) &&
     validCustomerPhone(data.phone, data.phoneCountry) &&
@@ -909,11 +923,57 @@ function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payme
     (isLocalTrip || data.dropAddress?.trim())
   );
   const blockedHoliday = holidayConflict(data, pricingSettings);
-  const canPay = detailsComplete && !blockedHoliday;
+  const canPay = detailsComplete && otpVerified && !blockedHoliday;
 
   if (!vehicle || !fare) return null;
   const toggleAddon = (id) => {
     setSelectedAddons((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  };
+  const sendOtp = async () => {
+    if (!validCustomerPhone(data.phone, data.phoneCountry)) {
+      toast.error(data.phoneCountry === '+91' ? 'Please enter a valid 10 digit Indian mobile number.' : 'Please enter a valid mobile number.');
+      return;
+    }
+    setSendingOtp(true);
+    try {
+      const response = await fetch('/api/otp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: otpPhone }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || 'Unable to send OTP.');
+      setOtp('');
+      setOtpSentPhone(otpPhone);
+      setOtpVerifiedPhone('');
+      toast.success('OTP sent to mobile number.');
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+  const verifyOtp = async () => {
+    if (!/^\d{6}$/.test(otp)) {
+      toast.error('Please enter the 6 digit OTP.');
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const response = await fetch('/api/otp/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: otpPhone, otp }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || 'Invalid OTP.');
+      setOtpVerifiedPhone(otpPhone);
+      toast.success('Mobile number verified.');
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setVerifyingOtp(false);
+    }
   };
 
   return (
@@ -944,6 +1004,18 @@ function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payme
                   ))}
                 </select>
                 <Input value={data.phone} onChange={(event) => set('phone', event.target.value)} placeholder="Mobile No." className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500" />
+                <div className="grid gap-2 rounded-md border border-slate-200 bg-slate-50 p-2 sm:col-span-3 sm:grid-cols-[1fr_auto_auto]">
+                  <Input value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="Enter OTP" disabled={!otpSent || otpVerified} className="h-9 bg-white text-sm font-semibold text-black placeholder:text-slate-500" />
+                  <Button type="button" variant="outline" onClick={sendOtp} disabled={sendingOtp || otpVerified || !validCustomerPhone(data.phone, data.phoneCountry)} className="h-9 rounded-md bg-white px-3 text-xs font-black">
+                    {sendingOtp ? 'Sending...' : otpSent ? 'Resend OTP' : 'Send OTP'}
+                  </Button>
+                  <Button type="button" onClick={verifyOtp} disabled={verifyingOtp || !otpSent || otpVerified || otp.length !== 6} className="h-9 rounded-md bg-teal-700 px-3 text-xs font-black text-white hover:bg-teal-800">
+                    {otpVerified ? 'Verified' : verifyingOtp ? 'Checking...' : 'Verify'}
+                  </Button>
+                  <div className={`text-[11px] font-bold sm:col-span-3 ${otpVerified ? 'text-emerald-700' : 'text-slate-500'}`}>
+                    {otpVerified ? 'Mobile number verified.' : 'Verify mobile number before payment.'}
+                  </div>
+                </div>
                 <Input value={data.email} onChange={(event) => set('email', event.target.value)} placeholder="Email ID" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />
                 <Input value={data.address} onChange={(event) => set('address', event.target.value)} placeholder="Pickup Location" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />
                 {!isLocalTrip && <Input value={data.dropAddress} onChange={(event) => set('dropAddress', event.target.value)} placeholder="Drop Location" className="h-9 bg-slate-100 text-sm font-semibold text-black placeholder:text-slate-500 sm:col-span-3" />}
@@ -954,6 +1026,11 @@ function Checkout({ data, set, routeLabel, vehicle, fare, pricingSettings, payme
             {!detailsComplete && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900">
                 Fill real first and last name, valid mobile number, valid email, {isLocalTrip ? 'and pickup details' : 'pickup and drop details'} to continue to payment.
+              </div>
+            )}
+            {detailsComplete && !otpVerified && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900">
+                Verify mobile number with OTP to continue to payment.
               </div>
             )}
             {blockedHoliday && (
