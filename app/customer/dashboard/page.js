@@ -1,11 +1,12 @@
 import Link from 'next/link';
-import { ArrowRight, CalendarClock, Car, Clock, LogOut, Mail, MapPin, Phone, Route, Sparkles, User } from 'lucide-react';
+import { CalendarClock, Car, Clock, LogOut, Mail, MapPin, Phone, Route, Sparkles, User } from 'lucide-react';
 import { logoutAction } from '@/app/actions/auth';
 import { updateProfileAction } from '@/app/actions/crm';
+import BookNowButton from '@/components/site/BookNowButton';
 import { requireUser } from '@/lib/auth';
 import { listCustomerBookings } from '@/lib/crm';
 
-export const metadata = { title: 'Customer Dashboard | ToursTaxi' };
+export const metadata = { title: 'Customer Dashboard | ToursTaxi', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
 
 export default async function CustomerDashboard() {
@@ -27,9 +28,7 @@ export default async function CustomerDashboard() {
               <p className="mt-3 max-w-2xl text-sm font-medium text-slate-300">Welcome, {user.name}. Track ride requests, fare status, pickup details, and your contact profile in one place.</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link href="/#book" className="inline-flex h-10 items-center rounded-md bg-amber-400 px-4 text-sm font-black text-slate-950 hover:bg-amber-300 sm:h-11">
-                Book Ride <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+              <BookNowButton className="h-10 rounded-md bg-amber-400 px-4 text-sm font-black text-slate-950 hover:bg-amber-300 sm:h-11">Book Ride</BookNowButton>
               <form action={logoutAction}>
                 <button className="inline-flex h-11 items-center rounded-md border border-white/20 bg-white/10 px-4 text-sm font-bold text-white hover:bg-white hover:text-slate-950">
                   <LogOut className="mr-2 h-4 w-4" /> Logout
@@ -132,9 +131,9 @@ function BookingsPanel({ bookings }) {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-white text-teal-700 shadow-sm"><Car className="h-6 w-6" /></div>
             <div className="mt-3 font-black text-slate-950">No bookings yet</div>
             <p className="mt-1 text-sm font-medium text-slate-600">Your ride requests will appear here after booking.</p>
-            <Link href="/#book" className="mt-4 inline-flex h-10 items-center rounded-md bg-amber-400 px-4 text-sm font-black text-slate-950 hover:bg-amber-300">
+            <BookNowButton className="mt-4 h-10 rounded-md bg-amber-400 px-4 text-sm font-black text-slate-950 hover:bg-amber-300">
               Book your first ride
-            </Link>
+            </BookNowButton>
           </div>
         )}
       </div>
@@ -197,17 +196,19 @@ function BookingExtras({ booking }) {
 
 function PaymentPanel({ booking }) {
   const status = booking.paymentStatus || 'pending';
-  const pending = ['pending', 'pending_payment', 'rejected'].includes(status) || booking.status === 'payment_rejected';
+  const payAfterRide = status === 'pay_after_ride';
+  const pending = !payAfterRide && (['pending', 'pending_payment', 'rejected'].includes(status) || booking.status === 'payment_rejected');
   return (
     <div className="mt-3 rounded-md border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-700">
       <div className="grid gap-2 sm:grid-cols-3">
         <div><b className="block text-slate-950">Booking Status</b>{String(booking.status || '-').replaceAll('_', ' ')}</div>
         <div><b className="block text-slate-950">Payment Status</b>{String(status).replaceAll('_', ' ')}</div>
-        <div><b className="block text-slate-950">Amount Paid</b>{status === 'paid' ? money(booking.paymentAmount || booking.fare?.total) : 'Pending'}</div>
+        <div><b className="block text-slate-950">Amount Paid</b>{status === 'paid' ? money(booking.paymentAmount || booking.fare?.total) : payAfterRide ? `Pay after ride: ${money(booking.fare?.total)}` : 'Pending'}</div>
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
         {booking.paymentScreenshot && <a href={booking.paymentScreenshot} target="_blank" rel="noopener noreferrer" className="rounded-md bg-slate-100 px-3 py-2 font-black text-slate-700">View Uploaded Screenshot</a>}
         {pending && <Link href={`/payment/${booking.bookingId}`} className="rounded-md bg-teal-700 px-3 py-2 font-black text-white">{status === 'rejected' ? 'Re-upload Screenshot' : 'Pay / Submit Payment'}</Link>}
+        {payAfterRide && <span className="rounded-md bg-sky-50 px-3 py-2 font-black text-sky-700">Pay after ride selected</span>}
         {status === 'pending_verification' && <span className="rounded-md bg-amber-50 px-3 py-2 font-black text-amber-700">Payment Pending Verification</span>}
         {status === 'paid' && <span className="rounded-md bg-emerald-50 px-3 py-2 font-black text-emerald-700">Payment Verified</span>}
       </div>

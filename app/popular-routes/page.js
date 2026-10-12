@@ -1,11 +1,12 @@
+import { pageMetadata, breadcrumbs, PUBLIC_PAGES } from '@/lib/seo';
+import JsonLd from '@/components/site/JsonLd';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import Reveal from '@/components/site/Reveal';
+import BookNowButton from '@/components/site/BookNowButton';
 import { listPopularRoutes } from '@/lib/crm';
 import { ArrowRight, MapPin, Clock } from 'lucide-react';
 
-export const metadata = { title: 'Popular Routes - ToursTaxi' };
+export const metadata = pageMetadata('/popular-routes');
 export const dynamic = 'force-dynamic';
 
 export default async function RoutesPage() {
@@ -13,6 +14,7 @@ export default async function RoutesPage() {
 
   return (
     <div className="pt-24">
+      <JsonLd data={breadcrumbs([{ name: PUBLIC_PAGES['/popular-routes'][0], path: '/popular-routes' }])} />
       <section className="bg-gradient-to-br from-[#12233f] via-[#0f3f3b] to-[#071527] py-16 text-white sm:py-20">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">Popular Routes</div>
@@ -40,7 +42,7 @@ export default async function RoutesPage() {
                     <div className="text-2xl font-extrabold text-slate-900">Rs {r.price.toLocaleString()}</div>
                     <div className="text-xs text-slate-500">incl. driver, fuel, tax</div>
                   </div>
-                  <Link href="/#book"><Button className="bg-[#12233f] hover:bg-[#0f1c33]">Book Cab</Button></Link>
+                  <BookNowButton prefill={{ pickup: r.from, drop: r.to, tripType: 'one-way', startStep: 0 }} className="bg-[#12233f] hover:bg-[#0f1c33]">Book Cab</BookNowButton>
                 </CardContent>
               </Card>
             </Reveal>

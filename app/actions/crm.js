@@ -36,7 +36,6 @@ export async function saveCabAction(formData) {
     ac: formData.get('ac') === 'on',
     features: formData.get('features'),
     pricePerKm: formData.get('pricePerKm'),
-    petrolPricePerKm: formData.get('petrolPricePerKm'),
     localPricePerKm: formData.get('localPricePerKm'),
     local4hrPrice: formData.get('local4hrPrice'),
     local8hrPrice: formData.get('local8hrPrice'),
@@ -267,7 +266,9 @@ export async function updatePricingSettingsAction(formData) {
     localMinimumKm: formData.get('localMinimumKm'),
     oneWayBaseFare: formData.get('oneWayBaseFare'),
     roundTripBaseFare: formData.get('roundTripBaseFare'),
+    offerDiscountPercent: formData.get('offerDiscountPercent'),
     roundTripDiscountPercent: formData.get('roundTripDiscountPercent'),
+    roundTripReturnLeadTimeMinutes: formData.get('roundTripReturnLeadTimeMinutes'),
     airportBaseFare: formData.get('airportBaseFare'),
     localBaseFare: formData.get('localBaseFare'),
     driverAllowancePerDay: formData.get('driverAllowancePerDay'),
@@ -275,7 +276,9 @@ export async function updatePricingSettingsAction(formData) {
     nightChargeEndTime: formData.get('nightChargeEndTime'),
     gstPercent: formData.get('gstPercent'),
     dieselSurchargePerKm: formData.get('dieselSurchargePerKm'),
+    petrolSurchargePerKm: formData.get('petrolSurchargePerKm'),
     advancePercent: formData.get('advancePercent'),
+    pickupLeadTimeMinutes: formData.get('pickupLeadTimeMinutes'),
     carrierAddonPrice: formData.get('carrierAddonPrice'),
     newCarAddonPrice: formData.get('newCarAddonPrice'),
     languageAddonPrice: formData.get('languageAddonPrice'),
@@ -284,6 +287,7 @@ export async function updatePricingSettingsAction(formData) {
     holidays: formData.get('holidays'),
     dutyEnabled: formData.get('dutyEnabled'),
     oneWayEnabled: formData.get('oneWayEnabled'),
+    showDutyOffCallButton: formData.get('showDutyOffCallButton'),
     dutyOffStart: formData.get('dutyOffStart'),
     dutyOffEnd: formData.get('dutyOffEnd'),
     facebookUrl: formData.get('facebookUrl'),
@@ -293,12 +297,19 @@ export async function updatePricingSettingsAction(formData) {
     googleBusinessUrl: formData.get('googleBusinessUrl'),
     whatsappNumber: formData.get('whatsappNumber'),
     callingNumber: formData.get('callingNumber'),
+    websiteEmail: formData.get('websiteEmail'),
+    showUpiAppButtons: formData.get('showUpiAppButtons'),
     upiId: formData.get('upiId'),
     upiBusinessName: formData.get('upiBusinessName'),
   });
   revalidatePath('/admin/dashboard');
   revalidatePath('/admin/pricing');
   revalidatePath('/');
+  revalidatePath('/services');
+  revalidatePath('/contact');
+  revalidatePath('/privacy-policy');
+  revalidatePath('/terms-conditions');
+  revalidatePath('/about');
 }
 
 export async function updateProfileAction(formData) {

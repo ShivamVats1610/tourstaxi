@@ -2,13 +2,16 @@ import { CalendarClock, Car, IndianRupee, Phone, Users } from 'lucide-react';
 import { adminStats, listAdminBookings, listCabs, listUsers } from '@/lib/crm';
 import { getPricingSettings } from '@/lib/pricing-settings';
 import { isNewBooking, todayDateValue } from '@/lib/booking-groups';
+import { filterBookingsBySearch } from '@/lib/booking-search';
 import { BookingTable, Notice, PricingSettingsForm, Stat, money } from '../_components';
 import AdminBookingNotifier from './AdminBookingNotifier';
+import ChangePasswordCard from './ChangePasswordCard';
 
 export const metadata = { title: 'Admin Dashboard | ToursTaxi' };
 export const dynamic = 'force-dynamic';
 
-export default async function AdminDashboard() {
+export default async function AdminDashboard({ searchParams }) {
+  const query = String((await searchParams)?.q || '').trim();
   const [stats, bookings, cabs, users, pricingSettings] = await Promise.all([
     adminStats(),
     listAdminBookings(),
@@ -20,7 +23,7 @@ export default async function AdminDashboard() {
   const revenue = bookings.reduce((sum, booking) => sum + Number(booking.fare?.total || 0), 0);
   const latest = bookings[0];
   const today = todayDateValue();
-  const activeBookings = bookings.filter((booking) => isNewBooking(booking, today));
+  const activeBookings = filterBookingsBySearch(bookings.filter((booking) => isNewBooking(booking, today)), query);
 
   return (
     <div className="grid gap-5">
@@ -33,8 +36,9 @@ export default async function AdminDashboard() {
         <Stat icon={Phone} label="Assigned" value={stats.assignedBookings} hint="Driver follow-up" href="/admin/bookings/new" />
         <Stat icon={IndianRupee} label="Fare Value" value={money(revenue)} hint="Visible bookings" href="/admin/bookings/old" />
       </div>
+      <ChangePasswordCard />
       <PricingSettingsForm settings={pricingSettings} />
-      <BookingTable bookings={activeBookings.slice(0, 10)} title="Latest Active Bookings" />
+      <BookingTable bookings={query ? activeBookings : activeBookings.slice(0, 10)} title="Latest Active Bookings" searchQuery={query} />
     </div>
   );
 }

@@ -1,0 +1,6 @@
+[browser] [mapbox:browser:route:error] SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON (file://D:/amar web connect/tourstaxi/.next/dev/static/chunks/_1z772ws._.js:2673:33)
+[browser] [mapbox:browser:route:error] Error: Route service is temporarily unavailable.
+    at FareCalculator.useEffect.loadRoute (file://D:/amar web connect/tourstaxi/.next/dev/static/chunks/_1z772ws._.js?id=%255Bproject%255D%252Fcomponents%252Fsite%252Fbooking%252FFareCalculator.tsx+%255Bapp-client%255D+%2528ecmascript%2529:125:94) (file://D:/amar web connect/tourstaxi/.next/dev/static/chunks/_1z772ws._.js?id=%255Bproject%255D%252Fcomponents%252Fsite%252Fbooking%252FFareCalculator.tsx+%255Bapp-client%255D+%2528ecmascript%2529:136:33)
+[browser] [mapbox:browser:route:fallback] Error: Route service is temporarily unavailable.
+    at FareCalculator.useEffect.loadRoute (file://D:/amar web connect/tourstaxi/.next/dev/static/chunks/_1z772ws._.js?id=%255Bproject%255D%252Fcomponents%252Fsite%252Fbooking%252FFareCalculator.tsx+%255Bapp-client%255D+%2528ecmascript%2529:125:94) (file://D:/amar web connect/tourstaxi/.next/dev/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477:13)

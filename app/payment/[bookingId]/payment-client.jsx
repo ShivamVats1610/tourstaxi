@@ -95,6 +95,7 @@ export default function PaymentClient({ bookingId }) {
 
   const amount = Number(booking.paymentAmount || booking.fare?.total || 0);
   const canSubmit = !['pending_verification', 'paid'].includes(booking.paymentStatus);
+  const showUpiAppButtons = upi.showAppButtons === true;
 
   return (
     <main className="min-h-screen bg-[#f7faf9] px-3 pb-8 pt-20 sm:px-6 sm:pt-24">
@@ -111,16 +112,18 @@ export default function PaymentClient({ bookingId }) {
               <img src={qrUrl} alt="UPI QR code" className="mx-auto mt-2 h-48 w-48 rounded-md border border-slate-200 bg-white p-2 sm:h-56 sm:w-56" />
               <div className="mt-2 text-2xl font-black text-teal-800">{money(amount)}</div>
 
-              <div className="mt-3 rounded-md border border-slate-200 bg-white p-2">
-                <div className="text-xs font-black text-slate-950">Pay with UPI app</div>
-                <div className="mt-2 grid grid-cols-2 gap-1.5">
-                  {appLinks.map((app) => (
-                    <a key={app.name} href={app.href} onClick={(event) => openUpiApp(event, app)} className="rounded-md border border-slate-200 bg-slate-50 px-2 py-2 text-[11px] font-black text-slate-950 transition hover:border-teal-300 hover:bg-teal-50">
-                      {app.name}
-                    </a>
-                  ))}
+              {showUpiAppButtons && (
+                <div className="mt-3 rounded-md border border-slate-200 bg-white p-2">
+                  <div className="text-xs font-black text-slate-950">Pay with UPI app</div>
+                  <div className="mt-2 grid grid-cols-2 gap-1.5">
+                    {appLinks.map((app) => (
+                      <a key={app.name} href={app.href} onClick={(event) => openUpiApp(event, app)} className="rounded-md border border-slate-200 bg-slate-50 px-2 py-2 text-[11px] font-black text-slate-950 transition hover:border-teal-300 hover:bg-teal-50">
+                        {app.name}
+                      </a>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="mt-2 rounded-md border border-slate-200 bg-white p-2 text-left">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">UPI ID</div>
@@ -167,7 +170,7 @@ export default function PaymentClient({ bookingId }) {
               <div className="rounded-md border border-slate-200 bg-white p-3">
                 <div className="text-sm font-black text-slate-950">Payment Instructions</div>
                 <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs font-semibold text-slate-700">
-                  <li>Complete the payment using any UPI application.</li>
+                  <li>Scan the QR code from any UPI application.</li>
                   <li>Return to the website.</li>
                   <li>Click I Have Paid.</li>
                   <li>Upload screenshot if available.</li>
@@ -175,7 +178,7 @@ export default function PaymentClient({ bookingId }) {
                   <li>Booking will be confirmed after verification.</li>
                 </ol>
                 <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-[11px] font-bold text-amber-900">
-                  If no UPI app opens, scan the QR code or copy the UPI ID.
+                  Scan the QR code or copy the UPI ID to complete the payment.
                 </div>
               </div>
             </section>

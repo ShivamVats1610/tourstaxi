@@ -1,8 +1,19 @@
-export const metadata = { title: 'Privacy Policy - ToursTaxi' };
+import { pageMetadata, breadcrumbs, PUBLIC_PAGES } from '@/lib/seo';
+import JsonLd from '@/components/site/JsonLd';
+import { COMPANY } from '@/lib/data';
+import { getPricingSettings } from '@/lib/pricing-settings';
+import { formatPhoneNumber } from '@/lib/phone-utils';
 
-export default function PrivacyPage() {
+export const metadata = pageMetadata('/privacy-policy');
+
+export default async function PrivacyPage() {
+  const settings = await getPricingSettings();
+  const phone = formatPhoneNumber(settings.callingNumber || COMPANY.phoneRaw);
+  const email = settings.websiteEmail || COMPANY.email;
+
   return (
     <div className="pt-24">
+      <JsonLd data={breadcrumbs([{ name: PUBLIC_PAGES['/privacy-policy'][0], path: '/privacy-policy' }])} />
       <section className="py-20 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 text-white">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-orange-300 text-xs font-semibold uppercase tracking-wider mb-4">Legal</div>
@@ -20,11 +31,11 @@ export default function PrivacyPage() {
           <h2>Sharing</h2>
           <p>We share trip details only with the assigned driver and payment processor. We never sell your data to third parties.</p>
           <h2>Your choices</h2>
-          <p>You can request a copy of your data or ask us to delete your account anytime by emailing tourstaxi.com@gmail.com.</p>
+          <p>You can request a copy of your data or ask us to delete your account anytime by emailing {email}.</p>
           <h2>Cookies</h2>
           <p>Our website uses essential cookies to keep you logged in and to remember your booking preferences.</p>
           <h2>Contact</h2>
-          <p>For any privacy-related queries, write to us at tourstaxi.com@gmail.com or call +91 8955458128.</p>
+          <p>For any privacy-related queries, write to us at {email} or call {phone}.</p>
         </article>
       </section>
     </div>

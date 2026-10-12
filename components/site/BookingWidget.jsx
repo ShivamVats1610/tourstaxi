@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeftRight, CalendarDays, ChevronDown, Plane, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useBooking } from '@/lib/booking-context';
+import { DEFAULT_PRICING_SETTINGS } from '@/lib/pricing-defaults';
 import { airportServiceAllowed, serviceCityAllowed } from '@/lib/service-cities';
 import LocationAutocomplete from '@/components/site/booking/LocationAutocomplete';
 import { toast } from 'sonner';
@@ -22,10 +23,33 @@ function todayValue() {
   return now.toISOString().slice(0, 10);
 }
 
-function nextPickupTimeValue() {
+function pickupLeadTimeMinutes(settings = DEFAULT_PRICING_SETTINGS) {
+  const minutes = Number(settings.pickupLeadTimeMinutes);
+  return Number.isFinite(minutes) && minutes >= 0 ? minutes : DEFAULT_PRICING_SETTINGS.pickupLeadTimeMinutes;
+}
+
+function minimumPickupDateTime(settings = DEFAULT_PRICING_SETTINGS) {
   const now = new Date();
-  now.setMinutes(now.getMinutes() + 30);
-  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  now.setMinutes(now.getMinutes() + pickupLeadTimeMinutes(settings));
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return { date: now.toISOString().slice(0, 10), time: now.toISOString().slice(11, 16) };
+}
+
+function roundTripReturnLeadTimeMinutes(settings = DEFAULT_PRICING_SETTINGS) {
+  const minutes = Number(settings.roundTripReturnLeadTimeMinutes);
+  return Number.isFinite(minutes) && minutes > 0 ? minutes : 0;
+}
+
+function addMinutesDateTime(date, time, minutes) {
+  const next = new Date(`${date || todayValue()}T${time || '07:00'}`);
+  next.setMinutes(next.getMinutes() + Number(minutes || 0));
+  next.setMinutes(next.getMinutes() - next.getTimezoneOffset());
+  return { date: next.toISOString().slice(0, 10), time: next.toISOString().slice(11, 16) };
+}
+
+function minimumReturnDateTime(date, time, settings = DEFAULT_PRICING_SETTINGS) {
+  const leadMinutes = roundTripReturnLeadTimeMinutes(settings);
+  return leadMinutes > 0 ? addMinutesDateTime(date, time, leadMinutes) : { date: date || todayValue(), time: time || '07:00' };
 }
 
 function displayDate(value) {
@@ -59,24 +83,47 @@ export default function BookingWidget() {
   const [airport, setAirport] = useState('');
   const [pickupCoordinates, setPickupCoordinates] = useState(null);
   const [dropCoordinates, setDropCoordinates] = useState(null);
-  const [date, setDate] = useState(todayValue());
-  const [returnDate, setReturnDate] = useState(todayValue());
-  const [time, setTime] = useState(nextPickupTimeValue());
+  const [date, setDate] = useState('');
+  const [returnDate, setReturnDate] = useState('');
+  const [time, setTime] = useState('');
   const [returnTime, setReturnTime] = useState('18:00');
   const [stops, setStops] = useState([]);
   const [stopCoordinates, setStopCoordinates] = useState([]);
-  const [pricingSettings, setPricingSettings] = useState({});
+  const [pricingSettings, setPricingSettings] = useState(DEFAULT_PRICING_SETTINGS);
   const { open } = useBooking();
-  const minDate = todayValue();
-  const minTime = date === minDate ? nextPickupTimeValue() : undefined;
-  const minReturnTime = returnDate === date ? time : undefined;
+  const minimumPickup = date && time
+    ? minimumPickupDateTime(pricingSettings)
+    : { date: '', time: '' };
+  const minDate = minimumPickup.date;
+  const minTime = date === minDate ? minimumPickup.time : undefined;
+  const minimumReturn = date && time
+    ? minimumReturnDateTime(date, time, pricingSettings)
+    : { date: '', time: '' };
+  const minReturnTime = returnDate === minimumReturn.date ? minimumReturn.time : undefined;
 
   useEffect(() => {
     let active = true;
+    const initialPickup = minimumPickupDateTime();
+    // These time-based values must be created in the browser. Generating them
+    // during SSR can cross a minute boundary before React hydrates.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDate(initialPickup.date);
+    setReturnDate(initialPickup.date);
+    setTime(initialPickup.time);
+
     fetch('/api/pricing-settings', { cache: 'no-store' })
       .then((response) => response.json())
       .then((result) => {
-        if (active && result?.settings) setPricingSettings(result.settings);
+        if (active && result?.settings) {
+          setPricingSettings(result.settings);
+          const minimum = minimumPickupDateTime(result.settings);
+          setDate(minimum.date);
+          setTime(minimum.time);
+          setReturnDate((current) => current < minimum.date ? minimum.date : current);
+          const minimumReturnTime = minimumReturnDateTime(minimum.date, minimum.time, result.settings);
+          setReturnDate(minimumReturnTime.date);
+          setReturnTime(minimumReturnTime.time);
+        }
       })
       .catch(() => {});
     return () => {
@@ -87,32 +134,35 @@ export default function BookingWidget() {
   const updateDate = (value) => {
     const nextDate = value && value < minDate ? minDate : value;
     setDate(nextDate);
-    if (returnDate < nextDate) setReturnDate(nextDate);
-    if (returnDate === nextDate && returnTime < time) setReturnTime(time);
-    if (nextDate === minDate && time < nextPickupTimeValue()) {
-      setTime(nextPickupTimeValue());
+    const nextReturn = minimumReturnDateTime(nextDate, time, pricingSettings);
+    if (returnDate < nextReturn.date) setReturnDate(nextReturn.date);
+    if (returnDate === nextReturn.date && returnTime < nextReturn.time) setReturnTime(nextReturn.time);
+    if (nextDate === minDate && time < minimumPickup.time) {
+      setTime(minimumPickup.time);
     }
   };
 
   const updateReturnDate = (value) => {
-    const nextReturnDate = value && value < date ? date : value;
+    const nextReturnDate = value && value < minimumReturn.date ? minimumReturn.date : value;
     setReturnDate(nextReturnDate);
-    if (nextReturnDate === date && returnTime < time) setReturnTime(time);
+    if (nextReturnDate === minimumReturn.date && returnTime < minimumReturn.time) setReturnTime(minimumReturn.time);
   };
 
   const updateTime = (value) => {
-    const nextTime = date === minDate && value < nextPickupTimeValue() ? nextPickupTimeValue() : value;
-    if (date === minDate && value < nextPickupTimeValue()) {
-      setTime(nextPickupTimeValue());
+    const nextTime = date === minDate && value < minimumPickup.time ? minimumPickup.time : value;
+    if (date === minDate && value < minimumPickup.time) {
+      setTime(minimumPickup.time);
     } else {
       setTime(value);
     }
-    if (returnDate === date && returnTime < nextTime) setReturnTime(nextTime);
+    const nextReturn = minimumReturnDateTime(date, nextTime, pricingSettings);
+    if (returnDate < nextReturn.date) setReturnDate(nextReturn.date);
+    if (returnDate === nextReturn.date && returnTime < nextReturn.time) setReturnTime(nextReturn.time);
   };
 
   const updateReturnTime = (value) => {
-    if (returnDate === date && value < time) {
-      setReturnTime(time);
+    if (returnDate === minimumReturn.date && value < minimumReturn.time) {
+      setReturnTime(minimumReturn.time);
       return;
     }
     setReturnTime(value);
@@ -205,7 +255,7 @@ export default function BookingWidget() {
           onChange={(value) => {
             const { nextDate, nextTime } = splitDateTime(value);
             updateReturnDate(nextDate);
-            updateReturnTime(nextDate === date && nextTime < time ? time : nextTime);
+            updateReturnTime(nextDate === minimumReturn.date && nextTime < minimumReturn.time ? minimumReturn.time : nextTime);
           }}
         />
       )}
@@ -403,7 +453,7 @@ function LineDateTime({ label, date, time, minDate, minTime, onChange }) {
         <span className="min-w-0 flex-1 truncate text-sm font-semibold text-black sm:text-base">{displayDate(date)} / {displayTime(time)}</span>
         <ChevronDown className="h-4 w-4 shrink-0 text-teal-700" />
       </span>
-      <input type="datetime-local" value={dateTimeValue(date, time)} min={min} onChange={(event) => onChange(event.target.value)} className="absolute inset-x-0 bottom-0 h-10 cursor-pointer opacity-0" />
+      <input type="datetime-local" value={date && time ? dateTimeValue(date, time) : ''} min={min} onChange={(event) => onChange(event.target.value)} className="absolute inset-x-0 bottom-0 h-10 cursor-pointer opacity-0" />
     </label>
   );
 }

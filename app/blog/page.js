@@ -1,13 +1,15 @@
+import { pageMetadata, breadcrumbs, PUBLIC_PAGES } from '@/lib/seo';
+import JsonLd from '@/components/site/JsonLd';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Reveal from '@/components/site/Reveal';
+import BookNowButton from '@/components/site/BookNowButton';
 import { BLOG_CATEGORIES } from '@/lib/data';
 import { listBlogPosts } from '@/lib/crm';
 import { Clock, ArrowRight, Search, User } from 'lucide-react';
 
-export const metadata = { title: 'Blog - ToursTaxi' };
+export const metadata = pageMetadata('/blog');
 export const dynamic = 'force-dynamic';
 
 export default async function BlogPage() {
@@ -22,6 +24,7 @@ export default async function BlogPage() {
   if (!featured) {
     return (
       <div className="pt-24">
+      <JsonLd data={breadcrumbs([{ name: PUBLIC_PAGES['/blog'][0], path: '/blog' }])} />
         <section className="py-20">
           <div className="mx-auto max-w-4xl px-4 text-center">
             <h1 className="text-3xl font-extrabold text-slate-950">No blog posts yet</h1>
@@ -34,6 +37,7 @@ export default async function BlogPage() {
 
   return (
     <div className="pt-24">
+      <JsonLd data={breadcrumbs([{ name: PUBLIC_PAGES['/blog'][0], path: '/blog' }])} />
       <section className="bg-gradient-to-br from-[#12233f] via-[#0f3f3b] to-[#071527] py-16 text-white sm:py-20">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">Travel Journal</div>
@@ -114,7 +118,7 @@ export default async function BlogPage() {
             <Card className="bg-[#12233f] text-white border-0"><CardContent className="p-5">
               <h4 className="font-bold text-lg">Need a cab now?</h4>
               <p className="text-sm opacity-90 mt-1">Get instant pricing in 30 seconds.</p>
-              <Link href="/#book"><Button className="mt-4 w-full bg-amber-400 text-slate-950 hover:bg-amber-300 font-bold">Book a Cab</Button></Link>
+              <BookNowButton className="mt-4 w-full bg-amber-400 text-slate-950 hover:bg-amber-300 font-bold">Book a Cab</BookNowButton>
             </CardContent></Card>
           </aside>
         </div>

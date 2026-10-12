@@ -1,11 +1,13 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { pageMetadata, breadcrumbs, PUBLIC_PAGES } from '@/lib/seo';
+import JsonLd from '@/components/site/JsonLd';
+import { Card, CardContent } from '@/components/ui/card';
 import Reveal from '@/components/site/Reveal';
+import BookNowButton from '@/components/site/BookNowButton';
 import { listTourPackages } from '@/lib/crm';
-import { Clock, Check, ArrowRight } from 'lucide-react';
+import { Clock, Check } from 'lucide-react';
 
-export const metadata = { title: 'Tour Packages - ToursTaxi' };
+export const metadata = pageMetadata('/tour-packages');
 export const dynamic = 'force-dynamic';
 
 export default async function ToursPage() {
@@ -13,6 +15,7 @@ export default async function ToursPage() {
 
   return (
     <div className="pt-24">
+      <JsonLd data={breadcrumbs([{ name: PUBLIC_PAGES['/tour-packages'][0], path: '/tour-packages' }])} />
       <section className="bg-gradient-to-br from-[#12233f] via-[#0f3f3b] to-[#071527] py-16 text-white sm:py-20">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">Tour Packages</div>
@@ -33,7 +36,7 @@ export default async function ToursPage() {
                   </div>
                   <CardContent className="sm:col-span-3 p-6 flex flex-col">
                     <div className="flex items-center gap-1.5 text-xs text-slate-500"><Clock className="h-3.5 w-3.5" />{p.duration}</div>
-                    <h3 className="text-2xl font-bold mt-1">{p.title}</h3>
+                    <h3 className="text-2xl font-bold mt-1"><Link href={`/tour-packages/${encodeURIComponent(p.slug)}`} className="hover:text-teal-700">{p.title}</Link></h3>
                     <p className="text-sm text-slate-600 mt-2 leading-relaxed">{p.description}</p>
                     <ul className="mt-4 grid grid-cols-2 gap-y-1.5 text-sm text-slate-700">
                       {p.inclusions.map(f => <li key={f} className="flex items-center gap-1.5"><Check className="h-4 w-4 text-teal-600" /> {f}</li>)}
@@ -43,7 +46,7 @@ export default async function ToursPage() {
                         <div className="text-[11px] text-slate-500">Starts at</div>
                         <div className="text-3xl font-extrabold text-slate-900">Rs {p.price.toLocaleString()}<span className="text-sm text-slate-500 font-medium"> / person</span></div>
                       </div>
-                      <Link href="/contact"><Button className="bg-amber-400 text-slate-950 hover:bg-amber-300">Book Now <ArrowRight className="h-4 w-4 ml-2" /></Button></Link>
+                      <BookNowButton prefill={{ tripType: 'round-trip', startStep: 0 }} className="bg-amber-400 text-slate-950 hover:bg-amber-300">Book Now</BookNowButton>
                     </div>
                   </CardContent>
                 </div>

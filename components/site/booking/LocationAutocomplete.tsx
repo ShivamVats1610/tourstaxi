@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Crosshair, Loader2, MapPin, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { fallbackSuggestions } from '@/lib/location-fallback';
 import type { LocationResult } from './types';
 
 type LocationAutocompleteProps = {
@@ -23,6 +24,18 @@ type PlacePrediction = {
   description?: string;
   coordinates?: [number, number];
 };
+
+function normalizePredictions(predictions: unknown): LocationResult[] {
+  if (!Array.isArray(predictions)) return [];
+
+  return predictions.map((place: PlacePrediction) => ({
+    id: String(place.id || place.description),
+    label: place.description || `${place.mainText || ''} ${place.secondaryText || ''}`.trim(),
+    name: place.mainText || place.description || '',
+    address: place.secondaryText || place.description || '',
+    coordinates: [Number(place.coordinates?.[0]), Number(place.coordinates?.[1])] as [number, number]
+  })).filter((item: LocationResult) => Number.isFinite(item.coordinates[0]) && Number.isFinite(item.coordinates[1]));
+}
 
 export default function LocationAutocomplete({
   label,
@@ -51,6 +64,14 @@ export default function LocationAutocomplete({
         url.searchParams.set('input', value);
         console.info('[mapbox:browser:autocomplete:request]', { inputLength: value.length });
         const response = await fetch(url);
+        if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+          console.warn('[mapbox:browser:autocomplete:fallback]', { status: response.status });
+          if (active) {
+            setServiceMessage('');
+            setSuggestions(normalizePredictions(fallbackSuggestions(value)));
+          }
+          return;
+        }
         const data = await response.json();
         console.info('[mapbox:browser:autocomplete:response]', {
           ok: response.ok,
@@ -61,27 +82,23 @@ export default function LocationAutocomplete({
         });
 
         if (response.status === 401 || response.status === 403 || data.mapboxError?.permissionIssue) {
-          setServiceMessage(data.mapboxError?.userMessage || 'Mapbox rejected the location search token.');
+          // The API still returns curated fallback locations. Keep deployment
+          // diagnostics in the console instead of exposing them to customers.
+          setServiceMessage('');
         } else if (data.error === 'missing-mapbox-token') {
-          setServiceMessage(data.userMessage || 'Location search is using fallback data because Mapbox is not configured.');
+          setServiceMessage('');
         } else {
           setServiceMessage('');
         }
 
-        const places = Array.isArray(data.predictions)
-          ? data.predictions.map((place: PlacePrediction) => ({
-              id: String(place.id || place.description),
-              label: place.description || `${place.mainText || ''} ${place.secondaryText || ''}`.trim(),
-              name: place.mainText || place.description || '',
-              address: place.secondaryText || place.description || '',
-              coordinates: [Number(place.coordinates?.[0]), Number(place.coordinates?.[1])] as [number, number]
-            })).filter((item: LocationResult) => Number.isFinite(item.coordinates[0]) && Number.isFinite(item.coordinates[1]))
-          : [];
+        const places = normalizePredictions(data.predictions);
         if (active) setSuggestions(places);
       } catch (error) {
-        console.error('[mapbox:browser:autocomplete:error]', error);
-        setServiceMessage('Location search is temporarily unavailable.');
-        if (active) setSuggestions([]);
+        console.warn('[mapbox:browser:autocomplete:fallback]', error);
+        if (active) {
+          setServiceMessage('');
+          setSuggestions(normalizePredictions(fallbackSuggestions(value)));
+        }
       } finally {
         if (active) setLoading(false);
       }

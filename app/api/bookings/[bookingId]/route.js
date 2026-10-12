@@ -17,6 +17,7 @@ export async function GET(_request, { params }) {
       id: settings.upiId || booking.upiId || UPI_ID,
       businessName: settings.upiBusinessName || booking.upiBusinessName || 'ToursTaxi',
       link: upiDeepLink(booking, settings),
+      showAppButtons: settings.showUpiAppButtons === true,
     },
   });
 }

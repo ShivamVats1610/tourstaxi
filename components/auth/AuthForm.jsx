@@ -4,14 +4,14 @@ import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { AlertCircle, ArrowRight, Car, Check, Lock, Mail, Phone, ShieldCheck, Sparkles, User } from 'lucide-react';
+import { AlertCircle, ArrowRight, Check, Lock, Mail, Phone, ShieldCheck, Sparkles, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createFirebaseSession, verifyLegacyLogin } from '@/app/actions/auth';
 import { firebaseAuth } from '@/lib/firebase';
 import { toast } from 'sonner';
 
-export default function AuthForm({ mode }) {
+export default function AuthForm({ mode, onAuthenticated, onModeChange, embedded = false }) {
   const isRegister = mode === 'register';
   const router = useRouter();
   const [role, setRole] = useState('customer');
@@ -56,8 +56,12 @@ export default function AuthForm({ mode }) {
         }
 
         toast.success(isRegister ? 'Account created' : 'Login successful', {
-          description: 'Opening your dashboard now.'
+          description: onAuthenticated ? 'Continue with your booking.' : 'Opening your dashboard now.'
         });
+        if (onAuthenticated) {
+          await onAuthenticated();
+          return;
+        }
         router.push(result.redirectTo);
         router.refresh();
       } catch (firebaseError) {
@@ -69,15 +73,15 @@ export default function AuthForm({ mode }) {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden pt-24">
+    <main className={embedded ? "relative p-4 sm:p-6" : "relative min-h-screen overflow-hidden pt-24"}>
       <div className="absolute inset-0">
         <img src="https://images.unsplash.com/photo-1625037669075-e5472e080265?crop=entropy&cs=srgb&fm=jpg&ixlib=rb-4.1.0&q=85" alt="ToursTaxi cab" className="h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-br from-[#071527]/90 via-[#12233f]/78 to-[#0f3f3b]/65" />
         <div className="absolute inset-0 bg-grid opacity-40" />
       </div>
 
-      <div className="relative mx-auto grid min-h-[calc(100vh-6rem)] max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
-        <section className="text-white">
+      <div className={embedded ? "relative mx-auto max-w-lg" : "relative mx-auto grid min-h-[calc(100vh-6rem)] max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8"}>
+        <section className={embedded ? "hidden" : "text-white"}>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider backdrop-blur">
             <Sparkles className="h-3.5 w-3.5 text-amber-300" /> ToursTaxi dashboard
           </div>
@@ -96,12 +100,12 @@ export default function AuthForm({ mode }) {
 
         <section className="rounded-2xl border border-white/20 bg-white p-6 shadow-2xl shadow-slate-950/30 sm:p-8">
           <div className="mb-6">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#12233f] text-white shadow-lg shadow-slate-950/20">
-              <Car className="h-5 w-5" />
+            <div className="mb-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-amber-400 bg-white shadow-lg shadow-slate-950/20">
+              <img src="/images/logo.png" alt="Tours Taxi" className="h-full w-full object-cover" />
             </div>
             <h2 className="text-3xl font-extrabold text-slate-950">{isRegister ? 'Create account' : 'Login'}</h2>
             <p className="mt-1 text-sm text-slate-500">
-              {isRegister ? 'Register as a customer or authorized admin.' : 'Access your ToursTaxi dashboard.'}
+              {embedded ? 'Sign in or create an account to save this booking to your dashboard.' : isRegister ? 'Register as a customer or authorized admin.' : 'Access your ToursTaxi dashboard.'}
             </p>
           </div>
 
@@ -130,7 +134,7 @@ export default function AuthForm({ mode }) {
               <Input name="password" type="password" required placeholder="Minimum 8 characters" />
             </Field>
 
-            {isRegister && (
+            {isRegister && !embedded && (
               <>
                 <div className="grid grid-cols-2 gap-2 rounded-md bg-slate-100 p-1">
                   {['customer', 'admin'].map((option) => (
@@ -161,9 +165,7 @@ export default function AuthForm({ mode }) {
 
           <div className="mt-6 text-center text-sm text-slate-500">
             {isRegister ? 'Already have an account?' : 'New to ToursTaxi?'}{' '}
-            <Link href={isRegister ? '/login' : '/register'} className="font-semibold text-teal-700 hover:text-teal-800">
-              {isRegister ? 'Sign in' : 'Create account'}
-            </Link>
+            {onModeChange ? <button type="button" onClick={() => onModeChange(isRegister ? 'login' : 'register')} className="font-semibold text-teal-700 hover:text-teal-800">{isRegister ? 'Sign in' : 'Create account'}</button> : <Link href={isRegister ? '/login' : '/register'} className="font-semibold text-teal-700 hover:text-teal-800">{isRegister ? 'Sign in' : 'Create account'}</Link>}
           </div>
         </section>
       </div>

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BookOpen, CalendarClock, Car, CheckCircle2, IndianRupee, LayoutDashboard, LogOut, Mail, Map, Plus, Settings, Trash2, Upload, Users } from 'lucide-react';
+import { BookOpen, CalendarClock, Car, CheckCircle2, IndianRupee, LayoutDashboard, LogOut, Mail, Map, Plus, Search, Settings, Trash2, Upload, Users, X } from 'lucide-react';
 import { logoutAction } from '@/app/actions/auth';
 import { deleteBlogPostAction, deleteBookingAction, deleteCabAction, deleteContactMessageAction, deletePopularRouteAction, deleteTourPackageAction, deleteUserAction, saveBlogPostAction, saveCabAction, savePopularRouteAction, saveTourPackageAction, updateBookingAction, updatePricingSettingsAction, updateUserAction, verifyUpiPaymentAction } from '@/app/actions/crm';
 import ToastSubmitButton from '@/components/ui/toast-submit-button';
@@ -87,10 +87,18 @@ export function Panel({ title, subtitle, icon: Icon, children, className = '' })
   );
 }
 
-export function BookingTable({ bookings, title = 'Bookings', tone = 'default' }) {
+export function BookingTable({ bookings, title = 'Bookings', tone = 'default', searchQuery = '' }) {
   const oldTone = tone === 'old';
   return (
     <Panel title={title} subtitle={oldTone ? 'Past trips, booking requests, and payment requests are kept here for records.' : 'Booking request and payment request are shown together for each customer.'} icon={CalendarClock} className={oldTone ? 'border-slate-300 bg-slate-50' : ''}>
+      <form method="get" className="mb-4 grid gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[1fr_auto_auto]">
+        <label className="relative min-w-0">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input name="q" defaultValue={searchQuery} placeholder="Search booking ID, name, phone, email, place, cab, status, fare..." className="h-11 w-full rounded-md border border-slate-300 bg-white pl-9 pr-3 text-sm font-semibold outline-none placeholder:text-slate-500 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15" />
+        </label>
+        <button className="inline-flex h-11 items-center justify-center rounded-md bg-teal-700 px-4 text-sm font-black text-white hover:bg-teal-800"><Search className="mr-2 h-4 w-4" /> Search</button>
+        {searchQuery && <Link href="?" className="inline-flex h-11 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-black text-slate-700 hover:bg-slate-100"><X className="mr-2 h-4 w-4" /> Clear</Link>}
+      </form>
       <div className="grid gap-3 xl:hidden">
         {bookings.map((booking) => (
           <article key={booking.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -180,7 +188,7 @@ export function CabManager({ cabs }) {
               <summary className="cursor-pointer list-none p-4 hover:bg-slate-50">
                 <div className="grid gap-3 sm:grid-cols-[92px_1fr_auto] sm:items-center">
                   <div className="flex h-20 items-center justify-center rounded-md bg-slate-100 p-2">{cab.image ? <img src={cab.image} alt={cab.name} className="max-h-full max-w-full object-contain" /> : <Car className="h-8 w-8 text-slate-400" />}</div>
-                  <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h3 className="font-black">{cab.name || 'Unnamed cab'}</h3><StatusBadge status={cab.status || 'active'} /></div><div className="mt-1 break-words text-sm font-semibold text-slate-700">{cab.category || 'Category not set'} | {cab.seats || 4} seats | CNG Rs {cab.pricePerKm || 0}/km | Petrol Rs {cab.petrolPricePerKm || cab.pricePerKm || 0}/km | Local Rs {cab.localPricePerKm || cab.pricePerKm || 0}/km</div><div className="mt-1 break-words text-xs font-medium text-slate-500">{cab.features?.join?.(', ') || 'No features added yet'}</div></div>
+                  <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h3 className="font-black">{cab.name || 'Unnamed cab'}</h3><StatusBadge status={cab.status || 'active'} /></div><div className="mt-1 break-words text-sm font-semibold text-slate-700">{cab.category || 'Category not set'} | {cab.seats || 4} seats | CNG Rs {cab.pricePerKm || 0}/km | Petrol Rs {cab.petrolPricePerKm || cab.pricePerKm || 0}/km | Local CNG Rs {cab.localPricePerKm || cab.pricePerKm || 0}/km | Local Petrol Rs {cab.localPetrolPricePerKm || cab.petrolPricePerKm || cab.pricePerKm || 0}/km</div><div className="mt-1 break-words text-xs font-medium text-slate-500">{cab.features?.join?.(', ') || 'No features added yet'}</div></div>
                   <div className="text-xs font-bold uppercase tracking-wide text-teal-700">Open editor</div>
                 </div>
               </summary>
@@ -322,7 +330,14 @@ function CabForm({ cab = {} }) {
       <input type="hidden" name="id" defaultValue={cab.id || ''} />
       <Field name="name" label="Cab Name" defaultValue={cab.name} placeholder="Swift Dzire" required />
       <Field name="slug" label="Slug" defaultValue={cab.slug} placeholder="swift-dzire" />
-      <div className="grid gap-3 sm:grid-cols-2"><Field name="category" label="Category" defaultValue={cab.category} /><Field name="badge" label="Badge" defaultValue={cab.badge} /><Field name="seats" label="Seats" type="number" min="1" defaultValue={cab.seats || 4} /><Field name="luggage" label="Luggage" defaultValue={cab.luggage} /><Field name="pricePerKm" label="CNG Price Per Km" type="number" min="0" step="0.1" defaultValue={cab.pricePerKm || 0} /><Field name="petrolPricePerKm" label="Petrol Price Per Km" type="number" min="0" step="0.1" defaultValue={cab.petrolPricePerKm || cab.pricePerKm || 0} /><Field name="localPricePerKm" label="Local Price Per Km" type="number" min="0" step="0.1" defaultValue={cab.localPricePerKm || cab.pricePerKm || 0} /><Field name="startPrice" label="Start Price" type="number" min="0" defaultValue={cab.startPrice || 0} /></div>
+      {!cab.id && <p className="text-xs text-slate-500">Leave the slug blank to generate it from the cab name. Cars with the same name are added separately.</p>}
+      <div className="grid gap-3 sm:grid-cols-2"><Field name="category" label="Category" defaultValue={cab.category} /><Field name="badge" label="Badge" defaultValue={cab.badge} /><Field name="seats" label="Seats" type="number" min="1" defaultValue={cab.seats || 4} /><Field name="luggage" label="Luggage" defaultValue={cab.luggage} /></div>
+      <div className="grid gap-3 rounded-md border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2">
+        <Field name="pricePerKm" label="CNG Price Per Km" type="number" min="0" step="0.1" defaultValue={cab.pricePerKm || 0} />
+        <Field name="localPricePerKm" label="Local CNG Price Per Km" type="number" min="0" step="0.1" defaultValue={cab.localPricePerKm || cab.pricePerKm || 0} />
+        <Field name="startPrice" label="Start Price" type="number" min="0" defaultValue={cab.startPrice || 0} />
+      </div>
+      <p className="text-xs text-slate-500">Petrol and diesel rates are calculated from the CNG rates plus the per-km surcharges in Fare Settings.</p>
       <div className="grid gap-3 sm:grid-cols-3"><Field name="local4hrPrice" label="4hrs | 40km Price" type="number" min="0" defaultValue={cab.local4hrPrice || ''} /><Field name="local8hrPrice" label="8hrs | 80km Price" type="number" min="0" defaultValue={cab.local8hrPrice || ''} /><Field name="local12hrPrice" label="12hrs | 120km Price" type="number" min="0" defaultValue={cab.local12hrPrice || ''} /></div>
       <Field name="image" label="Image URL" defaultValue={cab.image} />
       <label className="text-xs font-bold uppercase tracking-wider text-slate-700"><span className="mb-1 flex items-center gap-1.5"><Upload className="h-3.5 w-3.5 text-teal-600" /> Upload Cab Image</span><input name="imageFile" type="file" accept="image/*" className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-950 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white" /></label>
@@ -387,7 +402,7 @@ export function Customers({ users }) {
 
 export function PricingSettingsForm({ settings }) {
   return (
-    <Panel title="Fare Calculation Settings" subtitle="Control minimum kilometer rules and advance payment from the admin panel." icon={IndianRupee}>
+    <Panel title="Website & Fare Settings" subtitle="Edit website phone numbers, social links, booking availability, fare rules, and advance payment." icon={IndianRupee}>
       <form action={updatePricingSettingsAction} className="grid gap-4">
         <div className="grid gap-3 md:grid-cols-2">
           <Field name="minimumBillingKmPerDay" label="Default Minimum KM" type="number" min="0" defaultValue={settings.minimumBillingKmPerDay} />
@@ -396,17 +411,24 @@ export function PricingSettingsForm({ settings }) {
           <Field name="roundTripMinimumKmPerDay" label="Round Trip KM Per Day" type="number" min="0" defaultValue={settings.roundTripMinimumKmPerDay} />
           <Field name="localMinimumKm" label="Local Minimum KM" type="number" min="0" defaultValue={settings.localMinimumKm} />
           <Field name="advancePercent" label="Advance Payment %" type="number" min="0" max="100" step="1" defaultValue={settings.advancePercent} />
-          <Field name="roundTripDiscountPercent" label="Round Trip Discount %" type="number" min="0" max="100" step="1" defaultValue={settings.roundTripDiscountPercent} />
+          <Field name="pickupLeadTimeMinutes" label="Booking Start After Minutes" type="number" min="0" step="5" defaultValue={settings.pickupLeadTimeMinutes} />
+          <Field name="roundTripReturnLeadTimeMinutes" label="Round Trip Return After Minutes" type="number" min="0" step="5" defaultValue={settings.roundTripReturnLeadTimeMinutes} />
+          <Field name="offerDiscountPercent" label="Offer Discount %" type="number" min="0" max="100" step="0.1" defaultValue={settings.offerDiscountPercent} />
+          <Field name="roundTripDiscountPercent" label="Round Trip Discount %" type="number" min="0" max="100" step="0.1" defaultValue={settings.roundTripDiscountPercent} />
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           <Field name="oneWayBaseFare" label="One Way Base Fare" type="number" min="0" defaultValue={settings.oneWayBaseFare} />
           <Field name="roundTripBaseFare" label="Round Trip Base Fare" type="number" min="0" defaultValue={settings.roundTripBaseFare} />
           <Field name="airportBaseFare" label="Airport Base Fare" type="number" min="0" defaultValue={settings.airportBaseFare} />
           <Field name="localBaseFare" label="Local Base Fare" type="number" min="0" defaultValue={settings.localBaseFare} />
-          <Field name="driverAllowancePerDay" label="Driver Night Charge" type="number" min="0" defaultValue={settings.driverAllowancePerDay} />
-          <Field name="nightChargeStartTime" label="Night Charge Start Time" type="time" defaultValue={settings.nightChargeStartTime || '21:00'} />
-          <Field name="nightChargeEndTime" label="Night Charge End Time" type="time" defaultValue={settings.nightChargeEndTime || '06:00'} />
+          <Field name="driverAllowancePerDay" label="Driver Night Charge Amount" type="number" min="0" defaultValue={settings.driverAllowancePerDay} />
+          <Field name="nightChargeStartTime" label="Driver Night Charge Start" type="time" defaultValue={formatTimeInput(settings.nightChargeStartTime || '21:00')} />
+          <Field name="nightChargeEndTime" label="Driver Night Charge End" type="time" defaultValue={formatTimeInput(settings.nightChargeEndTime || '06:00')} />
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-900 md:col-span-2">
+            Driver night charge is added when any part of the trip overlaps this time window, including trips already running after midnight.
+          </div>
           <Field name="gstPercent" label="GST %" type="number" min="0" max="100" step="0.1" defaultValue={settings.gstPercent} />
+          <Field name="petrolSurchargePerKm" label="Petrol Extra Per KM (above CNG)" type="number" min="0" step="0.1" defaultValue={settings.petrolSurchargePerKm} />
           <Field name="dieselSurchargePerKm" label="Diesel Car Guarantee Per KM" type="number" min="0" step="0.1" defaultValue={settings.dieselSurchargePerKm} />
           <Field name="carrierAddonPrice" label="Luggage Carrier Add-on" type="number" min="0" defaultValue={settings.carrierAddonPrice} />
           <Field name="newCarAddonPrice" label="New Car Promise Add-on" type="number" min="0" defaultValue={settings.newCarAddonPrice} />
@@ -429,6 +451,14 @@ export function PricingSettingsForm({ settings }) {
             </select>
             <span className="mt-1 block text-[11px] font-semibold normal-case tracking-normal text-slate-500">Use this when only one way trips should be temporarily stopped.</span>
           </label>
+          <label className="min-w-0 text-xs font-bold uppercase tracking-wider text-slate-700">
+            Duty Off Call Button
+            <select name="showDutyOffCallButton" defaultValue={settings.showDutyOffCallButton === false ? 'off' : 'on'} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold normal-case tracking-normal outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15">
+              <option value="on">Show Call Button During Duty Off</option>
+              <option value="off">Hide Call Button During Duty Off</option>
+            </select>
+            <span className="mt-1 block text-[11px] font-semibold normal-case tracking-normal text-slate-500">When service is off, customers can still call for emergency or urgent booking help.</span>
+          </label>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field name="dutyOffStart" label="Scheduled Off From" type="datetime-local" defaultValue={settings.dutyOffStart} />
             <Field name="dutyOffEnd" label="Scheduled Off Until" type="datetime-local" defaultValue={settings.dutyOffEnd} />
@@ -441,15 +471,24 @@ export function PricingSettingsForm({ settings }) {
         <div className="grid gap-3 md:grid-cols-2">
           <Field name="upiId" label="UPI ID / VPA" defaultValue={settings.upiId} placeholder="merchant1305070.augp@aubank" />
           <Field name="upiBusinessName" label="UPI Business Name" defaultValue={settings.upiBusinessName} placeholder="ToursTaxi" />
+          <label className="min-w-0 text-xs font-bold uppercase tracking-wider text-slate-700">
+            UPI App Buttons
+            <select name="showUpiAppButtons" defaultValue={settings.showUpiAppButtons ? 'on' : 'off'} className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold normal-case tracking-normal outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15">
+              <option value="off">Hide Google Pay / PhonePe Buttons</option>
+              <option value="on">Show Google Pay / PhonePe Buttons</option>
+            </select>
+            <span className="mt-1 block text-[11px] font-semibold normal-case tracking-normal text-slate-500">QR code always remains visible on the payment page.</span>
+          </label>
           <Field name="facebookUrl" label="Facebook Page" defaultValue={settings.facebookUrl} placeholder="https://facebook.com/..." />
           <Field name="instagramUrl" label="Instagram" defaultValue={settings.instagramUrl} placeholder="https://instagram.com/..." />
           <Field name="youtubeUrl" label="YouTube" defaultValue={settings.youtubeUrl} placeholder="https://youtube.com/..." />
           <Field name="xUrl" label="X Account" defaultValue={settings.xUrl} placeholder="https://x.com/..." />
           <Field name="googleBusinessUrl" label="Google Business Profile" defaultValue={settings.googleBusinessUrl} placeholder="https://g.page/..." />
           <Field name="whatsappNumber" label="WhatsApp Number" defaultValue={settings.whatsappNumber} placeholder="+918955458128" />
-          <Field name="callingNumber" label="Calling Mobile Number" defaultValue={settings.callingNumber} placeholder="+918955458128" />
+          <Field name="callingNumber" label="Website Calling Number" defaultValue={settings.callingNumber} placeholder="+918955458128" />
+          <Field name="websiteEmail" label="Website Email Address" type="email" defaultValue={settings.websiteEmail} placeholder="tourstaxi.com@gmail.com" />
         </div>
-        <div className="break-words rounded-lg border border-teal-100 bg-teal-50 p-4 text-sm font-semibold text-teal-950">Car rates come from Add Cab. These rules add minimum KM, base fare, driver allowance, GST, diesel surcharge, and advance payment across one way, round trip, local, and airport bookings.</div>
+        <div className="break-words rounded-lg border border-teal-100 bg-teal-50 p-4 text-sm font-semibold text-teal-950">Car rates come from Add Cab. These rules add minimum KM, base fare, driver allowance, GST, petrol and diesel surcharges, and advance payment across one way, round trip, local, and airport bookings.</div>
         <ToastSubmitButton message="Saving fare settings" description="Fare calculation policy is being updated." className="h-11 w-full rounded-md bg-teal-700 px-4 text-sm font-black text-white hover:bg-teal-800 sm:w-fit">Save Fare Settings</ToastSubmitButton>
       </form>
     </Panel>
@@ -561,13 +600,13 @@ function BookingScheduleFields({ booking, compact = false }) {
 function PaymentReview({ booking, compact = false }) {
   const paymentStatus = booking.paymentStatus || booking.payment?.status || 'pending';
   const amount = booking.paymentAmount || booking.payment?.amount || booking.fare?.total;
-  const canVerify = ['pending', 'pending_payment', 'pending_verification', 'rejected'].includes(paymentStatus) || ['pending_payment', 'pending_verification', 'payment_rejected'].includes(booking.status);
+  const canVerify = paymentStatus !== 'pay_after_ride' && (['pending', 'pending_payment', 'pending_verification', 'rejected'].includes(paymentStatus) || ['pending_payment', 'pending_verification', 'payment_rejected'].includes(booking.status));
   return (
-    <div className={`mt-3 rounded-md border ${paymentStatus === 'paid' ? 'border-emerald-200 bg-emerald-50' : paymentStatus === 'rejected' ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'} p-2 text-xs`}>
+    <div className={`mt-3 rounded-md border ${paymentStatus === 'paid' ? 'border-emerald-200 bg-emerald-50' : paymentStatus === 'pay_after_ride' ? 'border-sky-200 bg-sky-50' : paymentStatus === 'rejected' ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'} p-2 text-xs`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="font-black text-slate-950">Payment Request</div>
-          <div className="mt-1 font-semibold text-slate-700">Amount: {money(amount)}</div>
+          <div className="mt-1 font-semibold text-slate-700">{paymentStatus === 'pay_after_ride' ? `Collect after ride: ${money(booking.fare?.total || amount)}` : `Amount: ${money(amount)}`}</div>
           {booking.paymentReference && <div className="mt-1 break-words font-semibold text-slate-700">Ref: {booking.paymentReference}</div>}
         </div>
         <StatusBadge status={paymentStatus} />
@@ -596,7 +635,7 @@ function PaymentReview({ booking, compact = false }) {
 
 function StatusBadge({ status, className = '' }) {
   const value = String(status || 'new');
-  const tones = { active: 'bg-emerald-50 text-emerald-700 ring-emerald-200', inactive: 'bg-slate-100 text-slate-600 ring-slate-200', pending: 'bg-amber-50 text-amber-700 ring-amber-200', pending_payment: 'bg-amber-50 text-amber-700 ring-amber-200', pending_verification: 'bg-sky-50 text-sky-700 ring-sky-200', payment_rejected: 'bg-red-50 text-red-700 ring-red-200', rejected: 'bg-red-50 text-red-700 ring-red-200', paid: 'bg-emerald-50 text-emerald-700 ring-emerald-200', new: 'bg-amber-50 text-amber-700 ring-amber-200', assigned: 'bg-teal-50 text-teal-700 ring-teal-200', confirmed: 'bg-emerald-50 text-emerald-700 ring-emerald-200', completed: 'bg-slate-950 text-white ring-slate-950', cancelled: 'bg-red-50 text-red-700 ring-red-200', admin: 'bg-teal-50 text-teal-700 ring-teal-200', customer: 'bg-slate-100 text-slate-700 ring-slate-200' };
+  const tones = { active: 'bg-emerald-50 text-emerald-700 ring-emerald-200', inactive: 'bg-slate-100 text-slate-600 ring-slate-200', pending: 'bg-amber-50 text-amber-700 ring-amber-200', pending_payment: 'bg-amber-50 text-amber-700 ring-amber-200', pending_verification: 'bg-sky-50 text-sky-700 ring-sky-200', pay_after_ride: 'bg-sky-50 text-sky-700 ring-sky-200', payment_rejected: 'bg-red-50 text-red-700 ring-red-200', rejected: 'bg-red-50 text-red-700 ring-red-200', paid: 'bg-emerald-50 text-emerald-700 ring-emerald-200', new: 'bg-amber-50 text-amber-700 ring-amber-200', assigned: 'bg-teal-50 text-teal-700 ring-teal-200', confirmed: 'bg-emerald-50 text-emerald-700 ring-emerald-200', completed: 'bg-slate-950 text-white ring-slate-950', cancelled: 'bg-red-50 text-red-700 ring-red-200', admin: 'bg-teal-50 text-teal-700 ring-teal-200', customer: 'bg-slate-100 text-slate-700 ring-slate-200' };
   return <span className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wide ring-1 ${tones[value] || tones.new} ${className}`}>{value}</span>;
 }
 
@@ -627,4 +666,10 @@ export function formatClock(value) {
   const date = new Date();
   date.setHours(Number(hours) || 0, Number(minutes) || 0, 0, 0);
   return date.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+function formatTimeInput(value) {
+  const match = String(value || '').match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return '';
+  return `${String(Number(match[1]) || 0).padStart(2, '0')}:${match[2]}`;
 }

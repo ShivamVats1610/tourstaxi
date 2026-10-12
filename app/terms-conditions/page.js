@@ -1,8 +1,19 @@
-export const metadata = { title: 'Terms & Conditions - ToursTaxi' };
+import { pageMetadata, breadcrumbs, PUBLIC_PAGES } from '@/lib/seo';
+import JsonLd from '@/components/site/JsonLd';
+import { COMPANY } from '@/lib/data';
+import { getPricingSettings } from '@/lib/pricing-settings';
+import { formatPhoneNumber } from '@/lib/phone-utils';
 
-export default function TermsPage() {
+export const metadata = pageMetadata('/terms-conditions');
+
+export default async function TermsPage() {
+  const settings = await getPricingSettings();
+  const phone = formatPhoneNumber(settings.callingNumber || COMPANY.phoneRaw);
+  const email = settings.websiteEmail || COMPANY.email;
+
   return (
     <div className="pt-24">
+      <JsonLd data={breadcrumbs([{ name: PUBLIC_PAGES['/terms-conditions'][0], path: '/terms-conditions' }])} />
       <section className="py-20 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 text-white">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-orange-300 text-xs font-semibold uppercase tracking-wider mb-4">Legal</div>
@@ -28,7 +39,7 @@ export default function TermsPage() {
           <h2>Governing law</h2>
           <p>These terms are governed by the laws of India. Disputes are subject to the exclusive jurisdiction of courts in Sawai Madhopur, Rajasthan.</p>
           <h2>Contact</h2>
-          <p>For any clarifications, write to tourstaxi.com@gmail.com or call +91 8955458128.</p>
+          <p>For any clarifications, write to {email} or call {phone}.</p>
         </article>
       </section>
     </div>

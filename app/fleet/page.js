@@ -1,11 +1,13 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { pageMetadata, breadcrumbs, PUBLIC_PAGES } from '@/lib/seo';
+import JsonLd from '@/components/site/JsonLd';
+import { Card, CardContent } from '@/components/ui/card';
 import Reveal from '@/components/site/Reveal';
+import BookNowButton from '@/components/site/BookNowButton';
 import { listCabs } from '@/lib/crm';
-import { Users, Briefcase, Check, ArrowRight } from 'lucide-react';
+import { Users, Briefcase, Check } from 'lucide-react';
 
-export const metadata = { title: 'Fleet - ToursTaxi' };
+export const metadata = pageMetadata('/fleet');
 
 export const dynamic = 'force-dynamic';
 
@@ -14,10 +16,11 @@ export default async function FleetPage() {
 
   return (
     <div className="pt-24">
+      <JsonLd data={breadcrumbs([{ name: PUBLIC_PAGES['/fleet'][0], path: '/fleet' }])} />
       <section className="bg-gradient-to-br from-[#12233f] via-[#0f3f3b] to-[#071527] py-16 text-white sm:py-20">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">Our Fleet</div>
-          <h1 className="text-3xl md:text-5xl font-extrabold">Six cabs. One promise of comfort.</h1>
+          <h1 className="text-3xl md:text-5xl font-extrabold">Choose your cab for Rajasthan travel</h1>
           <p className="mt-4 text-white/80 text-lg">Sanitised, GPS-tracked and serviced fortnightly - pick the cab that fits your trip.</p>
         </div>
       </section>
@@ -34,7 +37,7 @@ export default async function FleetPage() {
                   </div>
                   <CardContent className="sm:col-span-3 p-6 flex flex-col">
                     <div className="text-xs text-teal-700 font-semibold uppercase tracking-wider">{v.category}</div>
-                    <h3 className="text-2xl font-bold mt-1">{v.name}</h3>
+                    <h3 className="text-2xl font-bold mt-1"><Link href={`/fleet/${encodeURIComponent(v.slug)}`} className="hover:text-teal-700">{v.name}</Link></h3>
                     <div className="flex flex-wrap gap-4 mt-3 text-sm text-slate-600">
                       <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{v.seats} Seater</span>
                       <span className="flex items-center gap-1.5"><Briefcase className="h-4 w-4" />{v.luggage}</span>
@@ -49,7 +52,7 @@ export default async function FleetPage() {
                         <div className="text-3xl font-extrabold text-slate-900">Rs {v.startPrice.toLocaleString()}<span className="text-sm text-slate-500 font-medium"> / trip</span></div>
                         <div className="text-xs text-slate-500">Rs {v.pricePerKm}/km / incl. driver & fuel</div>
                       </div>
-                      <Link href="/#book"><Button className="bg-amber-400 text-slate-950 hover:bg-amber-300">Book Now <ArrowRight className="h-4 w-4 ml-2" /></Button></Link>
+                      <BookNowButton prefill={{ vehicleSlug: v.slug, startStep: 0 }} className="bg-amber-400 text-slate-950 hover:bg-amber-300">Book Now</BookNowButton>
                     </div>
                   </CardContent>
                 </div>

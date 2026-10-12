@@ -1,3 +1,6 @@
+import JsonLd from '@/components/site/JsonLd';
+import { pageMetadata, plainDescription, breadcrumbs, absoluteUrl } from '@/lib/seo';
+import { cache } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,17 +10,19 @@ import { listBlogPosts } from '@/lib/crm';
 import { Clock, User, ArrowLeft, ArrowRight, Calendar } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
+const getPosts = cache(() => listBlogPosts());
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const posts = await listBlogPosts();
+  const posts = await getPosts();
   const p = posts.find(b => b.slug === slug);
-  return { title: p ? `${p.title} - ToursTaxi Blog` : 'Blog - ToursTaxi' };
+  if (!p) notFound();
+  return pageMetadata('/blog/' + encodeURIComponent(slug), { title: p.title, description: plainDescription(p.excerpt || p.content, 'Read ' + p.title + ' on the ToursTaxi travel blog.'), image: p.image, type: 'article' });
 }
 
 export default async function BlogSinglePage({ params }) {
   const { slug } = await params;
-  const posts = await listBlogPosts();
+  const posts = await getPosts();
   const post = posts.find(p => p.slug === slug);
   if (!post) return notFound();
   const categories = [...new Set(posts.map((item) => item.category).filter(Boolean))].map((name) => ({
@@ -30,6 +35,8 @@ export default async function BlogSinglePage({ params }) {
 
   return (
     <div className="pt-24">
+      <JsonLd data={breadcrumbs([{ name: 'Travel Blog', path: '/blog' }, { name: post.title, path: '/blog/' + encodeURIComponent(slug) }])} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BlogPosting', headline: post.title, description: plainDescription(post.excerpt || post.content), image: post.image ? absoluteUrl(post.image) : undefined, mainEntityOfPage: absoluteUrl('/blog/' + encodeURIComponent(slug)), author: post.author ? { '@type': 'Person', name: post.author } : { '@id': absoluteUrl('/#business') }, publisher: { '@id': absoluteUrl('/#business') }, ...(post.createdAt ? { datePublished: new Date(post.createdAt).toISOString() } : {}), ...(post.updatedAt ? { dateModified: new Date(post.updatedAt).toISOString() } : {}) }} />
       <section className="relative">
         <div className="relative h-[55vh] overflow-hidden">
           <img src={post.image} alt={post.title} className="w-full h-full object-cover" />

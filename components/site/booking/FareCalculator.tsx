@@ -105,7 +105,10 @@ export default function FareCalculator({
           stops: stableStopCoordinates.length || stableStopLabels.length
         });
         const response = await fetch(url);
-        const data = await response.json();
+        const contentType = response.headers.get('content-type') || '';
+        const data = contentType.includes('application/json')
+          ? await response.json()
+          : { error: 'route-api-unavailable', userMessage: 'Route service is temporarily unavailable.' };
         console.info('[mapbox:browser:route:response]', {
           ok: response.ok,
           status: response.status,
@@ -137,7 +140,7 @@ export default function FareCalculator({
         onRouteChange?.(nextRoute);
         onFareChange?.(null);
       } catch (error) {
-        console.error('[mapbox:browser:route:error]', error);
+        console.warn('[mapbox:browser:route:fallback]', error);
         setServiceMessage(error instanceof Error ? error.message : 'Route calculation is temporarily unavailable.');
         if (active) {
           setRoute(null);

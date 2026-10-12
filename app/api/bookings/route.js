@@ -41,6 +41,10 @@ return domain.includes('.') && !domain.startsWith('.') && !domain.endsWith('.');
 
 export async function POST(request) {
 try {
+const session = await getSession();
+if (!session?.userId) {
+  return Response.json({ success: false, error: 'Please log in before booking.' }, { status: 401 });
+}
 const body = await request.json();
 
 

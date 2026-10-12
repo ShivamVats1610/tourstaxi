@@ -1,3 +1,6 @@
+import { SITE_URL, PUBLIC_PAGES, businessSchema } from '@/lib/seo';
+import { COMPANY } from '@/lib/data';
+import JsonLd from '@/components/site/JsonLd';
 import './globals.css';
 import { Inter } from 'next/font/google';
 import Header from '@/components/site/Header';
@@ -13,14 +16,12 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'ToursTaxi - Premium Cab Booking & Rajasthan Tours',
-  description: 'Book outstation cabs, airport transfers and curated Rajasthan tour packages with ToursTaxi. Verified drivers, transparent pricing, 24x7 support. 100+ cities.',
-  keywords: 'cab booking, ranthambore taxi, jaipur taxi, golden triangle tour, outstation cab, ToursTaxi',
-  icons: {
-    icon: '/icon.svg',
-    shortcut: '/icon.svg',
-    apple: '/icon.svg'
-  }
+  metadataBase: new URL(SITE_URL),
+  title: { default: 'ToursTaxi | Sawai Madhopur Taxi & Rajasthan Tours', template: '%s | ToursTaxi' },
+  description: PUBLIC_PAGES['/'][1],
+  applicationName: 'ToursTaxi',
+  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
+  icons: { icon: '/icon.png', shortcut: '/icon.png', apple: '/apple-icon.png' },
 };
 
 export default async function RootLayout({ children }) {
@@ -32,6 +33,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en" className={inter.variable}>
       <body className="bg-slate-50 font-sans text-slate-900 antialiased">
+        <JsonLd data={businessSchema(COMPANY, settings)} />
         <BookingProvider cabs={cabs}>
           <Header settings={settings} />
           <main className="min-h-screen">{children}</main>

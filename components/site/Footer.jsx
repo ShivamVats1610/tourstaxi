@@ -3,18 +3,29 @@
 import Link from 'next/link';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { COMPANY, NAV } from '@/lib/data';
+import { formatPhoneNumber, phoneHref } from '@/lib/phone-utils';
 import { usePathname } from 'next/navigation';
+
+const SOCIAL_ICONS = {
+  facebook: '/images/social/facebook.svg',
+  instagram: '/images/social/instagram.svg',
+  x: '/images/social/x.svg',
+  youtube: '/images/social/youtube.svg',
+  google: '/images/social/google.svg',
+};
 
 export default function Footer({ settings = {} }) {
   const pathname = usePathname();
   const phone = settings.callingNumber || COMPANY.phoneRaw;
+  const phoneLabel = formatPhoneNumber(phone);
+  const email = settings.websiteEmail || COMPANY.email;
   const socials = [
-    ['f', settings.facebookUrl],
-    ['ig', settings.instagramUrl],
-    ['x', settings.xUrl],
-    ['yt', settings.youtubeUrl],
-    ['g', settings.googleBusinessUrl],
-  ].filter(([, href]) => href);
+    ['facebook', 'Facebook', settings.facebookUrl],
+    ['instagram', 'Instagram', settings.instagramUrl],
+    ['x', 'X', settings.xUrl],
+    ['youtube', 'YouTube', settings.youtubeUrl],
+    ['google', 'Google Business', settings.googleBusinessUrl],
+  ].filter(([key, , href]) => href || key === 'youtube');
 
   if (pathname?.startsWith('/admin')) return null;
 
@@ -23,16 +34,24 @@ export default function Footer({ settings = {} }) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-10 lg:grid-cols-4">
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <img src="/icon.svg" alt="" className="h-10 w-10 rounded-xl shadow-lg" />
+            <img src="/images/logo.png" alt="" className="h-10 w-10 rounded-full border border-amber-400 bg-white object-cover shadow-lg" />
             <div>
-              <div className="text-white font-extrabold text-lg">Tours<span className="text-teal-300">Taxi</span></div>
-              <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Premium Cab Rentals</div>
+              <div className="text-white font-extrabold text-lg">Tours <span className="text-amber-300">Taxi</span></div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">{COMPANY.legalName}</div>
             </div>
           </div>
-          <p className="text-sm text-slate-400 leading-relaxed mb-4">India most-trusted cab partner for outstation trips, airport transfers and curated Rajasthan tours - serving 100+ cities since 2014.</p>
+          <p className="text-sm text-slate-400 leading-relaxed mb-4">ToursTaxi by {COMPANY.legalName} is a trusted cab partner for outstation trips, airport transfers and curated Rajasthan tours from Sawai Madhopur.</p>
           <div className="flex gap-3">
-            {socials.map(([label, href]) => (
-              <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="h-9 w-9 rounded-full bg-white/10 hover:bg-teal-700 flex items-center justify-center text-xs font-bold uppercase text-white transition-colors">{label}</a>
+            {socials.map(([key, label, href]) => (
+              href ? (
+                <a key={key} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label} className="flex h-9 w-9 items-center justify-center rounded-full bg-white transition-colors hover:bg-white/90">
+                  <img src={SOCIAL_ICONS[key]} alt="" className="h-5 w-5 object-contain" />
+                </a>
+              ) : (
+                <span key={key} aria-label={`${label} coming soon`} title={`${label} coming soon`} className="flex h-9 w-9 items-center justify-center rounded-full bg-white/70 opacity-75">
+                  <img src={SOCIAL_ICONS[key]} alt="" className="h-5 w-5 object-contain" />
+                </span>
+              )
             ))}
           </div>
         </div>
@@ -56,15 +75,16 @@ export default function Footer({ settings = {} }) {
         <div>
           <h4 className="text-white font-semibold mb-4">Get in Touch</h4>
           <ul className="space-y-3 text-sm">
+            <li className="font-bold text-white">{COMPANY.legalName}</li>
             <li className="flex gap-3"><MapPin className="h-5 w-5 text-amber-400 shrink-0" /><span>{COMPANY.address}</span></li>
-            <li className="flex gap-3"><Phone className="h-5 w-5 text-amber-400 shrink-0" /><a href={`tel:${phone}`} className="hover:text-teal-300">{phone}</a></li>
-            <li className="flex gap-3"><Mail className="h-5 w-5 text-amber-400 shrink-0" /><a href={`mailto:${COMPANY.email}`} className="hover:text-teal-300 break-all">{COMPANY.email}</a></li>
+            <li className="flex gap-3"><Phone className="h-5 w-5 text-amber-400 shrink-0" /><a href={phoneHref(phone)} className="hover:text-teal-300">{phoneLabel}</a></li>
+            <li className="flex gap-3"><Mail className="h-5 w-5 text-amber-400 shrink-0" /><a href={`mailto:${email}`} className="hover:text-teal-300 break-all">{email}</a></li>
           </ul>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-        <div>&copy; {new Date().getFullYear()} ToursTaxi. All rights reserved. Powered by Amar Web Connect.</div>
+        <div>&copy; {new Date().getFullYear()} ToursTaxi / {COMPANY.legalName}. All rights reserved. Powered by Amar Web Connect.</div>
         <div className="flex gap-5">
           <Link href="/privacy-policy" className="hover:text-teal-300">Privacy Policy</Link>
           <Link href="/terms-conditions" className="hover:text-teal-300">Terms & Conditions</Link>

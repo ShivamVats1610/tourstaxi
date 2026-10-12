@@ -20,6 +20,11 @@ export async function POST(request) {
   revalidatePath('/admin/dashboard');
   revalidatePath('/admin/pricing');
   revalidatePath('/');
+  revalidatePath('/services');
+  revalidatePath('/contact');
+  revalidatePath('/privacy-policy');
+  revalidatePath('/terms-conditions');
+  revalidatePath('/about');
 
   return Response.json({ success: true, settings });
 }

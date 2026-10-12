@@ -1,10 +1,12 @@
+import { pageMetadata, breadcrumbs, PUBLIC_PAGES } from '@/lib/seo';
+import JsonLd from '@/components/site/JsonLd';
 import { Card, CardContent } from '@/components/ui/card';
 import Reveal from '@/components/site/Reveal';
 import SectionTitle from '@/components/site/SectionTitle';
 import { STATS } from '@/lib/data';
 import { Award, Heart, Globe2, Target } from 'lucide-react';
 
-export const metadata = { title: 'About - ToursTaxi' };
+export const metadata = pageMetadata('/about');
 
 export default function AboutPage() {
   const values = [
@@ -16,6 +18,7 @@ export default function AboutPage() {
 
   return (
     <div className="pt-24">
+      <JsonLd data={breadcrumbs([{ name: PUBLIC_PAGES['/about'][0], path: '/about' }])} />
       <section className="relative py-20 lg:py-28 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 text-white overflow-hidden">
         <div className="absolute inset-0 bg-grid opacity-30" />
         <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
@@ -57,11 +60,11 @@ export default function AboutPage() {
 
       <section className="py-16 lg:py-24">
         <div className="mx-auto max-w-5xl px-4 grid lg:grid-cols-2 gap-10 items-center">
-          <Reveal><img src="https://images.unsplash.com/photo-1477587458883-47145ed94245?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzV8MHwxfHNlYXJjaHwxfHxSYWphc3RoYW58ZW58MHx8fHwxNzgwNzI3Njc3fDA&ixlib=rb-4.1.0&q=85" alt="rajasthan" className="rounded-3xl shadow-xl" /></Reveal>
+          <Reveal><img src="https://images.unsplash.com/photo-1586617356423-52763004deac?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzOTB8MHwxfHNlYXJjaHwyfHx0aWdlciUyMHNhZmFyaXxlbnwwfHx8fDE3ODA3Mjc2ODZ8MA&ixlib=rb-4.1.0&q=85" alt="Ranthambore National Park safari near Sawai Madhopur" className="rounded-3xl shadow-xl" /></Reveal>
           <Reveal delay={0.1}>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">Made in Sawai Madhopur. <span className="bg-gradient-to-r from-sky-600 to-orange-500 bg-clip-text text-transparent">Trusted across India.</span></h2>
-            <p className="mt-4 text-slate-600 leading-relaxed">From a tiny cab stand near Ranthambore National Park to a pan-India ground-transport partner for hotels, travel agents and corporates - ToursTaxi has grown one happy traveller at a time.</p>
-            <p className="mt-4 text-slate-600 leading-relaxed">Today we power 10,000+ trips a year, but our promise remains unchanged: honest pricing, warm hospitality and a driver who genuinely loves the road.</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">Born beside Ranthambore. <span className="bg-gradient-to-r from-sky-600 to-orange-500 bg-clip-text text-transparent">Trusted across India.</span></h2>
+            <p className="mt-4 text-slate-600 leading-relaxed">Our roots are in Sawai Madhopur, the gateway to Ranthambore National Park safari. What began with local wildlife transfers has grown into a dependable travel partner for families, hotels, travel agents and corporates.</p>
+            <p className="mt-4 text-slate-600 leading-relaxed">Today we power 10,000+ trips a year, but the Ranthambore promise remains unchanged: punctual pickups, honest pricing, warm hospitality and drivers who know the road like locals.</p>
           </Reveal>
         </div>
       </section>

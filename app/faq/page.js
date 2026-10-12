@@ -1,12 +1,15 @@
+import JsonLd from '@/components/site/JsonLd';
+import { pageMetadata } from '@/lib/seo';
 import Reveal from '@/components/site/Reveal';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { FAQS } from '@/lib/data';
 
-export const metadata = { title: 'FAQ - ToursTaxi' };
+export const metadata = pageMetadata('/faq');
 
 export default function FAQPage() {
   return (
     <div className="pt-24">
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: FAQS.map(faq => ({ '@type': 'Question', name: faq.q, acceptedAnswer: { '@type': 'Answer', text: faq.a } })) }} />
       <section className="py-20 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 text-white">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-orange-300 text-xs font-semibold uppercase tracking-wider mb-4">Help Centre</div>
