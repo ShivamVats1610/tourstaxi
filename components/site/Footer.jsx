@@ -84,7 +84,7 @@ export default function Footer({ settings = {} }) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-        <div>&copy; {new Date().getFullYear()} ToursTaxi / {COMPANY.legalName}. All rights reserved. Powered by Amar Web Connect.</div>
+        <div>&copy; {new Date().getFullYear()} ToursTaxi / {COMPANY.legalName}. All rights reserved. Developed by <a href="https://codnest.online/" target="_blank" rel="noopener noreferrer" className="hover:text-teal-300 transition-colors">Codnest Online</a>.</div>
         <div className="flex gap-5">
           <Link href="/privacy-policy" className="hover:text-teal-300">Privacy Policy</Link>
           <Link href="/terms-conditions" className="hover:text-teal-300">Terms & Conditions</Link>
